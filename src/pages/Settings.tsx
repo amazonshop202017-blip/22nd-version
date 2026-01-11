@@ -1,15 +1,16 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Trash2, Edit2, Check, X, Tag, Wallet, TrendingUp, TrendingDown } from 'lucide-react';
+import { Plus, Trash2, Edit2, Check, X, Tag, Wallet, TrendingUp, TrendingDown, ArrowLeftRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useTagsContext } from '@/contexts/TagsContext';
 import { useAccountsContext } from '@/contexts/AccountsContext';
 import { cn } from '@/lib/utils';
+import DepositWithdrawModal from '@/components/settings/DepositWithdrawModal';
 
 const Settings = () => {
   const { tags, addTag, removeTag, updateTag } = useTagsContext();
-  const { accounts, addAccount, removeAccount, updateAccount, getAllAccountsWithStats } = useAccountsContext();
+  const { accounts, addAccount, removeAccount, updateAccount, getAllAccountsWithStats, addTransaction, getTransactionsForAccount } = useAccountsContext();
   
   const [newTag, setNewTag] = useState('');
   const [editingTag, setEditingTag] = useState<string | null>(null);
@@ -21,9 +22,11 @@ const Settings = () => {
   const [editingAccount, setEditingAccount] = useState<string | null>(null);
   const [editAccountName, setEditAccountName] = useState('');
   const [editAccountBalance, setEditAccountBalance] = useState('');
+  
+  // Deposit/Withdraw modal state
+  const [depositWithdrawAccountId, setDepositWithdrawAccountId] = useState<string | null>(null);
 
   const accountsWithStats = getAllAccountsWithStats();
-
   const handleAddTag = () => {
     if (newTag.trim()) {
       addTag(newTag.trim());
@@ -215,6 +218,14 @@ const Settings = () => {
                         <Button
                           size="sm"
                           variant="ghost"
+                          onClick={() => setDepositWithdrawAccountId(account.id)}
+                          title="Deposit & Withdraw"
+                        >
+                          <ArrowLeftRight className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
                           onClick={() => startEditingAccount(account)}
                         >
                           <Edit2 className="w-4 h-4" />
@@ -330,6 +341,24 @@ const Settings = () => {
           </div>
         )}
       </div>
+
+      {/* Deposit/Withdraw Modal */}
+      {depositWithdrawAccountId && (() => {
+        const account = accounts.find(a => a.id === depositWithdrawAccountId);
+        if (!account) return null;
+        return (
+          <DepositWithdrawModal
+            isOpen={true}
+            onClose={() => setDepositWithdrawAccountId(null)}
+            accountId={account.id}
+            accountName={account.name}
+            transactions={getTransactionsForAccount(account.id)}
+            onAddTransaction={(type, amount, note) => {
+              addTransaction(account.id, type, amount, note);
+            }}
+          />
+        );
+      })()}
     </div>
   );
 };

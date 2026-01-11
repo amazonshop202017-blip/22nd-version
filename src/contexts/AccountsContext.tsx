@@ -9,6 +9,15 @@ export interface Account {
   createdAt: string;
 }
 
+export interface Transaction {
+  id: string;
+  accountId: string;
+  type: 'deposit' | 'withdraw';
+  amount: number;
+  date: string;
+  note?: string;
+}
+
 export interface AccountWithStats extends Account {
   currentBalance: number;
   pnl: number;
@@ -17,20 +26,25 @@ export interface AccountWithStats extends Account {
 
 interface AccountsContextType {
   accounts: Account[];
+  transactions: Transaction[];
   addAccount: (name: string, startingBalance: number) => Account;
   removeAccount: (id: string) => void;
   updateAccount: (id: string, name: string, startingBalance: number) => void;
   getAccountById: (id: string) => Account | undefined;
   getAccountWithStats: (id: string) => AccountWithStats | undefined;
   getAllAccountsWithStats: () => AccountWithStats[];
+  addTransaction: (accountId: string, type: 'deposit' | 'withdraw', amount: number, note?: string) => void;
+  getTransactionsForAccount: (accountId: string) => Transaction[];
 }
 
 const AccountsContext = createContext<AccountsContextType | undefined>(undefined);
 
 const STORAGE_KEY = 'trading-journal-accounts';
+const TRANSACTIONS_STORAGE_KEY = 'trading-journal-transactions';
 
 export const AccountsProvider = ({ children }: { children: ReactNode }) => {
   const [accounts, setAccounts] = useState<Account[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const { trades } = useTradesContext();
 
   useEffect(() => {
@@ -38,6 +52,10 @@ export const AccountsProvider = ({ children }: { children: ReactNode }) => {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
         setAccounts(JSON.parse(stored));
+      }
+      const storedTransactions = localStorage.getItem(TRANSACTIONS_STORAGE_KEY);
+      if (storedTransactions) {
+        setTransactions(JSON.parse(storedTransactions));
       }
     } catch (error) {
       console.error('Error loading accounts:', error);
@@ -47,6 +65,11 @@ export const AccountsProvider = ({ children }: { children: ReactNode }) => {
   const saveAccounts = useCallback((newAccounts: Account[]) => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(newAccounts));
     setAccounts(newAccounts);
+  }, []);
+
+  const saveTransactions = useCallback((newTransactions: Transaction[]) => {
+    localStorage.setItem(TRANSACTIONS_STORAGE_KEY, JSON.stringify(newTransactions));
+    setTransactions(newTransactions);
   }, []);
 
   const addAccount = useCallback((name: string, startingBalance: number) => {
@@ -62,7 +85,9 @@ export const AccountsProvider = ({ children }: { children: ReactNode }) => {
 
   const removeAccount = useCallback((id: string) => {
     saveAccounts(accounts.filter(a => a.id !== id));
-  }, [accounts, saveAccounts]);
+    // Also remove transactions for this account
+    saveTransactions(transactions.filter(t => t.accountId !== id));
+  }, [accounts, transactions, saveAccounts, saveTransactions]);
 
   const updateAccount = useCallback((id: string, name: string, startingBalance: number) => {
     saveAccounts(accounts.map(a => 
@@ -74,53 +99,94 @@ export const AccountsProvider = ({ children }: { children: ReactNode }) => {
     return accounts.find(a => a.id === id);
   }, [accounts]);
 
+  const addTransaction = useCallback((accountId: string, type: 'deposit' | 'withdraw', amount: number, note?: string) => {
+    const newTransaction: Transaction = {
+      id: crypto.randomUUID(),
+      accountId,
+      type,
+      amount,
+      date: new Date().toISOString(),
+      note,
+    };
+    saveTransactions([...transactions, newTransaction]);
+  }, [transactions, saveTransactions]);
+
+  const getTransactionsForAccount = useCallback((accountId: string) => {
+    return transactions.filter(t => t.accountId === accountId);
+  }, [transactions]);
+
   const getAccountWithStats = useCallback((id: string): AccountWithStats | undefined => {
     const account = accounts.find(a => a.id === id);
     if (!account) return undefined;
 
     // Calculate P&L from all trades linked to this account
     const accountTrades = trades.filter(t => t.accountName === account.name);
-    const pnl = accountTrades.reduce((sum, t) => sum + calculateTradeMetrics(t).netPnl, 0);
-    const currentBalance = account.startingBalance + pnl;
-    const roi = account.startingBalance > 0 
-      ? ((currentBalance - account.startingBalance) / account.startingBalance) * 100 
+    const tradePnl = accountTrades.reduce((sum, t) => sum + calculateTradeMetrics(t).netPnl, 0);
+    
+    // Add transaction adjustments
+    const accountTransactions = transactions.filter(t => t.accountId === id);
+    const depositTotal = accountTransactions
+      .filter(t => t.type === 'deposit')
+      .reduce((sum, t) => sum + t.amount, 0);
+    const withdrawTotal = accountTransactions
+      .filter(t => t.type === 'withdraw')
+      .reduce((sum, t) => sum + t.amount, 0);
+    
+    const adjustedStartingBalance = account.startingBalance + depositTotal - withdrawTotal;
+    const currentBalance = adjustedStartingBalance + tradePnl;
+    const roi = adjustedStartingBalance > 0 
+      ? ((currentBalance - adjustedStartingBalance) / adjustedStartingBalance) * 100 
       : 0;
 
     return {
       ...account,
       currentBalance,
-      pnl,
+      pnl: tradePnl,
       roi,
     };
-  }, [accounts, trades]);
+  }, [accounts, trades, transactions]);
 
   const getAllAccountsWithStats = useCallback((): AccountWithStats[] => {
     return accounts.map(account => {
       const accountTrades = trades.filter(t => t.accountName === account.name);
-      const pnl = accountTrades.reduce((sum, t) => sum + calculateTradeMetrics(t).netPnl, 0);
-      const currentBalance = account.startingBalance + pnl;
-      const roi = account.startingBalance > 0 
-        ? ((currentBalance - account.startingBalance) / account.startingBalance) * 100 
+      const tradePnl = accountTrades.reduce((sum, t) => sum + calculateTradeMetrics(t).netPnl, 0);
+      
+      // Add transaction adjustments
+      const accountTransactions = transactions.filter(t => t.accountId === account.id);
+      const depositTotal = accountTransactions
+        .filter(t => t.type === 'deposit')
+        .reduce((sum, t) => sum + t.amount, 0);
+      const withdrawTotal = accountTransactions
+        .filter(t => t.type === 'withdraw')
+        .reduce((sum, t) => sum + t.amount, 0);
+      
+      const adjustedStartingBalance = account.startingBalance + depositTotal - withdrawTotal;
+      const currentBalance = adjustedStartingBalance + tradePnl;
+      const roi = adjustedStartingBalance > 0 
+        ? ((currentBalance - adjustedStartingBalance) / adjustedStartingBalance) * 100 
         : 0;
 
       return {
         ...account,
         currentBalance,
-        pnl,
+        pnl: tradePnl,
         roi,
       };
     });
-  }, [accounts, trades]);
+  }, [accounts, trades, transactions]);
 
   return (
     <AccountsContext.Provider value={{
       accounts,
+      transactions,
       addAccount,
       removeAccount,
       updateAccount,
       getAccountById,
       getAccountWithStats,
       getAllAccountsWithStats,
+      addTransaction,
+      getTransactionsForAccount,
     }}>
       {children}
     </AccountsContext.Provider>
