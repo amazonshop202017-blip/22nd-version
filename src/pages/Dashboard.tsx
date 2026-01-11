@@ -9,14 +9,13 @@ import { TradeDurationPerformanceChart } from '@/components/dashboard/TradeDurat
 import { MonthlyPerformanceCalendar } from '@/components/dashboard/MonthlyPerformanceCalendar';
 import { InstrumentAnalysisChart } from '@/components/dashboard/InstrumentAnalysisChart';
 import { LongShortAnalysisChart } from '@/components/dashboard/LongShortAnalysisChart';
-import { useTradesContext } from '@/contexts/TradesContext';
+import { useFilteredTradesContext } from '@/contexts/TradesContext';
+import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { motion } from 'framer-motion';
+
 const Dashboard = () => {
-  const { stats } = useTradesContext();
-  const formatCurrency = (value: number) => {
-    const prefix = value >= 0 ? '+$' : '-$';
-    return `${prefix}${Math.abs(value).toFixed(2)}`;
-  };
+  const { stats } = useFilteredTradesContext();
+  const { formatCurrency } = useGlobalFilters();
 
   return (
     <div className="space-y-8">

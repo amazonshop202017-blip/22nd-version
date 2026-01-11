@@ -2,7 +2,8 @@ import { useMemo } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Cell } from 'recharts';
 import { format, parseISO } from 'date-fns';
 import { motion } from 'framer-motion';
-import { useTradesContext } from '@/contexts/TradesContext';
+import { useFilteredTradesContext } from '@/contexts/TradesContext';
+import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { calculateTradeMetrics } from '@/types/trade';
 import { Info } from 'lucide-react';
 import { Tooltip as UITooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -15,7 +16,8 @@ interface DailyData {
 }
 
 export const NetDailyPnLChart = () => {
-  const { trades } = useTradesContext();
+  const { filteredTrades: trades } = useFilteredTradesContext();
+  const { currencyConfig } = useGlobalFilters();
 
   const chartData = useMemo(() => {
     if (trades.length === 0) return [];

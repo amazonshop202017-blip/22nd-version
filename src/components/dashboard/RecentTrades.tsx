@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useTradesContext } from '@/contexts/TradesContext';
+import { useFilteredTradesContext } from '@/contexts/TradesContext';
+import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { useTradeModal } from '@/contexts/TradeModalContext';
 import { Trade, calculateTradeMetrics } from '@/types/trade';
 import { cn } from '@/lib/utils';
@@ -11,13 +12,14 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 export const RecentTrades = () => {
-  const { trades } = useTradesContext();
+  const { filteredTrades } = useFilteredTradesContext();
+  const { formatCurrency } = useGlobalFilters();
   const { openModal } = useTradeModal();
   const navigate = useNavigate();
   const [showViewMore, setShowViewMore] = useState(false);
 
   // Get closed trades sorted by close date (most recent first)
-  const closedTrades = trades
+  const closedTrades = filteredTrades
     .filter(trade => calculateTradeMetrics(trade).positionStatus === 'CLOSED')
     .sort((a, b) => {
       const metricsA = calculateTradeMetrics(a);
@@ -29,7 +31,7 @@ export const RecentTrades = () => {
   const hasMoreTrades = closedTrades.length >= 10;
 
   // Get open trades
-  const openTrades = trades
+  const openTrades = filteredTrades
     .filter(trade => calculateTradeMetrics(trade).positionStatus === 'OPEN')
     .sort((a, b) => {
       const metricsA = calculateTradeMetrics(a);
@@ -92,7 +94,7 @@ export const RecentTrades = () => {
                 "font-mono font-semibold",
                 metrics.netPnl >= 0 ? "profit-text" : "loss-text"
               )}>
-                {metrics.netPnl >= 0 ? '+' : ''}₹{metrics.netPnl.toFixed(2)}
+                {formatCurrency(metrics.netPnl)}
               </p>
               <p className="text-xs text-muted-foreground">{trade.side}</p>
             </>

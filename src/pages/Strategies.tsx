@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useStrategiesContext } from '@/contexts/StrategiesContext';
-import { useTradesContext } from '@/contexts/TradesContext';
+import { useFilteredTradesContext } from '@/contexts/TradesContext';
+import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { useNavigate } from 'react-router-dom';
 import { calculateStrategyStats } from '@/lib/strategyStats';
 import {
@@ -15,18 +16,10 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
-const formatCurrency = (value: number) => {
-  const prefix = value >= 0 ? '$' : '-$';
-  return `${prefix}${Math.abs(value).toFixed(2)}`;
-};
-
-const formatPercent = (value: number) => {
-  return `${Math.round(value)}%`;
-};
-
 const Strategies = () => {
   const { strategies, addStrategy, removeStrategy, updateStrategy } = useStrategiesContext();
-  const { trades } = useTradesContext();
+  const { filteredTrades } = useFilteredTradesContext();
+  const { formatCurrency } = useGlobalFilters();
   const navigate = useNavigate();
   const [newName, setNewName] = useState('');
   const [newDescription, setNewDescription] = useState('');
@@ -35,13 +28,17 @@ const Strategies = () => {
   const [editDescription, setEditDescription] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
 
-  // Calculate stats for all strategies
+  const formatPercent = (value: number) => {
+    return `${Math.round(value)}%`;
+  };
+
+  // Calculate stats for all strategies using filtered trades
   const strategiesWithStats = useMemo(() => {
     return strategies.map(strategy => ({
       ...strategy,
-      stats: calculateStrategyStats(strategy.id, trades),
+      stats: calculateStrategyStats(strategy.id, filteredTrades),
     }));
-  }, [strategies, trades]);
+  }, [strategies, filteredTrades]);
 
   const handleAddStrategy = () => {
     if (newName.trim()) {

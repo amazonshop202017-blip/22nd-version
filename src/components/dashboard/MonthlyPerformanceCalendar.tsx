@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
-import { useTradesContext } from '@/contexts/TradesContext';
+import { useFilteredTradesContext } from '@/contexts/TradesContext';
+import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { calculateTradeMetrics } from '@/types/trade';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, addMonths, subMonths, isSameMonth, getDay, startOfWeek, endOfWeek } from 'date-fns';
 import { ChevronLeft, ChevronRight, Settings } from 'lucide-react';
@@ -35,7 +36,8 @@ interface DisplaySettings {
 }
 
 export const MonthlyPerformanceCalendar = () => {
-  const { trades } = useTradesContext();
+  const { filteredTrades: trades } = useFilteredTradesContext();
+  const { currencyConfig } = useGlobalFilters();
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [displaySettings, setDisplaySettings] = useState<DisplaySettings>({
     dailyPnl: true,

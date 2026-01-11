@@ -7,7 +7,8 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useStrategiesContext } from '@/contexts/StrategiesContext';
-import { useTradesContext } from '@/contexts/TradesContext';
+import { useFilteredTradesContext } from '@/contexts/TradesContext';
+import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { calculateTradeMetrics } from '@/types/trade';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -18,13 +19,14 @@ const StrategyDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { getStrategyById } = useStrategiesContext();
-  const { trades } = useTradesContext();
+  const { filteredTrades } = useFilteredTradesContext();
+  const { formatCurrency, currencyConfig } = useGlobalFilters();
 
   const strategy = id ? getStrategyById(id) : undefined;
 
   const strategyTrades = useMemo(() => {
-    return trades.filter(t => t.strategyId === id);
-  }, [trades, id]);
+    return filteredTrades.filter(t => t.strategyId === id);
+  }, [filteredTrades, id]);
 
   const stats = useMemo(() => {
     if (strategyTrades.length === 0) {
@@ -131,7 +133,7 @@ const StrategyDetail = () => {
                 "text-2xl font-bold font-mono",
                 stats.totalPnl >= 0 ? "profit-text" : "loss-text"
               )}>
-                ₹{stats.totalPnl.toFixed(2)}
+                {formatCurrency(stats.totalPnl)}
               </p>
             </motion.div>
 
@@ -201,11 +203,11 @@ const StrategyDetail = () => {
             </div>
             <div className="glass-card rounded-xl p-5">
               <p className="text-sm text-muted-foreground mb-1">Average Win</p>
-              <p className="text-xl font-bold font-mono profit-text">₹{stats.avgWin.toFixed(2)}</p>
+              <p className="text-xl font-bold font-mono profit-text">{formatCurrency(stats.avgWin)}</p>
             </div>
             <div className="glass-card rounded-xl p-5">
               <p className="text-sm text-muted-foreground mb-1">Average Loss</p>
-              <p className="text-xl font-bold font-mono loss-text">₹{stats.avgLoss.toFixed(2)}</p>
+              <p className="text-xl font-bold font-mono loss-text">{formatCurrency(stats.avgLoss)}</p>
             </div>
           </div>
 
@@ -266,7 +268,7 @@ const StrategyDetail = () => {
                           "text-right font-mono font-medium",
                           metrics.netPnl >= 0 ? "profit-text" : "loss-text"
                         )}>
-                          ₹{metrics.netPnl.toFixed(2)}
+                          {formatCurrency(metrics.netPnl)}
                         </TableCell>
                         <TableCell className="text-right font-mono">
                           {metrics.rFactor.toFixed(2)}R

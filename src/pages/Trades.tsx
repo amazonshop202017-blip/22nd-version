@@ -2,8 +2,9 @@ import { motion } from 'framer-motion';
 import { Pencil, Trash2, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
-import { useTradesContext } from '@/contexts/TradesContext';
+import { useFilteredTradesContext } from '@/contexts/TradesContext';
 import { useTradeModal } from '@/contexts/TradeModalContext';
+import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { calculateTradeMetrics } from '@/types/trade';
 import { cn } from '@/lib/utils';
 import {
@@ -28,10 +29,11 @@ import {
 import { Badge } from '@/components/ui/badge';
 
 const Trades = () => {
-  const { trades, deleteTrade } = useTradesContext();
+  const { filteredTrades, deleteTrade } = useFilteredTradesContext();
   const { openModal } = useTradeModal();
+  const { formatCurrency, currencyConfig } = useGlobalFilters();
 
-  const sortedTrades = [...trades].sort((a, b) => {
+  const sortedTrades = [...filteredTrades].sort((a, b) => {
     const metricsA = calculateTradeMetrics(a);
     const metricsB = calculateTradeMetrics(b);
     return new Date(metricsB.closeDate || 0).getTime() - new Date(metricsA.closeDate || 0).getTime();
@@ -116,13 +118,13 @@ const Trades = () => {
                       "font-mono font-semibold",
                       metrics.grossPnl >= 0 ? "profit-text" : "loss-text"
                     )}>
-                      {metrics.grossPnl >= 0 ? '+' : ''}₹{metrics.grossPnl.toFixed(2)}
+                      {formatCurrency(metrics.grossPnl)}
                     </TableCell>
                     <TableCell className={cn(
                       "font-mono font-semibold",
                       metrics.netPnl >= 0 ? "profit-text" : "loss-text"
                     )}>
-                      {metrics.netPnl >= 0 ? '+' : ''}₹{metrics.netPnl.toFixed(2)}
+                      {formatCurrency(metrics.netPnl)}
                     </TableCell>
                     <TableCell className="font-mono">{metrics.rFactor.toFixed(2)}</TableCell>
                     <TableCell>
