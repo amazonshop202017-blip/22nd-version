@@ -1,13 +1,19 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useTradesContext } from '@/contexts/TradesContext';
 import { calculateTradeMetrics } from '@/types/trade';
 import { motion } from 'framer-motion';
-import { Info } from 'lucide-react';
+import { Info, Settings } from 'lucide-react';
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import {
   ScatterChart,
   Scatter,
@@ -21,6 +27,8 @@ import {
 } from 'recharts';
 import { format } from 'date-fns';
 
+type TimeMode = 'entry' | 'exit';
+
 interface ChartDataPoint {
   timeMinutes: number;
   timeDisplay: string;
@@ -32,6 +40,7 @@ interface ChartDataPoint {
 
 export const TradeTimePerformanceChart = () => {
   const { trades } = useTradesContext();
+  const [timeMode, setTimeMode] = useState<TimeMode>('entry');
 
   const chartData = useMemo(() => {
     const data: ChartDataPoint[] = [];
@@ -39,33 +48,54 @@ export const TradeTimePerformanceChart = () => {
     trades.forEach((trade) => {
       const metrics = calculateTradeMetrics(trade);
       
-      // Get the first entry (opening) time
-      const sortedEntries = [...trade.entries].sort(
+      // Separate entries based on trade side
+      const buyEntries = trade.entries.filter(e => e.type === 'BUY');
+      const sellEntries = trade.entries.filter(e => e.type === 'SELL');
+      
+      // For LONG trades: BUY is entry, SELL is exit
+      // For SHORT trades: SELL is entry, BUY is exit
+      const openingEntries = trade.side === 'LONG' ? buyEntries : sellEntries;
+      const closingEntries = trade.side === 'LONG' ? sellEntries : buyEntries;
+      
+      // Sort entries by datetime
+      const sortedOpeningEntries = [...openingEntries].sort(
+        (a, b) => new Date(a.datetime).getTime() - new Date(b.datetime).getTime()
+      );
+      const sortedClosingEntries = [...closingEntries].sort(
         (a, b) => new Date(a.datetime).getTime() - new Date(b.datetime).getTime()
       );
       
-      if (sortedEntries.length === 0) return;
+      if (sortedOpeningEntries.length === 0) return;
       
-      const entryDate = new Date(sortedEntries[0].datetime);
+      const entryDate = new Date(sortedOpeningEntries[0].datetime);
       if (isNaN(entryDate.getTime())) return;
       
+      // Use exit time if available and mode is exit, otherwise use entry
+      let timeDate = entryDate;
+      if (timeMode === 'exit' && sortedClosingEntries.length > 0) {
+        const exitDate = new Date(sortedClosingEntries[sortedClosingEntries.length - 1].datetime);
+        if (!isNaN(exitDate.getTime())) {
+          timeDate = exitDate;
+        }
+      }
+      
       // Convert time to minutes from midnight for precise positioning
-      const hours = entryDate.getHours();
-      const minutes = entryDate.getMinutes();
+      const hours = timeDate.getHours();
+      const minutes = timeDate.getMinutes();
       const timeMinutes = hours * 60 + minutes;
       
       data.push({
         timeMinutes,
-        timeDisplay: format(entryDate, 'HH:mm'),
+        timeDisplay: format(timeDate, 'HH:mm'),
         pnl: metrics.netPnl,
-        date: format(entryDate, 'MMM dd, yyyy'),
+        date: format(timeDate, 'MMM dd, yyyy'),
         symbol: trade.symbol,
         isProfit: metrics.netPnl >= 0,
       });
     });
 
     return data;
-  }, [trades]);
+  }, [trades, timeMode]);
 
   const formatCurrency = (value: number) => {
     const prefix = value >= 0 ? '$' : '-$';
@@ -87,7 +117,7 @@ export const TradeTimePerformanceChart = () => {
           <p className="text-xs text-muted-foreground">{data.date}</p>
           <p className="text-sm font-medium">{data.symbol}</p>
           <p className="text-xs text-muted-foreground">
-            Entry: {data.timeDisplay}
+            {timeMode === 'entry' ? 'Entry' : 'Exit'}: {data.timeDisplay}
           </p>
           <p className={`text-sm font-bold font-mono ${data.isProfit ? 'profit-text' : 'loss-text'}`}>
             {data.pnl >= 0 ? '+' : ''}{formatCurrency(data.pnl)}
@@ -106,16 +136,39 @@ export const TradeTimePerformanceChart = () => {
         transition={{ duration: 0.4, delay: 0.5 }}
         className="glass-card rounded-xl p-6"
       >
-        <div className="flex items-center gap-2 mb-4">
-          <h3 className="text-lg font-semibold">Trade Time Performance</h3>
-          <Tooltip>
-            <TooltipTrigger>
-              <Info className="h-4 w-4 text-muted-foreground" />
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Shows P&L by entry time of day</p>
-            </TooltipContent>
-          </Tooltip>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <h3 className="text-lg font-semibold">Trade Time Performance</h3>
+            <Tooltip>
+              <TooltipTrigger>
+                <Info className="h-4 w-4 text-muted-foreground" />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Shows P&L by {timeMode === 'entry' ? 'entry' : 'exit'} time of day</p>
+              </TooltipContent>
+            </Tooltip>
+          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="p-1.5 rounded-md hover:bg-muted transition-colors">
+                <Settings className="h-4 w-4 text-muted-foreground" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="min-w-[120px]">
+              <DropdownMenuItem 
+                onClick={() => setTimeMode('entry')}
+                className={timeMode === 'entry' ? 'bg-muted' : ''}
+              >
+                Entry time
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                onClick={() => setTimeMode('exit')}
+                className={timeMode === 'exit' ? 'bg-muted' : ''}
+              >
+                Exit time
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
         <div className="h-[300px] flex items-center justify-center text-muted-foreground">
           No trades to display
@@ -131,16 +184,39 @@ export const TradeTimePerformanceChart = () => {
       transition={{ duration: 0.4, delay: 0.5 }}
       className="glass-card rounded-xl p-6"
     >
-      <div className="flex items-center gap-2 mb-4">
-        <h3 className="text-lg font-semibold">Trade Time Performance</h3>
-        <Tooltip>
-          <TooltipTrigger>
-            <Info className="h-4 w-4 text-muted-foreground" />
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Shows P&L by entry time of day</p>
-          </TooltipContent>
-        </Tooltip>
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <h3 className="text-lg font-semibold">Trade Time Performance</h3>
+          <Tooltip>
+            <TooltipTrigger>
+              <Info className="h-4 w-4 text-muted-foreground" />
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Shows P&L by {timeMode === 'entry' ? 'entry' : 'exit'} time of day</p>
+            </TooltipContent>
+          </Tooltip>
+        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="p-1.5 rounded-md hover:bg-muted transition-colors">
+              <Settings className="h-4 w-4 text-muted-foreground" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="min-w-[120px]">
+            <DropdownMenuItem 
+              onClick={() => setTimeMode('entry')}
+              className={timeMode === 'entry' ? 'bg-muted' : ''}
+            >
+              Entry time
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              onClick={() => setTimeMode('exit')}
+              className={timeMode === 'exit' ? 'bg-muted' : ''}
+            >
+              Exit time
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
       
       <div className="h-[300px]">
