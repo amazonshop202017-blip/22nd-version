@@ -1,0 +1,86 @@
+import { useState, useEffect, useCallback } from 'react';
+import { Trade, TradeFormData } from '@/types/trade';
+
+const STORAGE_KEY = 'trading-journal-trades';
+
+export const useTrades = () => {
+  const [trades, setTrades] = useState<Trade[]>([]);
+
+  useEffect(() => {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      setTrades(JSON.parse(stored));
+    }
+  }, []);
+
+  const saveTrades = useCallback((newTrades: Trade[]) => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(newTrades));
+    setTrades(newTrades);
+  }, []);
+
+  const addTrade = useCallback((data: TradeFormData) => {
+    const newTrade: Trade = {
+      ...data,
+      id: crypto.randomUUID(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    saveTrades([...trades, newTrade]);
+    return newTrade;
+  }, [trades, saveTrades]);
+
+  const updateTrade = useCallback((id: string, data: TradeFormData) => {
+    const updated = trades.map(trade =>
+      trade.id === id
+        ? { ...trade, ...data, updatedAt: new Date().toISOString() }
+        : trade
+    );
+    saveTrades(updated);
+  }, [trades, saveTrades]);
+
+  const deleteTrade = useCallback((id: string) => {
+    saveTrades(trades.filter(trade => trade.id !== id));
+  }, [trades, saveTrades]);
+
+  const getTradeById = useCallback((id: string) => {
+    return trades.find(trade => trade.id === id);
+  }, [trades]);
+
+  // Stats calculations
+  const stats = {
+    netPnl: trades.reduce((sum, t) => sum + t.netPnl, 0),
+    totalTrades: trades.length,
+    winningTrades: trades.filter(t => t.netPnl > 0).length,
+    losingTrades: trades.filter(t => t.netPnl < 0).length,
+    tradeWinRate: trades.length > 0 
+      ? (trades.filter(t => t.netPnl > 0).length / trades.length) * 100 
+      : 0,
+    dayWinRate: (() => {
+      const dayPnl = trades.reduce((acc, t) => {
+        const day = t.closeDate.split('T')[0];
+        acc[day] = (acc[day] || 0) + t.netPnl;
+        return acc;
+      }, {} as Record<string, number>);
+      const days = Object.values(dayPnl);
+      if (days.length === 0) return 0;
+      return (days.filter(p => p > 0).length / days.length) * 100;
+    })(),
+    avgWin: (() => {
+      const wins = trades.filter(t => t.netPnl > 0);
+      return wins.length > 0 ? wins.reduce((s, t) => s + t.netPnl, 0) / wins.length : 0;
+    })(),
+    avgLoss: (() => {
+      const losses = trades.filter(t => t.netPnl < 0);
+      return losses.length > 0 ? losses.reduce((s, t) => s + t.netPnl, 0) / losses.length : 0;
+    })(),
+  };
+
+  return {
+    trades,
+    stats,
+    addTrade,
+    updateTrade,
+    deleteTrade,
+    getTradeById,
+  };
+};
