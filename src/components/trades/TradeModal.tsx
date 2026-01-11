@@ -321,12 +321,12 @@ export const TradeModal = () => {
                     Add Strategy
                   </Button>
                 ) : (
-                  <Select value={strategyId} onValueChange={setStrategyId}>
+                  <Select value={strategyId || "none"} onValueChange={(val) => setStrategyId(val === "none" ? "" : val)}>
                     <SelectTrigger className="h-8 text-sm bg-input border-border">
                       <SelectValue placeholder="Select strategy..." />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">None</SelectItem>
+                      <SelectItem value="none">None</SelectItem>
                       {strategies.map((s) => (
                         <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
                       ))}
