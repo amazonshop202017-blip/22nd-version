@@ -2,6 +2,7 @@ import { DollarSign } from 'lucide-react';
 import { RecentTrades } from '@/components/dashboard/RecentTrades';
 import { WinRateGauge } from '@/components/dashboard/WinRateGauge';
 import { ProfitFactorRing } from '@/components/dashboard/ProfitFactorRing';
+import { AvgWinLossRatio } from '@/components/dashboard/AvgWinLossRatio';
 import { useTradesContext } from '@/contexts/TradesContext';
 import { motion } from 'framer-motion';
 
@@ -91,42 +92,21 @@ const Dashboard = () => {
         </motion.div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <RecentTrades />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <RecentTrades />
+        </div>
         
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.4 }}
-          className="glass-card rounded-2xl p-6"
+          className="glass-card rounded-2xl p-6 flex items-center justify-center"
         >
-          <h3 className="text-lg font-semibold mb-4">Performance Summary</h3>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="p-4 rounded-xl bg-profit/10">
-              <p className="text-sm text-muted-foreground mb-1">Avg Win</p>
-              <p className="text-xl font-mono font-bold profit-text">
-                +${stats.avgWin.toFixed(2)}
-              </p>
-            </div>
-            <div className="p-4 rounded-xl bg-loss/10">
-              <p className="text-sm text-muted-foreground mb-1">Avg Loss</p>
-              <p className="text-xl font-mono font-bold loss-text">
-                ${stats.avgLoss.toFixed(2)}
-              </p>
-            </div>
-            <div className="p-4 rounded-xl bg-secondary">
-              <p className="text-sm text-muted-foreground mb-1">Winning Trades</p>
-              <p className="text-xl font-mono font-bold profit-text">
-                {stats.winningTrades}
-              </p>
-            </div>
-            <div className="p-4 rounded-xl bg-secondary">
-              <p className="text-sm text-muted-foreground mb-1">Losing Trades</p>
-              <p className="text-xl font-mono font-bold loss-text">
-                {stats.losingTrades}
-              </p>
-            </div>
-          </div>
+          <AvgWinLossRatio 
+            avgWin={stats.avgWin}
+            avgLoss={stats.avgLoss}
+          />
         </motion.div>
       </div>
     </div>
