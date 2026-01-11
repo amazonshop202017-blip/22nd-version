@@ -3,11 +3,11 @@ import { WinRateGauge } from '@/components/dashboard/WinRateGauge';
 import { ProfitFactorRing } from '@/components/dashboard/ProfitFactorRing';
 import { AvgWinLossRatio } from '@/components/dashboard/AvgWinLossRatio';
 import { DailyCumulativePnLChart } from '@/components/dashboard/DailyCumulativePnLChart';
+import { TradeTimePerformanceChart } from '@/components/dashboard/TradeTimePerformanceChart';
 import { useTradesContext } from '@/contexts/TradesContext';
 import { motion } from 'framer-motion';
 const Dashboard = () => {
   const { stats } = useTradesContext();
-
   const formatCurrency = (value: number) => {
     const prefix = value >= 0 ? '+$' : '-$';
     return `${prefix}${Math.abs(value).toFixed(2)}`;
@@ -103,6 +103,8 @@ const Dashboard = () => {
       </div>
 
       <DailyCumulativePnLChart />
+
+      <TradeTimePerformanceChart />
 
       <div className="grid grid-cols-1 gap-6">
         <RecentTrades />
