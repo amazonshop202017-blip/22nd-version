@@ -11,6 +11,8 @@ import { useTradesContext } from '@/contexts/TradesContext';
 import { calculateTradeMetrics } from '@/types/trade';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import StrategyCumulativePnLChart from '@/components/strategy/StrategyCumulativePnLChart';
+import StrategyDetailedStats from '@/components/strategy/StrategyDetailedStats';
 
 const StrategyDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -205,6 +207,16 @@ const StrategyDetail = () => {
               <p className="text-sm text-muted-foreground mb-1">Average Loss</p>
               <p className="text-xl font-bold font-mono loss-text">₹{stats.avgLoss.toFixed(2)}</p>
             </div>
+          </div>
+
+          {/* Daily Net Cumulative P&L Chart */}
+          <div className="mt-6">
+            <StrategyCumulativePnLChart trades={strategyTrades} />
+          </div>
+
+          {/* Detailed Strategy Stats */}
+          <div className="mt-6">
+            <StrategyDetailedStats trades={strategyTrades} />
           </div>
         </TabsContent>
 
