@@ -91,42 +91,42 @@ const YearlyCalendar = () => {
 
   return (
     <TooltipProvider>
-      <div className="glass-card rounded-2xl p-6">
+      <div className="glass-card rounded-2xl p-4 sm:p-6 mx-auto max-w-6xl">
         {/* Year Header */}
-        <div className="flex items-center justify-center gap-8 mb-8">
+        <div className="flex items-center justify-center gap-6 mb-6">
           <button
             onClick={handlePrevYear}
-            className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+            className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
           >
-            <ChevronLeft className="w-5 h-5" />
+            <ChevronLeft className="w-4 h-4" />
           </button>
-          <h2 className="text-xl font-semibold text-foreground">{selectedYear}</h2>
+          <h2 className="text-lg font-semibold text-foreground">{selectedYear}</h2>
           <button
             onClick={handleNextYear}
-            className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+            className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
           >
-            <ChevronRight className="w-5 h-5" />
+            <ChevronRight className="w-4 h-4" />
           </button>
         </div>
 
         {/* 12-Month Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-5">
           {MONTHS.map((monthName, monthIndex) => {
             const monthDays = getMonthDays(selectedYear, monthIndex);
             
             return (
-              <div key={monthName} className="space-y-2">
+              <div key={monthName} className="space-y-1">
                 {/* Month Name */}
-                <h3 className="text-sm font-medium text-foreground text-center mb-3">
+                <h3 className="text-xs font-medium text-foreground text-center mb-2">
                   {monthName}
                 </h3>
                 
                 {/* Weekday Headers */}
-                <div className="grid grid-cols-7 gap-0.5 mb-1">
+                <div className="grid grid-cols-7 gap-px mb-0.5">
                   {WEEKDAYS.map((day) => (
                     <div
                       key={day}
-                      className="text-[10px] text-muted-foreground text-center py-1"
+                      className="text-[9px] text-muted-foreground text-center py-0.5"
                     >
                       {day}
                     </div>
@@ -134,7 +134,7 @@ const YearlyCalendar = () => {
                 </div>
 
                 {/* Calendar Days */}
-                <div className="grid grid-cols-7 gap-0.5">
+                <div className="grid grid-cols-7 gap-px">
                   {monthDays.map((date, idx) => {
                     const dateKey = format(date, 'yyyy-MM-dd');
                     const dayData = dailyData[dateKey];
@@ -146,7 +146,7 @@ const YearlyCalendar = () => {
                         <TooltipTrigger asChild>
                           <div
                             className={cn(
-                              "aspect-square flex items-center justify-center text-[11px] rounded-sm cursor-default transition-colors",
+                              "aspect-square flex items-center justify-center text-[9px] rounded-[2px] cursor-default transition-colors",
                               getDayClass(date, monthIndex),
                               isToday(date) && isCurrentMonth && "ring-1 ring-primary"
                             )}
@@ -189,6 +189,9 @@ const YearlyCalendar = () => {
             );
           })}
         </div>
+        
+        {/* Bottom spacing */}
+        <div className="h-4" />
       </div>
     </TooltipProvider>
   );
