@@ -1,5 +1,5 @@
-import { useEffect, useState, useMemo } from 'react';
-import { X, Calendar, Star, Settings2, Clock } from 'lucide-react';
+import { useEffect, useState, useMemo, useRef } from 'react';
+import { X, Calendar, Star, Settings2, Clock, ChevronDown, Check } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useTradeModal } from '@/contexts/TradeModalContext';
 import { useTradesContext } from '@/contexts/TradesContext';
 import { useStrategiesContext } from '@/contexts/StrategiesContext';
@@ -287,10 +288,60 @@ export const TradeModal = () => {
     );
   };
 
-  // Calculated summary metrics
-  const rrr = tradeRisk > 0 && tradeTarget > 0 ? (tradeTarget / tradeRisk).toFixed(0) : '0';
-  const rMultiple = metrics.rFactor.toFixed(0);
+  // Calculated summary metrics - Fixed calculations
+  const rrrCalculated = useMemo(() => {
+    const entry = parseFloat(entryPrice) || 0;
+    const sl = parseFloat(stopLoss) || 0;
+    const tp = parseFloat(takeProfit) || 0;
+    
+    if (entry <= 0 || sl <= 0 || tp <= 0) return null;
+    
+    let risk: number;
+    let reward: number;
+    
+    if (direction === 'LONG') {
+      risk = entry - sl;
+      reward = tp - entry;
+    } else {
+      risk = sl - entry;
+      reward = entry - tp;
+    }
+    
+    // Avoid division by zero
+    if (risk <= 0) return null;
+    
+    return reward / risk;
+  }, [entryPrice, stopLoss, takeProfit, direction]);
+
+  const rMultipleCalculated = useMemo(() => {
+    const entry = parseFloat(entryPrice) || 0;
+    const sl = parseFloat(stopLoss) || 0;
+    const exit = parseFloat(exitPrice) || 0;
+    
+    // Require exit price for R-Multiple
+    if (entry <= 0 || sl <= 0 || exit <= 0) return null;
+    
+    let risk: number;
+    let realizedPnl: number;
+    
+    if (direction === 'LONG') {
+      risk = entry - sl;
+      realizedPnl = exit - entry;
+    } else {
+      risk = sl - entry;
+      realizedPnl = entry - exit;
+    }
+    
+    // Avoid division by zero
+    if (risk <= 0) return null;
+    
+    return realizedPnl / risk;
+  }, [entryPrice, stopLoss, exitPrice, direction]);
+
   const returnPercent = metrics.returnPercent.toFixed(2) + '%';
+
+  // Checklist dropdown state
+  const [checklistOpen, setChecklistOpen] = useState(false);
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && handleDiscard()}>
@@ -362,8 +413,8 @@ export const TradeModal = () => {
                   />
                 </div>
 
-                {/* Setup & Setup Checklist */}
-                <div className="space-y-3">
+                {/* Setup & Checklist - Same Row 50/50 */}
+                <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5">
                     <Label className="text-xs text-muted-foreground">Setup</Label>
                     <Select value={strategyId || "none"} onValueChange={(val) => setStrategyId(val === "none" ? "" : val)}>
@@ -379,34 +430,52 @@ export const TradeModal = () => {
                     </Select>
                   </div>
                   
-                  {/* Strategy Checklist Selection */}
-                  {strategyId && currentStrategyChecklist.length > 0 && (
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <Label className="text-xs text-muted-foreground">Setup Checklist</Label>
-                        <span className="text-xs text-muted-foreground">
-                          {selectedChecklistItems.length} of {currentStrategyChecklist.length} selected
-                        </span>
-                      </div>
-                      <div className="space-y-2 bg-muted/30 rounded-lg p-3 max-h-32 overflow-y-auto">
-                        {currentStrategyChecklist.map((item, index) => (
-                          <div key={index} className="flex items-center gap-2">
-                            <Checkbox
-                              id={`checklist-${index}`}
-                              checked={selectedChecklistItems.includes(item)}
-                              onCheckedChange={() => toggleChecklistItem(item)}
-                            />
-                            <label 
-                              htmlFor={`checklist-${index}`}
-                              className="text-sm cursor-pointer flex-1"
+                  {/* Checklist Dropdown */}
+                  <div className="space-y-1.5">
+                    <Label className="text-xs text-muted-foreground">Checklist</Label>
+                    <Popover open={checklistOpen} onOpenChange={setChecklistOpen}>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          aria-expanded={checklistOpen}
+                          className="h-10 w-full justify-between bg-input border-border font-normal"
+                          disabled={!strategyId || currentStrategyChecklist.length === 0}
+                        >
+                          <span className="truncate text-sm">
+                            {!strategyId ? 'Select setup first' : 
+                              currentStrategyChecklist.length === 0 ? 'No items' :
+                              selectedChecklistItems.length === 0 ? 'Select items...' :
+                              `${selectedChecklistItems.length} of ${currentStrategyChecklist.length} selected`}
+                          </span>
+                          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-[200px] p-0 bg-popover border-border z-50" align="start">
+                        <div className="max-h-48 overflow-y-auto p-2 space-y-1">
+                          {currentStrategyChecklist.map((item, index) => (
+                            <div 
+                              key={index} 
+                              className="flex items-center gap-2 p-2 rounded-md hover:bg-muted/50 cursor-pointer"
+                              onClick={() => toggleChecklistItem(item)}
                             >
-                              {item}
-                            </label>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                              <Checkbox
+                                id={`checklist-dropdown-${index}`}
+                                checked={selectedChecklistItems.includes(item)}
+                                onCheckedChange={() => toggleChecklistItem(item)}
+                                className="pointer-events-none"
+                              />
+                              <label 
+                                className="text-sm cursor-pointer flex-1 select-none"
+                              >
+                                {item}
+                              </label>
+                            </div>
+                          ))}
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  </div>
                 </div>
               </div>
 
@@ -656,11 +725,11 @@ export const TradeModal = () => {
               </div>
               <div className="text-center">
                 <p className="text-xs text-muted-foreground">RRR</p>
-                <p className="font-semibold">{rrr}</p>
+                <p className="font-semibold">{rrrCalculated !== null ? rrrCalculated.toFixed(1) : '—'}</p>
               </div>
               <div className="text-center">
                 <p className="text-xs text-muted-foreground">R-Multiple</p>
-                <p className="font-semibold">{rMultiple}</p>
+                <p className="font-semibold">{rMultipleCalculated !== null ? rMultipleCalculated.toFixed(2) : '—'}</p>
               </div>
               <div className="text-center">
                 <p className="text-xs text-muted-foreground">Return</p>
