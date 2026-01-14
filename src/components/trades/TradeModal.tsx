@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo, useRef } from 'react';
-import { X, Calendar, Star, Settings2, Clock, ChevronDown, Check, Plus } from 'lucide-react';
+import { X, Calendar, Star, Settings2, Clock, ChevronDown, Check, Plus, Info } from 'lucide-react';
 import { ScaleInOutModal } from './ScaleInOutModal';
+import { TypeableCombobox } from './TypeableCombobox';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -10,11 +11,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useTradeModal } from '@/contexts/TradeModalContext';
 import { useTradesContext } from '@/contexts/TradesContext';
 import { useStrategiesContext } from '@/contexts/StrategiesContext';
 import { useAccountsContext } from '@/contexts/AccountsContext';
 import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
+import { useCustomStats } from '@/contexts/CustomStatsContext';
 import { TradeFormData, TradeEntry, ScaleEntry, calculateTradeMetrics } from '@/types/trade';
 import { cn } from '@/lib/utils';
 
@@ -33,6 +36,16 @@ export const TradeModal = () => {
   const { strategies, getStrategyById } = useStrategiesContext();
   const { accounts } = useAccountsContext();
   const { currencyConfig } = useGlobalFilters();
+  const { 
+    options: customStatsOptions,
+    addTimeframe,
+    addConfluence,
+    addPattern,
+    addPreparation,
+    addEntryComment,
+    addTradeManagement,
+    addExitComment,
+  } = useCustomStats();
 
   // Form state
   const [activeTab, setActiveTab] = useState('regular');
@@ -75,6 +88,21 @@ export const TradeModal = () => {
   const [scaleEntries, setScaleEntries] = useState<ScaleEntry[]>([]);
   const [scaleExits, setScaleExits] = useState<ScaleEntry[]>([]);
   const [openQuantity, setOpenQuantity] = useState(0);
+
+  // Advanced Data fields
+  const [entryComment, setEntryComment] = useState('');
+  const [tradeManagement, setTradeManagement] = useState('');
+  const [exitComment, setExitComment] = useState('');
+  const [highestPrice, setHighestPrice] = useState<string>('');
+  const [lowestPrice, setLowestPrice] = useState<string>('');
+  const [priceReachedFirst, setPriceReachedFirst] = useState<'takeProfit' | 'stopLoss' | ''>('');
+  const [breakEven, setBreakEven] = useState<boolean | null>(null);
+  
+  // Custom Stats fields
+  const [timeframe, setTimeframe] = useState('');
+  const [confluence, setConfluence] = useState('');
+  const [pattern, setPattern] = useState('');
+  const [preparation, setPreparation] = useState('');
 
   // Get current strategy's checklist items
   const currentStrategyChecklist = useMemo(() => {
@@ -186,6 +214,21 @@ export const TradeModal = () => {
       if (editingTrade.manualGrossPnl !== undefined) {
         setManualGrossPnl(editingTrade.manualGrossPnl.toString());
       }
+
+      // Load Advanced Data fields
+      setEntryComment(editingTrade.entryComment || '');
+      setTradeManagement(editingTrade.tradeManagement || '');
+      setExitComment(editingTrade.exitComment || '');
+      setHighestPrice(editingTrade.highestPrice !== undefined ? editingTrade.highestPrice.toString() : '');
+      setLowestPrice(editingTrade.lowestPrice !== undefined ? editingTrade.lowestPrice.toString() : '');
+      setPriceReachedFirst(editingTrade.priceReachedFirst || '');
+      setBreakEven(editingTrade.breakEven ?? null);
+      
+      // Load Custom Stats
+      setTimeframe(editingTrade.timeframe || '');
+      setConfluence(editingTrade.confluence || '');
+      setPattern(editingTrade.pattern || '');
+      setPreparation(editingTrade.preparation || '');
     } else {
       resetForm();
     }
@@ -222,6 +265,19 @@ export const TradeModal = () => {
     setScaleEntries([]);
     setScaleExits([]);
     setOpenQuantity(0);
+    // Reset Advanced Data
+    setEntryComment('');
+    setTradeManagement('');
+    setExitComment('');
+    setHighestPrice('');
+    setLowestPrice('');
+    setPriceReachedFirst('');
+    setBreakEven(null);
+    // Reset Custom Stats
+    setTimeframe('');
+    setConfluence('');
+    setPattern('');
+    setPreparation('');
   };
 
   const metrics = useMemo(() => {
@@ -294,6 +350,19 @@ export const TradeModal = () => {
       // Persist scale entries and exits
       scaleEntries: scaleEntries.length > 0 ? scaleEntries : undefined,
       scaleExits: scaleExits.length > 0 ? scaleExits : undefined,
+      // Advanced Data fields
+      entryComment: entryComment || undefined,
+      tradeManagement: tradeManagement || undefined,
+      exitComment: exitComment || undefined,
+      highestPrice: highestPrice !== '' ? parseFloat(highestPrice) : undefined,
+      lowestPrice: lowestPrice !== '' ? parseFloat(lowestPrice) : undefined,
+      priceReachedFirst: priceReachedFirst || undefined,
+      breakEven: breakEven ?? undefined,
+      // Custom Stats
+      timeframe: timeframe || undefined,
+      confluence: confluence || undefined,
+      pattern: pattern || undefined,
+      preparation: preparation || undefined,
     };
 
     if (editingTrade) {
@@ -770,8 +839,207 @@ export const TradeModal = () => {
           )}
 
           {activeTab === 'advanced' && (
-            <div className="flex items-center justify-center h-64 text-muted-foreground">
-              <p className="text-sm">Advanced Data - Coming Soon</p>
+            <div className="space-y-6">
+              {/* Trade Comments Section */}
+              <div className="space-y-4">
+                <div className="space-y-1.5">
+                  <Label className="text-xs text-muted-foreground">Entry Comments</Label>
+                  <Select value={entryComment || "none"} onValueChange={(val) => setEntryComment(val === "none" ? "" : val)}>
+                    <SelectTrigger className="h-10 bg-input border-border">
+                      <SelectValue placeholder="Select..." />
+                    </SelectTrigger>
+                    <SelectContent className="bg-popover border-border z-50">
+                      <SelectItem value="none">Select...</SelectItem>
+                      {customStatsOptions.entryComments.map((opt) => (
+                        <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label className="text-xs text-muted-foreground">Trade Management</Label>
+                  <Select value={tradeManagement || "none"} onValueChange={(val) => setTradeManagement(val === "none" ? "" : val)}>
+                    <SelectTrigger className="h-10 bg-input border-border">
+                      <SelectValue placeholder="Select..." />
+                    </SelectTrigger>
+                    <SelectContent className="bg-popover border-border z-50">
+                      <SelectItem value="none">Select...</SelectItem>
+                      {customStatsOptions.tradeManagements.map((opt) => (
+                        <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label className="text-xs text-muted-foreground">Exit Comments</Label>
+                  <Select value={exitComment || "none"} onValueChange={(val) => setExitComment(val === "none" ? "" : val)}>
+                    <SelectTrigger className="h-10 bg-input border-border">
+                      <SelectValue placeholder="Select..." />
+                    </SelectTrigger>
+                    <SelectContent className="bg-popover border-border z-50">
+                      <SelectItem value="none">Select...</SelectItem>
+                      {customStatsOptions.exitComments.map((opt) => (
+                        <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Advanced Price Data */}
+              <div className="space-y-3">
+                <h4 className="text-sm font-medium text-foreground">Advanced Price Data</h4>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs text-muted-foreground">Highest Price</Label>
+                    <Input
+                      type="text"
+                      inputMode="decimal"
+                      placeholder="0.00"
+                      value={highestPrice}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (val === '' || /^\d*\.?\d*$/.test(val)) {
+                          setHighestPrice(val);
+                        }
+                      }}
+                      className="h-10 bg-input border-border"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs text-muted-foreground">Lowest Price</Label>
+                    <Input
+                      type="text"
+                      inputMode="decimal"
+                      placeholder="0.00"
+                      value={lowestPrice}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (val === '' || /^\d*\.?\d*$/.test(val)) {
+                          setLowestPrice(val);
+                        }
+                      }}
+                      className="h-10 bg-input border-border"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Price Level & Break Even Row */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-1">
+                    <span className="text-sm font-medium text-foreground">Which level did the price reach first?</span>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Info className="w-3.5 h-3.5 text-muted-foreground cursor-help" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="text-xs">Did the price hit your take profit or stop loss first?</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+                  <span className="text-sm font-medium text-foreground">Break Even</span>
+                </div>
+                <div className="flex gap-4">
+                  {/* Price Reached First Toggle */}
+                  <div className="grid grid-cols-2 gap-0 border border-border rounded-lg overflow-hidden">
+                    <button
+                      type="button"
+                      onClick={() => setPriceReachedFirst(priceReachedFirst === 'takeProfit' ? '' : 'takeProfit')}
+                      className={cn(
+                        "h-10 px-4 text-sm font-medium transition-colors",
+                        priceReachedFirst === 'takeProfit'
+                          ? "bg-foreground text-background"
+                          : "bg-background text-foreground hover:bg-muted/50"
+                      )}
+                    >
+                      Take Profit
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPriceReachedFirst(priceReachedFirst === 'stopLoss' ? '' : 'stopLoss')}
+                      className={cn(
+                        "h-10 px-4 text-sm font-medium transition-colors border-l border-border",
+                        priceReachedFirst === 'stopLoss'
+                          ? "bg-foreground text-background"
+                          : "bg-background text-foreground hover:bg-muted/50"
+                      )}
+                    >
+                      Stop Loss
+                    </button>
+                  </div>
+
+                  {/* Break Even Toggle */}
+                  <div className="border border-border rounded-lg overflow-hidden">
+                    <button
+                      type="button"
+                      onClick={() => setBreakEven(breakEven === true ? null : true)}
+                      className={cn(
+                        "h-10 px-6 text-sm font-medium transition-colors",
+                        breakEven === true
+                          ? "bg-foreground text-background"
+                          : "bg-background text-foreground hover:bg-muted/50"
+                      )}
+                    >
+                      Yes
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Custom Stats Section */}
+              <div className="space-y-4">
+                <h4 className="text-sm font-medium text-foreground">Custom Stats</h4>
+                
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs text-muted-foreground">Timeframe</Label>
+                    <TypeableCombobox
+                      value={timeframe}
+                      onChange={setTimeframe}
+                      options={customStatsOptions.timeframes}
+                      onAddNew={addTimeframe}
+                      placeholder="Select..."
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs text-muted-foreground">Confluence</Label>
+                    <TypeableCombobox
+                      value={confluence}
+                      onChange={setConfluence}
+                      options={customStatsOptions.confluences}
+                      onAddNew={addConfluence}
+                      placeholder="Select..."
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs text-muted-foreground">Pattern</Label>
+                    <TypeableCombobox
+                      value={pattern}
+                      onChange={setPattern}
+                      options={customStatsOptions.patterns}
+                      onAddNew={addPattern}
+                      placeholder="Select..."
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs text-muted-foreground">Preparation</Label>
+                    <TypeableCombobox
+                      value={preparation}
+                      onChange={setPreparation}
+                      options={customStatsOptions.preparations}
+                      onAddNew={addPreparation}
+                      placeholder="Select..."
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
           )}
 

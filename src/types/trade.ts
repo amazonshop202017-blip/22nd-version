@@ -43,6 +43,19 @@ export interface Trade {
   // Scale In/Out entries and exits for persistence
   scaleEntries?: ScaleEntry[];
   scaleExits?: ScaleEntry[];
+  // Advanced Data fields
+  entryComment?: string;
+  tradeManagement?: string;
+  exitComment?: string;
+  highestPrice?: number;
+  lowestPrice?: number;
+  priceReachedFirst?: 'takeProfit' | 'stopLoss';
+  breakEven?: boolean;
+  // Custom Stats
+  timeframe?: string;
+  confluence?: string;
+  pattern?: string;
+  preparation?: string;
 }
 
 // Calculated values (not stored, computed on-the-fly)

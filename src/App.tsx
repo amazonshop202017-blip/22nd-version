@@ -9,6 +9,7 @@ import { TagsProvider } from "@/contexts/TagsContext";
 import { StrategiesProvider } from "@/contexts/StrategiesContext";
 import { AccountsProvider } from "@/contexts/AccountsContext";
 import { GlobalFiltersProvider } from "@/contexts/GlobalFiltersContext";
+import { CustomStatsProvider } from "@/contexts/CustomStatsContext";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { TradeModal } from "@/components/trades/TradeModal";
 import Dashboard from "./pages/Dashboard";
@@ -30,24 +31,26 @@ const App = () => (
           <TradesProvider>
             <AccountsProvider>
               <GlobalFiltersProvider>
-                <TradeModalProvider>
-                  <BrowserRouter>
-                    <Toaster />
-                    <Sonner />
-                    <AppLayout>
-                      <Routes>
-                        <Route path="/" element={<Dashboard />} />
-                        <Route path="/trades" element={<Trades />} />
-                        <Route path="/strategies" element={<Strategies />} />
-                        <Route path="/strategies/:id" element={<StrategyDetail />} />
-                        <Route path="/reports/*" element={<Reports />} />
-                        <Route path="/settings" element={<Settings />} />
-                        <Route path="*" element={<NotFound />} />
-                      </Routes>
-                    </AppLayout>
-                    <TradeModal />
-                  </BrowserRouter>
-                </TradeModalProvider>
+                <CustomStatsProvider>
+                  <TradeModalProvider>
+                    <BrowserRouter>
+                      <Toaster />
+                      <Sonner />
+                      <AppLayout>
+                        <Routes>
+                          <Route path="/" element={<Dashboard />} />
+                          <Route path="/trades" element={<Trades />} />
+                          <Route path="/strategies" element={<Strategies />} />
+                          <Route path="/strategies/:id" element={<StrategyDetail />} />
+                          <Route path="/reports/*" element={<Reports />} />
+                          <Route path="/settings" element={<Settings />} />
+                          <Route path="*" element={<NotFound />} />
+                        </Routes>
+                      </AppLayout>
+                      <TradeModal />
+                    </BrowserRouter>
+                  </TradeModalProvider>
+                </CustomStatsProvider>
               </GlobalFiltersProvider>
             </AccountsProvider>
           </TradesProvider>

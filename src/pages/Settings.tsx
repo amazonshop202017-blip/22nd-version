@@ -1,16 +1,24 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Trash2, Edit2, Check, X, Tag, Wallet, TrendingUp, TrendingDown, ArrowLeftRight } from 'lucide-react';
+import { Plus, Trash2, Edit2, Check, X, Tag, Wallet, TrendingUp, TrendingDown, ArrowLeftRight, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useTagsContext } from '@/contexts/TagsContext';
 import { useAccountsContext } from '@/contexts/AccountsContext';
+import { useCustomStats } from '@/contexts/CustomStatsContext';
 import { cn } from '@/lib/utils';
 import DepositWithdrawModal from '@/components/settings/DepositWithdrawModal';
 
 const Settings = () => {
   const { tags, addTag, removeTag, updateTag } = useTagsContext();
   const { accounts, addAccount, removeAccount, updateAccount, getAllAccountsWithStats, addTransaction, getTransactionsForAccount } = useAccountsContext();
+  const { 
+    options: customStatsOptions,
+    addTimeframe, removeTimeframe,
+    addConfluence, removeConfluence,
+    addPattern, removePattern,
+    addPreparation, removePreparation,
+  } = useCustomStats();
   
   const [newTag, setNewTag] = useState('');
   const [editingTag, setEditingTag] = useState<string | null>(null);
@@ -25,6 +33,12 @@ const Settings = () => {
   
   // Deposit/Withdraw modal state
   const [depositWithdrawAccountId, setDepositWithdrawAccountId] = useState<string | null>(null);
+
+  // Custom Stats input state
+  const [newTimeframe, setNewTimeframe] = useState('');
+  const [newConfluence, setNewConfluence] = useState('');
+  const [newPattern, setNewPattern] = useState('');
+  const [newPreparation, setNewPreparation] = useState('');
 
   const accountsWithStats = getAllAccountsWithStats();
   const handleAddTag = () => {
@@ -92,6 +106,35 @@ const Settings = () => {
     setEditingAccount(null);
     setEditAccountName('');
     setEditAccountBalance('');
+  };
+
+  // Custom Stats handlers
+  const handleAddTimeframe = () => {
+    if (newTimeframe.trim()) {
+      addTimeframe(newTimeframe.trim());
+      setNewTimeframe('');
+    }
+  };
+
+  const handleAddConfluence = () => {
+    if (newConfluence.trim()) {
+      addConfluence(newConfluence.trim());
+      setNewConfluence('');
+    }
+  };
+
+  const handleAddPattern = () => {
+    if (newPattern.trim()) {
+      addPattern(newPattern.trim());
+      setNewPattern('');
+    }
+  };
+
+  const handleAddPreparation = () => {
+    if (newPreparation.trim()) {
+      addPreparation(newPreparation.trim());
+      setNewPreparation('');
+    }
   };
 
   return (
@@ -340,6 +383,165 @@ const Settings = () => {
             </AnimatePresence>
           </div>
         )}
+      </div>
+
+      {/* Custom Stats Section */}
+      <div className="glass-card rounded-2xl p-6">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
+            <BarChart3 className="w-5 h-5 text-primary" />
+          </div>
+          <div>
+            <h2 className="text-xl font-semibold">Custom Stats</h2>
+            <p className="text-sm text-muted-foreground">Manage dropdown options for trade Advanced Data</p>
+          </div>
+        </div>
+
+        <div className="space-y-6">
+          {/* Timeframe */}
+          <div className="space-y-3">
+            <h3 className="text-sm font-medium text-foreground">Timeframe</h3>
+            <div className="flex gap-3">
+              <Input
+                placeholder="Add new timeframe (e.g., 3M)..."
+                value={newTimeframe}
+                onChange={(e) => setNewTimeframe(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleAddTimeframe()}
+                className="bg-input border-border flex-1"
+              />
+              <Button onClick={handleAddTimeframe} disabled={!newTimeframe.trim()} size="sm">
+                <Plus className="w-4 h-4" />
+              </Button>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {customStatsOptions.timeframes.map((item) => (
+                <div
+                  key={item}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-muted/50 rounded-lg border border-border group"
+                >
+                  <span className="text-sm">{item}</span>
+                  <button
+                    onClick={() => removeTimeframe(item)}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 hover:text-destructive"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Confluence */}
+          <div className="space-y-3">
+            <h3 className="text-sm font-medium text-foreground">Confluence</h3>
+            <div className="flex gap-3">
+              <Input
+                placeholder="Add new confluence..."
+                value={newConfluence}
+                onChange={(e) => setNewConfluence(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleAddConfluence()}
+                className="bg-input border-border flex-1"
+              />
+              <Button onClick={handleAddConfluence} disabled={!newConfluence.trim()} size="sm">
+                <Plus className="w-4 h-4" />
+              </Button>
+            </div>
+            {customStatsOptions.confluences.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No confluence options added yet</p>
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                {customStatsOptions.confluences.map((item) => (
+                  <div
+                    key={item}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-muted/50 rounded-lg border border-border group"
+                  >
+                    <span className="text-sm">{item}</span>
+                    <button
+                      onClick={() => removeConfluence(item)}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 hover:text-destructive"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Pattern */}
+          <div className="space-y-3">
+            <h3 className="text-sm font-medium text-foreground">Pattern</h3>
+            <div className="flex gap-3">
+              <Input
+                placeholder="Add new pattern..."
+                value={newPattern}
+                onChange={(e) => setNewPattern(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleAddPattern()}
+                className="bg-input border-border flex-1"
+              />
+              <Button onClick={handleAddPattern} disabled={!newPattern.trim()} size="sm">
+                <Plus className="w-4 h-4" />
+              </Button>
+            </div>
+            {customStatsOptions.patterns.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No pattern options added yet</p>
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                {customStatsOptions.patterns.map((item) => (
+                  <div
+                    key={item}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-muted/50 rounded-lg border border-border group"
+                  >
+                    <span className="text-sm">{item}</span>
+                    <button
+                      onClick={() => removePattern(item)}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 hover:text-destructive"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Preparation */}
+          <div className="space-y-3">
+            <h3 className="text-sm font-medium text-foreground">Preparation</h3>
+            <div className="flex gap-3">
+              <Input
+                placeholder="Add new preparation..."
+                value={newPreparation}
+                onChange={(e) => setNewPreparation(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleAddPreparation()}
+                className="bg-input border-border flex-1"
+              />
+              <Button onClick={handleAddPreparation} disabled={!newPreparation.trim()} size="sm">
+                <Plus className="w-4 h-4" />
+              </Button>
+            </div>
+            {customStatsOptions.preparations.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No preparation options added yet</p>
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                {customStatsOptions.preparations.map((item) => (
+                  <div
+                    key={item}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-muted/50 rounded-lg border border-border group"
+                  >
+                    <span className="text-sm">{item}</span>
+                    <button
+                      onClick={() => removePreparation(item)}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 hover:text-destructive"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Deposit/Withdraw Modal */}
