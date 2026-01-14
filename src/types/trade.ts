@@ -105,15 +105,18 @@ export function calculateTradeMetrics(trade: Trade | TradeFormData): TradeCalcul
   
   // For LONG: profit when sell price > buy price
   // For SHORT: profit when buy price > sell price (sell first, buy to cover)
-  let grossPnl = 0;
+  let calculatedGrossPnl = 0;
   const closedQty = Math.min(totalBuyQty, totalSellQty);
   
   if (side === 'LONG') {
-    grossPnl = (avgExitPrice - avgEntryPrice) * closedQty;
+    calculatedGrossPnl = (avgExitPrice - avgEntryPrice) * closedQty;
   } else {
     // SHORT: sell first, buy to close
-    grossPnl = (avgEntryPrice - avgExitPrice) * closedQty;
+    calculatedGrossPnl = (avgEntryPrice - avgExitPrice) * closedQty;
   }
+  
+  // Use manual Gross P/L if provided, otherwise use calculated
+  const grossPnl = trade.manualGrossPnl !== undefined ? trade.manualGrossPnl : calculatedGrossPnl;
   
   const netPnl = grossPnl - totalCharges;
   
