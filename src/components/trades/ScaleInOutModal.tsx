@@ -6,8 +6,9 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
+import { ScaleEntry } from '@/types/trade';
 
-interface ScaleEntry {
+interface ScaleEntryRow {
   id: string;
   price: string;
   quantity: string;
@@ -16,18 +17,35 @@ interface ScaleEntry {
 interface ScaleInOutModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (avgEntry: number, avgExit: number, entries: ScaleEntry[], exits: ScaleEntry[]) => void;
+  onSave: (avgEntry: number, avgExit: number, totalExitQty: number, entries: ScaleEntry[], exits: ScaleEntry[], openQty: number) => void;
   initialEntryPrice?: string;
   initialQuantity?: string;
   initialExitPrice?: string;
   initialExitQuantity?: string;
+  existingScaleEntries?: ScaleEntry[];
+  existingScaleExits?: ScaleEntry[];
 }
 
-const createEmptyEntry = (): ScaleEntry => ({
+const createEmptyEntry = (): ScaleEntryRow => ({
   id: crypto.randomUUID(),
   price: '',
   quantity: '',
 });
+
+const scaleEntryToRow = (entry: ScaleEntry): ScaleEntryRow => ({
+  id: entry.id,
+  price: entry.price.toString(),
+  quantity: entry.quantity.toString(),
+});
+
+const rowToScaleEntry = (row: ScaleEntryRow): ScaleEntry | null => {
+  const price = parseFloat(row.price);
+  const quantity = parseFloat(row.quantity);
+  if (price > 0 && quantity > 0) {
+    return { id: row.id, price, quantity };
+  }
+  return null;
+};
 
 export const ScaleInOutModal = ({
   isOpen,
@@ -37,17 +55,22 @@ export const ScaleInOutModal = ({
   initialQuantity = '',
   initialExitPrice = '',
   initialExitQuantity = '',
+  existingScaleEntries = [],
+  existingScaleExits = [],
 }: ScaleInOutModalProps) => {
   const { currencyConfig } = useGlobalFilters();
   const [activeTab, setActiveTab] = useState<'entries' | 'exits'>('entries');
-  const [entries, setEntries] = useState<ScaleEntry[]>([createEmptyEntry()]);
-  const [exits, setExits] = useState<ScaleEntry[]>([createEmptyEntry()]);
+  const [entries, setEntries] = useState<ScaleEntryRow[]>([createEmptyEntry()]);
+  const [exits, setExits] = useState<ScaleEntryRow[]>([createEmptyEntry()]);
 
   // Initialize with existing values when modal opens
   useEffect(() => {
     if (isOpen) {
-      // Pre-fill first entry with existing values
-      if (initialEntryPrice || initialQuantity) {
+      // Load existing scale entries if available
+      if (existingScaleEntries.length > 0) {
+        setEntries(existingScaleEntries.map(scaleEntryToRow));
+      } else if (initialEntryPrice || initialQuantity) {
+        // Pre-fill first entry with existing values
         setEntries([{
           id: crypto.randomUUID(),
           price: initialEntryPrice,
@@ -57,8 +80,11 @@ export const ScaleInOutModal = ({
         setEntries([createEmptyEntry()]);
       }
 
-      // Pre-fill first exit with existing values
-      if (initialExitPrice || initialExitQuantity) {
+      // Load existing scale exits if available
+      if (existingScaleExits.length > 0) {
+        setExits(existingScaleExits.map(scaleEntryToRow));
+      } else if (initialExitPrice || initialExitQuantity) {
+        // Pre-fill first exit with existing values
         setExits([{
           id: crypto.randomUUID(),
           price: initialExitPrice,
@@ -68,7 +94,7 @@ export const ScaleInOutModal = ({
         setExits([createEmptyEntry()]);
       }
     }
-  }, [isOpen, initialEntryPrice, initialQuantity, initialExitPrice, initialExitQuantity]);
+  }, [isOpen, initialEntryPrice, initialQuantity, initialExitPrice, initialExitQuantity, existingScaleEntries, existingScaleExits]);
 
   // Handle entry row updates
   const updateEntry = (id: string, field: 'price' | 'quantity', value: string) => {
@@ -156,7 +182,18 @@ export const ScaleInOutModal = ({
 
   // Handle save
   const handleSave = () => {
-    onSave(calculations.avgEntry, calculations.avgExit, entries, exits);
+    // Convert rows to ScaleEntry objects (only valid ones)
+    const validScaleEntries = entries.map(rowToScaleEntry).filter((e): e is ScaleEntry => e !== null);
+    const validScaleExits = exits.map(rowToScaleEntry).filter((e): e is ScaleEntry => e !== null);
+    
+    onSave(
+      calculations.avgEntry, 
+      calculations.avgExit, 
+      calculations.totalExitQty,
+      validScaleEntries, 
+      validScaleExits,
+      calculations.openQty
+    );
     onClose();
   };
 

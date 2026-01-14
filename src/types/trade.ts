@@ -7,6 +7,13 @@ export interface TradeEntry {
   charges: number;
 }
 
+// Scale entry/exit row for persistence
+export interface ScaleEntry {
+  id: string;
+  price: number;
+  quantity: number;
+}
+
 export interface Trade {
   id: string;
   symbol: string;
@@ -33,6 +40,9 @@ export interface Trade {
   missedTrade?: boolean;
   // Manual Gross P/L override
   manualGrossPnl?: number;
+  // Scale In/Out entries and exits for persistence
+  scaleEntries?: ScaleEntry[];
+  scaleExits?: ScaleEntry[];
 }
 
 // Calculated values (not stored, computed on-the-fly)

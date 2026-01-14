@@ -15,7 +15,7 @@ import { useTradesContext } from '@/contexts/TradesContext';
 import { useStrategiesContext } from '@/contexts/StrategiesContext';
 import { useAccountsContext } from '@/contexts/AccountsContext';
 import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
-import { TradeFormData, TradeEntry, calculateTradeMetrics } from '@/types/trade';
+import { TradeFormData, TradeEntry, ScaleEntry, calculateTradeMetrics } from '@/types/trade';
 import { cn } from '@/lib/utils';
 
 const defaultEntry = (): TradeEntry => ({
@@ -70,8 +70,11 @@ export const TradeModal = () => {
   const [potentialMFE, setPotentialMFE] = useState(0);
   const [missedTrade, setMissedTrade] = useState(false);
 
-  // Scale In/Out modal state
+  // Scale In/Out modal state and data
   const [scaleModalOpen, setScaleModalOpen] = useState(false);
+  const [scaleEntries, setScaleEntries] = useState<ScaleEntry[]>([]);
+  const [scaleExits, setScaleExits] = useState<ScaleEntry[]>([]);
+  const [openQuantity, setOpenQuantity] = useState(0);
 
   // Get current strategy's checklist items
   const currentStrategyChecklist = useMemo(() => {
@@ -142,6 +145,18 @@ export const TradeModal = () => {
       setPotentialMAE(editingTrade.potentialMAE || 0);
       setPotentialMFE(editingTrade.potentialMFE || 0);
       setMissedTrade(editingTrade.missedTrade || false);
+
+      // Load scale entries/exits if available
+      if (editingTrade.scaleEntries && editingTrade.scaleEntries.length > 0) {
+        setScaleEntries(editingTrade.scaleEntries);
+      }
+      if (editingTrade.scaleExits && editingTrade.scaleExits.length > 0) {
+        setScaleExits(editingTrade.scaleExits);
+        // Calculate open quantity from scale data
+        const totalEntryQty = editingTrade.scaleEntries?.reduce((sum, e) => sum + e.quantity, 0) || 0;
+        const totalExitQty = editingTrade.scaleExits.reduce((sum, e) => sum + e.quantity, 0);
+        setOpenQuantity(totalEntryQty - totalExitQty);
+      }
       
       // Parse entries to simplified format
       if (editingTrade.entries.length > 0) {
@@ -203,6 +218,10 @@ export const TradeModal = () => {
     setPotentialMAE(0);
     setPotentialMFE(0);
     setMissedTrade(false);
+    // Reset scale data
+    setScaleEntries([]);
+    setScaleExits([]);
+    setOpenQuantity(0);
   };
 
   const metrics = useMemo(() => {
@@ -272,6 +291,9 @@ export const TradeModal = () => {
       potentialMFE,
       missedTrade,
       manualGrossPnl: manualGrossPnl !== '' ? parseFloat(manualGrossPnl) : undefined,
+      // Persist scale entries and exits
+      scaleEntries: scaleEntries.length > 0 ? scaleEntries : undefined,
+      scaleExits: scaleExits.length > 0 ? scaleExits : undefined,
     };
 
     if (editingTrade) {
@@ -297,13 +319,33 @@ export const TradeModal = () => {
   };
 
   // Handle scale in/out modal save
-  const handleScaleInOutSave = (avgEntry: number, avgExit: number) => {
+  const handleScaleInOutSave = (
+    avgEntry: number, 
+    avgExit: number, 
+    totalExitQty: number,
+    newScaleEntries: ScaleEntry[], 
+    newScaleExits: ScaleEntry[],
+    openQty: number
+  ) => {
+    // Persist scale entries and exits
+    setScaleEntries(newScaleEntries);
+    setScaleExits(newScaleExits);
+    setOpenQuantity(openQty);
+    
     // Update entry and exit prices with averaged values
     if (avgEntry > 0) {
       setEntryPrice(avgEntry.toFixed(2));
     }
     if (avgExit > 0) {
       setExitPrice(avgExit.toFixed(2));
+    }
+    // Quantity reflects closed quantity (total exit quantity)
+    if (totalExitQty > 0) {
+      setQuantity(totalExitQty.toString());
+    } else if (newScaleEntries.length > 0) {
+      // If no exits, show total entry quantity
+      const totalEntryQty = newScaleEntries.reduce((sum, e) => sum + e.quantity, 0);
+      setQuantity(totalEntryQty.toString());
     }
   };
 
@@ -578,6 +620,11 @@ export const TradeModal = () => {
                       }}
                       className="h-10 bg-input border-border"
                     />
+                    {openQuantity > 0 && (
+                      <p className="text-xs text-destructive font-medium">
+                        {openQuantity} still open
+                      </p>
+                    )}
                   </div>
 
                   <div className="space-y-1.5">
@@ -790,6 +837,8 @@ export const TradeModal = () => {
         initialQuantity={quantity}
         initialExitPrice={exitPrice}
         initialExitQuantity={quantity}
+        existingScaleEntries={scaleEntries}
+        existingScaleExits={scaleExits}
       />
     </Sheet>
   );
