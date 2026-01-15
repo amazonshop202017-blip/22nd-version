@@ -214,16 +214,87 @@ const ExitAnalysis = () => {
     );
   };
 
-  // Placeholder metrics for design
+  // Calculate metrics from exitAnalysisData
+  const calculatedMetrics = useMemo(() => {
+    if (exitAnalysisData.length === 0) {
+      return {
+        tradesHitTP: 0,
+        tradesHitSL: 0,
+        avgUpdrawWinner: null,
+        avgUpdrawLoser: null,
+        avgDrawdownWinner: null,
+        avgDrawdownLoser: null,
+        avgExitWinner: null,
+        avgExitLoser: null,
+      };
+    }
+
+    // Trades that hit TP (+100%) or SL (-100%)
+    const tradesHitTP = exitAnalysisData.filter(d => d.updraw >= 100).length;
+    const tradesHitSL = exitAnalysisData.filter(d => d.drawdown <= -100).length;
+
+    // Classify winners (exitPercent > 0) and losers (exitPercent < 0)
+    const winners = exitAnalysisData.filter(d => d.exitPercent > 0);
+    const losers = exitAnalysisData.filter(d => d.exitPercent < 0);
+
+    // Average Updraw for Winners
+    const avgUpdrawWinner = winners.length > 0
+      ? winners.reduce((sum, d) => sum + d.updraw, 0) / winners.length
+      : null;
+
+    // Average Updraw for Losers
+    const avgUpdrawLoser = losers.length > 0
+      ? losers.reduce((sum, d) => sum + d.updraw, 0) / losers.length
+      : null;
+
+    // Average Drawdown for Winners (use absolute value)
+    const avgDrawdownWinner = winners.length > 0
+      ? winners.reduce((sum, d) => sum + Math.abs(d.drawdown), 0) / winners.length
+      : null;
+
+    // Average Drawdown for Losers (use absolute value)
+    const avgDrawdownLoser = losers.length > 0
+      ? losers.reduce((sum, d) => sum + Math.abs(d.drawdown), 0) / losers.length
+      : null;
+
+    // Average Exit for Winners
+    const avgExitWinner = winners.length > 0
+      ? winners.reduce((sum, d) => sum + d.exitPercent, 0) / winners.length
+      : null;
+
+    // Average Exit for Losers (use absolute value)
+    const avgExitLoser = losers.length > 0
+      ? losers.reduce((sum, d) => sum + Math.abs(d.exitPercent), 0) / losers.length
+      : null;
+
+    return {
+      tradesHitTP,
+      tradesHitSL,
+      avgUpdrawWinner,
+      avgUpdrawLoser,
+      avgDrawdownWinner,
+      avgDrawdownLoser,
+      avgExitWinner,
+      avgExitLoser,
+    };
+  }, [exitAnalysisData]);
+
+  // Format metric value
+  const formatMetric = (value: number | null, isCount = false): string => {
+    if (value === null) return '—';
+    if (isCount) return value.toString();
+    return `${value.toFixed(1)}%`;
+  };
+
   const metrics = [
-    { label: 'Trades Hit TP', value: '—', hasInfo: true, color: 'green' },
-    { label: 'Trades Hit SL', value: '—', hasInfo: true, color: 'red' },
-    { label: 'Avg. Updraw Winner', value: '—', hasInfo: false, color: 'green' },
-    { label: 'Avg. Updraw Loser', value: '—', hasInfo: false, color: 'green' },
-    { label: 'Avg. Drawdown Winner', value: '—', hasInfo: false, color: 'red' },
-    { label: 'Avg. Drawdown Loser', value: '—', hasInfo: false, color: 'red' },
-    { label: 'Avg. Exit Winner', value: '—', hasInfo: false, color: 'green' },
-    { label: 'Avg. Exit Loser', value: '—', hasInfo: false, color: 'red' },
+    { label: 'Trades Hit TP', value: formatMetric(calculatedMetrics.tradesHitTP, true), hasInfo: true, color: 'green' },
+    { label: 'Trades Hit SL', value: formatMetric(calculatedMetrics.tradesHitSL, true), hasInfo: true, color: 'red' },
+    { label: 'Avg. Updraw Winner', value: formatMetric(calculatedMetrics.avgUpdrawWinner), hasInfo: false, color: 'green' },
+    { label: 'Avg. Updraw Loser', value: formatMetric(calculatedMetrics.avgUpdrawLoser), hasInfo: false, color: 'green' },
+    { label: 'Avg. Drawdown Winner', value: formatMetric(calculatedMetrics.avgDrawdownWinner), hasInfo: false, color: 'red' },
+    { label: 'Avg. Drawdown Loser', value: formatMetric(calculatedMetrics.avgDrawdownLoser), hasInfo: false, color: 'red' },
+    { label: 'Avg. Exit Winner', value: formatMetric(calculatedMetrics.avgExitWinner), hasInfo: false, color: 'green' },
+    { label: 'Avg. Exit Loser', value: formatMetric(calculatedMetrics.avgExitLoser), hasInfo: false, color: 'red' },
   ];
 
   return (
