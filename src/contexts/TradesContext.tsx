@@ -12,8 +12,12 @@ interface TradesContextType {
     totalTrades: number;
     winningTrades: number;
     losingTrades: number;
+    breakevenTrades: number;
     tradeWinRate: number;
     dayWinRate: number;
+    winningDays: number;
+    losingDays: number;
+    breakevenDays: number;
     avgWin: number;
     avgLoss: number;
     totalProfits: number;
@@ -87,29 +91,39 @@ export const useFilteredTradesContext = () => {
   const stats = useMemo(() => {
     const winningTrades = filteredTrades.filter(t => calculateTradeMetrics(t).netPnl > 0);
     const losingTrades = filteredTrades.filter(t => calculateTradeMetrics(t).netPnl < 0);
+    const breakevenTrades = filteredTrades.filter(t => calculateTradeMetrics(t).netPnl === 0);
     
     const totalProfits = winningTrades.reduce((sum, t) => sum + calculateTradeMetrics(t).netPnl, 0);
     const totalLosses = Math.abs(losingTrades.reduce((sum, t) => sum + calculateTradeMetrics(t).netPnl, 0));
+    
+    // Calculate day-based stats
+    const dayPnl = filteredTrades.reduce((acc, t) => {
+      const metrics = calculateTradeMetrics(t);
+      const day = metrics.closeDate ? metrics.closeDate.split('T')[0] : 'unknown';
+      acc[day] = (acc[day] || 0) + metrics.netPnl;
+      return acc;
+    }, {} as Record<string, number>);
+    
+    const days = Object.values(dayPnl);
+    const winningDaysCount = days.filter(p => p > 0).length;
+    const losingDaysCount = days.filter(p => p < 0).length;
+    const breakevenDaysCount = days.filter(p => p === 0).length;
     
     return {
       netPnl: filteredTrades.reduce((sum, t) => sum + calculateTradeMetrics(t).netPnl, 0),
       totalTrades: filteredTrades.length,
       winningTrades: winningTrades.length,
       losingTrades: losingTrades.length,
+      breakevenTrades: breakevenTrades.length,
       tradeWinRate: filteredTrades.length > 0 
         ? (winningTrades.length / filteredTrades.length) * 100 
         : 0,
-      dayWinRate: (() => {
-        const dayPnl = filteredTrades.reduce((acc, t) => {
-          const metrics = calculateTradeMetrics(t);
-          const day = metrics.closeDate ? metrics.closeDate.split('T')[0] : 'unknown';
-          acc[day] = (acc[day] || 0) + metrics.netPnl;
-          return acc;
-        }, {} as Record<string, number>);
-        const days = Object.values(dayPnl);
-        if (days.length === 0) return 0;
-        return (days.filter(p => p > 0).length / days.length) * 100;
-      })(),
+      dayWinRate: days.length > 0 
+        ? (winningDaysCount / days.length) * 100 
+        : 0,
+      winningDays: winningDaysCount,
+      losingDays: losingDaysCount,
+      breakevenDays: breakevenDaysCount,
       avgWin: winningTrades.length > 0 
         ? totalProfits / winningTrades.length 
         : 0,

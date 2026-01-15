@@ -89,6 +89,9 @@ const Dashboard = () => {
           <WinRateGauge 
             value={stats.dayWinRate} 
             label="Day Win %"
+            winners={stats.winningDays}
+            losers={stats.losingDays}
+            breakeven={stats.breakevenDays}
           />
         </motion.div>
 

@@ -70,29 +70,39 @@ export const useTrades = () => {
   // Stats calculations using the new calculateTradeMetrics
   const winningTrades = trades.filter(t => calculateTradeMetrics(t).netPnl > 0);
   const losingTrades = trades.filter(t => calculateTradeMetrics(t).netPnl < 0);
+  const breakevenTrades = trades.filter(t => calculateTradeMetrics(t).netPnl === 0);
   
   const totalProfits = winningTrades.reduce((sum, t) => sum + calculateTradeMetrics(t).netPnl, 0);
   const totalLosses = Math.abs(losingTrades.reduce((sum, t) => sum + calculateTradeMetrics(t).netPnl, 0));
+  
+  // Calculate day-based stats
+  const dayPnl = trades.reduce((acc, t) => {
+    const metrics = calculateTradeMetrics(t);
+    const day = metrics.closeDate ? metrics.closeDate.split('T')[0] : 'unknown';
+    acc[day] = (acc[day] || 0) + metrics.netPnl;
+    return acc;
+  }, {} as Record<string, number>);
+  
+  const days = Object.values(dayPnl);
+  const winningDaysCount = days.filter(p => p > 0).length;
+  const losingDaysCount = days.filter(p => p < 0).length;
+  const breakevenDaysCount = days.filter(p => p === 0).length;
   
   const stats = {
     netPnl: trades.reduce((sum, t) => sum + calculateTradeMetrics(t).netPnl, 0),
     totalTrades: trades.length,
     winningTrades: winningTrades.length,
     losingTrades: losingTrades.length,
+    breakevenTrades: breakevenTrades.length,
     tradeWinRate: trades.length > 0 
       ? (winningTrades.length / trades.length) * 100 
       : 0,
-    dayWinRate: (() => {
-      const dayPnl = trades.reduce((acc, t) => {
-        const metrics = calculateTradeMetrics(t);
-        const day = metrics.closeDate ? metrics.closeDate.split('T')[0] : 'unknown';
-        acc[day] = (acc[day] || 0) + metrics.netPnl;
-        return acc;
-      }, {} as Record<string, number>);
-      const days = Object.values(dayPnl);
-      if (days.length === 0) return 0;
-      return (days.filter(p => p > 0).length / days.length) * 100;
-    })(),
+    dayWinRate: days.length > 0 
+      ? (winningDaysCount / days.length) * 100 
+      : 0,
+    winningDays: winningDaysCount,
+    losingDays: losingDaysCount,
+    breakevenDays: breakevenDaysCount,
     avgWin: winningTrades.length > 0 
       ? totalProfits / winningTrades.length 
       : 0,
