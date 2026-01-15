@@ -10,7 +10,6 @@ import {
   ResponsiveContainer,
   Tooltip,
   ReferenceLine,
-  Cell,
   Scatter,
 } from 'recharts';
 import {
@@ -36,9 +35,8 @@ interface ExitAnalysisData {
   exitPercent: number;
   symbol: string;
   side: 'LONG' | 'SHORT';
-  // For rendering: separate positive and negative portions
-  greenBar: number; // updraw value (positive)
-  redBar: number;   // drawdown value (negative, will be plotted separately)
+  // For range bar rendering: [bottom, top] of the bar
+  barRange: [number, number];
 }
 
 const ExitAnalysis = () => {
@@ -174,17 +172,18 @@ const ExitAnalysis = () => {
         }
       }
 
+      const roundedUpdraw = Math.round(updraw * 10) / 10;
+      const roundedDrawdown = Math.round(drawdown * 10) / 10;
+      
       return {
         trade: index + 1,
-        updraw: Math.round(updraw * 10) / 10,
-        drawdown: Math.round(drawdown * 10) / 10,
+        updraw: roundedUpdraw,
+        drawdown: roundedDrawdown,
         exitPercent: Math.round(exitPercent * 10) / 10,
         symbol: trade.symbol,
         side: trade.side,
-        // greenBar is the positive portion (updraw), rendered from 0 upward
-        greenBar: Math.round(updraw * 10) / 10,
-        // redBar is the negative portion (drawdown), rendered from 0 downward
-        redBar: Math.round(drawdown * 10) / 10,
+        // barRange: [bottom (drawdown, negative), top (updraw, positive)]
+        barRange: [roundedDrawdown, roundedUpdraw] as [number, number],
       };
     });
   }, [filteredTrades]);
@@ -335,30 +334,56 @@ const ExitAnalysis = () => {
                     }}
                   />
 
-                  {/* Single visual bar per trade: green above 0, red below 0 */}
-                  {/* Using stackId ensures bars overlap at the same x position */}
+                  {/* Single range bar per trade using barRange [drawdown, updraw] */}
                   <Bar 
-                    dataKey="greenBar" 
-                    name="updraw" 
-                    stackId="trade"
+                    dataKey="barRange" 
+                    name="excursion" 
                     maxBarSize={24}
-                    fill="hsl(142, 71%, 45%)"
-                  >
-                    {exitAnalysisData.map((_, index) => (
-                      <Cell key={`green-${index}`} fill="hsl(142, 71%, 45%)" />
-                    ))}
-                  </Bar>
-                  <Bar 
-                    dataKey="redBar" 
-                    name="drawdown" 
-                    stackId="trade"
-                    maxBarSize={24}
-                    fill="hsl(0, 84%, 60%)"
-                  >
-                    {exitAnalysisData.map((_, index) => (
-                      <Cell key={`red-${index}`} fill="hsl(0, 84%, 60%)" />
-                    ))}
-                  </Bar>
+                    shape={(props: any) => {
+                      const { x, y, width, height, payload } = props;
+                      if (!payload) return null;
+                      
+                      const updraw = payload.updraw;
+                      const drawdown = payload.drawdown;
+                      
+                      // For range bars, y is the top of the bar, height is the full height
+                      // We need to calculate where 0 falls within this range
+                      const barTop = y; // This is the y position of the top (updraw)
+                      const barBottom = y + height; // This is the y position of the bottom (drawdown)
+                      
+                      // Calculate the proportion where 0 falls
+                      const totalRange = updraw - drawdown;
+                      if (totalRange === 0) return null;
+                      
+                      const zeroRatio = updraw / totalRange;
+                      const zeroY = barTop + (height * zeroRatio);
+                      
+                      return (
+                        <g>
+                          {/* Green portion: from zeroY to barTop (updraw > 0) */}
+                          {updraw > 0 && (
+                            <rect
+                              x={x}
+                              y={barTop}
+                              width={width}
+                              height={Math.max(0, zeroY - barTop)}
+                              fill="hsl(142, 71%, 45%)"
+                            />
+                          )}
+                          {/* Red portion: from zeroY to barBottom (drawdown < 0) */}
+                          {drawdown < 0 && (
+                            <rect
+                              x={x}
+                              y={zeroY}
+                              width={width}
+                              height={Math.max(0, barBottom - zeroY)}
+                              fill="hsl(0, 84%, 60%)"
+                            />
+                          )}
+                        </g>
+                      );
+                    }}
+                  />
 
                   {/* Exit marker (black diamond) */}
                   <Scatter
