@@ -19,6 +19,9 @@ import StrategyDetail from "./pages/StrategyDetail";
 import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
+import Drawdown from "./pages/chartroom/Drawdown";
+import ExitAnalysis from "./pages/chartroom/ExitAnalysis";
+import HoldingTime from "./pages/chartroom/HoldingTime";
 
 const queryClient = new QueryClient();
 
@@ -43,6 +46,9 @@ const App = () => (
                           <Route path="/strategies" element={<Strategies />} />
                           <Route path="/strategies/:id" element={<StrategyDetail />} />
                           <Route path="/reports/*" element={<Reports />} />
+                          <Route path="/chart-room/drawdown" element={<Drawdown />} />
+                          <Route path="/chart-room/exit-analysis" element={<ExitAnalysis />} />
+                          <Route path="/chart-room/holding-time" element={<HoldingTime />} />
                           <Route path="/settings" element={<Settings />} />
                           <Route path="*" element={<NotFound />} />
                         </Routes>
