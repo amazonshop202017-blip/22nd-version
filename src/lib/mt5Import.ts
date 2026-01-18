@@ -114,34 +114,41 @@ function parseCSVLine(line: string): string[] {
 }
 
 function findColumnIndexes(headers: string[]): ColumnIndexes {
-  const normalizedHeaders = headers.map(h => h.toLowerCase().trim());
+  // Store headers as array with indexes to handle duplicate column names
+  // MT5 has duplicate "Time" and "Price" columns
+  const headerEntries: { name: string; index: number }[] = headers.map((h, i) => ({
+    name: h.toLowerCase().trim(),
+    index: i,
+  }));
   
-  // Find Time columns (there should be two)
-  const timeIndexes: number[] = [];
-  normalizedHeaders.forEach((h, i) => {
-    if (h === 'time') timeIndexes.push(i);
-  });
+  // Find all Time columns (first = entry, second = exit)
+  const timeIndexes: number[] = headerEntries
+    .filter(h => h.name === 'time')
+    .map(h => h.index);
   
-  // Find Price columns (there should be two)
-  const priceIndexes: number[] = [];
-  normalizedHeaders.forEach((h, i) => {
-    if (h === 'price') priceIndexes.push(i);
-  });
+  // Find all Price columns (first = entry, second = exit)
+  const priceIndexes: number[] = headerEntries
+    .filter(h => h.name === 'price')
+    .map(h => h.index);
   
-  const symbolIndex = normalizedHeaders.indexOf('symbol');
-  const typeIndex = normalizedHeaders.indexOf('type');
-  const volumeIndex = normalizedHeaders.indexOf('volume');
-  const commissionIndex = normalizedHeaders.indexOf('commission');
-  const profitIndex = normalizedHeaders.indexOf('profit');
+  // Find unique columns by their first occurrence
+  const symbolIndex = headerEntries.find(h => h.name === 'symbol')?.index ?? -1;
+  const typeIndex = headerEntries.find(h => h.name === 'type')?.index ?? -1;
+  const volumeIndex = headerEntries.find(h => h.name === 'volume')?.index ?? -1;
+  const commissionIndex = headerEntries.find(h => h.name === 'commission')?.index ?? -1;
+  const profitIndex = headerEntries.find(h => h.name === 'profit')?.index ?? -1;
   
   // Validate required columns
   const missing: string[] = [];
   
-  if (timeIndexes.length < 2) missing.push('Time (need 2 columns)');
+  // Time and Price require exactly 2 columns each (duplicates expected)
+  if (timeIndexes.length < 2) missing.push(`Time (found ${timeIndexes.length}, need 2)`);
+  if (priceIndexes.length < 2) missing.push(`Price (found ${priceIndexes.length}, need 2)`);
+  
+  // Unique columns must exist
   if (symbolIndex === -1) missing.push('Symbol');
   if (typeIndex === -1) missing.push('Type');
   if (volumeIndex === -1) missing.push('Volume');
-  if (priceIndexes.length < 2) missing.push('Price (need 2 columns)');
   if (commissionIndex === -1) missing.push('Commission');
   if (profitIndex === -1) missing.push('Profit');
   
@@ -150,13 +157,13 @@ function findColumnIndexes(headers: string[]): ColumnIndexes {
   }
   
   return {
-    time1: timeIndexes[0],
-    time2: timeIndexes[1],
+    time1: timeIndexes[0],      // Entry time (first occurrence)
+    time2: timeIndexes[1],      // Exit time (second occurrence)
     symbol: symbolIndex,
     type: typeIndex,
     volume: volumeIndex,
-    price1: priceIndexes[0],
-    price2: priceIndexes[1],
+    price1: priceIndexes[0],    // Entry price (first occurrence)
+    price2: priceIndexes[1],    // Exit price (second occurrence)
     commission: commissionIndex,
     profit: profitIndex,
   };
