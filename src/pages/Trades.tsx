@@ -126,7 +126,11 @@ const Trades = () => {
                     )}>
                       {formatCurrency(metrics.netPnl)}
                     </TableCell>
-                    <TableCell className="font-mono">{metrics.rFactor.toFixed(2)}</TableCell>
+                    <TableCell className="font-mono">
+                      {trade.savedRMultiple !== undefined && trade.savedRMultiple !== null 
+                        ? trade.savedRMultiple.toFixed(2) 
+                        : '-'}
+                    </TableCell>
                     <TableCell>
                       <div className="flex flex-wrap gap-1 max-w-[150px]">
                         {trade.tags.slice(0, 2).map((tag, i) => (

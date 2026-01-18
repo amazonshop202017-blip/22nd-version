@@ -1,8 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useFilteredTradesContext } from '@/contexts/TradesContext';
-import { useAccountsContext, Account, Transaction } from '@/contexts/AccountsContext';
 import { calculateTradeMetrics, Trade } from '@/types/trade';
-import { parseISO } from 'date-fns';
 import {
   ScatterChart,
   Scatter,
@@ -37,7 +35,6 @@ interface HoldingTimeData {
 
 const HoldingTime = () => {
   const { filteredTrades } = useFilteredTradesContext();
-  const { accounts, transactions } = useAccountsContext();
   const [timeUnit, setTimeUnit] = useState<TimeUnit>('hours');
   const [displayType, setDisplayType] = useState<DisplayType>('dollar');
 
@@ -55,34 +52,8 @@ const HoldingTime = () => {
     }
   };
 
-  // Calculate account balance before each trade
-  const getAccountBalanceBeforeTrade = (trade: Trade, tradeOpenDate: string): number => {
-    const account = accounts.find(a => a.name === trade.accountName);
-    if (!account) return 0;
-
-    const tradeDate = parseISO(tradeOpenDate);
-    
-    // Get transactions before this trade
-    const accountTransactions = transactions.filter(t => t.accountId === account.id);
-    const depositTotal = accountTransactions
-      .filter(t => t.type === 'deposit' && parseISO(t.date) < tradeDate)
-      .reduce((sum, t) => sum + t.amount, 0);
-    const withdrawTotal = accountTransactions
-      .filter(t => t.type === 'withdraw' && parseISO(t.date) < tradeDate)
-      .reduce((sum, t) => sum + t.amount, 0);
-
-    // Calculate PnL from trades closed before this trade's open date
-    const priorTradesPnl = filteredTrades
-      .filter(t => {
-        if (t.id === trade.id) return false;
-        const metrics = calculateTradeMetrics(t);
-        if (!metrics.closeDate || metrics.positionStatus !== 'CLOSED') return false;
-        return parseISO(metrics.closeDate) < tradeDate;
-      })
-      .reduce((sum, t) => sum + calculateTradeMetrics(t).netPnl, 0);
-
-    return account.startingBalance + depositTotal - withdrawTotal + priorTradesPnl;
-  };
+  // NOTE: Return (%) is now stored on each trade as savedReturnPercent
+  // We use the stored value directly - never recalculate it
 
   // Calculate holding time data for each closed trade
   const holdingTimeData = useMemo(() => {
@@ -91,25 +62,34 @@ const HoldingTime = () => {
       return metrics.positionStatus === 'CLOSED' && metrics.closeDate && metrics.durationMinutes > 0;
     });
 
-    return closedTrades.map((trade) => {
-      const metrics = calculateTradeMetrics(trade);
-      const holdingTimeInUnit = convertTime(metrics.durationMinutes, timeUnit);
-      const accountBalanceBefore = getAccountBalanceBeforeTrade(trade, metrics.openDate);
-      const returnPercent = accountBalanceBefore > 0 
-        ? (metrics.netPnl / accountBalanceBefore) * 100 
-        : 0;
+    return closedTrades
+      .filter((trade) => {
+        // For percent mode, skip trades without stored return %
+        if (displayType === 'percent') {
+          const returnPercent = trade.savedReturnPercent;
+          if (returnPercent === undefined || returnPercent === null || !isFinite(returnPercent)) {
+            return false;
+          }
+        }
+        return true;
+      })
+      .map((trade) => {
+        const metrics = calculateTradeMetrics(trade);
+        const holdingTimeInUnit = convertTime(metrics.durationMinutes, timeUnit);
+        // Use stored Return % from trade
+        const returnPercent = trade.savedReturnPercent ?? 0;
 
-      return {
-        holdingTime: Math.round(holdingTimeInUnit * 100) / 100,
-        returnValue: displayType === 'dollar' ? metrics.netPnl : returnPercent,
-        isWinner: metrics.netPnl > 0,
-        symbol: trade.symbol,
-        side: trade.side,
-        netPnl: metrics.netPnl,
-        returnPercent,
-      };
-    });
-  }, [filteredTrades, timeUnit, displayType, accounts, transactions]);
+        return {
+          holdingTime: Math.round(holdingTimeInUnit * 100) / 100,
+          returnValue: displayType === 'dollar' ? metrics.netPnl : returnPercent,
+          isWinner: metrics.netPnl > 0,
+          symbol: trade.symbol,
+          side: trade.side,
+          netPnl: metrics.netPnl,
+          returnPercent,
+        };
+      });
+  }, [filteredTrades, timeUnit, displayType]);
 
   // Split data for coloring
   const winnerData = holdingTimeData.filter(d => d.isWinner);

@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react';
 import { useFilteredTradesContext } from '@/contexts/TradesContext';
 import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { calculateTradeMetrics, Trade } from '@/types/trade';
-import { useAccountsContext } from '@/contexts/AccountsContext';
 import { parseISO, getDay, getMonth, getWeek, getHours, getMinutes, format } from 'date-fns';
 import {
   BarChart,
@@ -54,38 +53,13 @@ const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'S
 const PerformanceByTime = () => {
   const { filteredTrades } = useFilteredTradesContext();
   const { currencyConfig } = useGlobalFilters();
-  const { accounts, transactions } = useAccountsContext();
   
   const [displayType, setDisplayType] = useState<DisplayType>('dollar');
   const [dateSetting, setDateSetting] = useState<DateSettingType>('entry');
   const [period, setPeriod] = useState<PeriodType>('weekday');
 
-  // Calculate account balance before each trade for % calculations
-  const getAccountBalanceBeforeTrade = (trade: Trade, tradeOpenDate: string): number => {
-    const account = accounts.find(a => a.name === trade.accountName);
-    if (!account) return 0;
-
-    const tradeDate = parseISO(tradeOpenDate);
-    
-    const accountTransactions = transactions.filter(t => t.accountId === account.id);
-    const depositTotal = accountTransactions
-      .filter(t => t.type === 'deposit' && parseISO(t.date) < tradeDate)
-      .reduce((sum, t) => sum + t.amount, 0);
-    const withdrawTotal = accountTransactions
-      .filter(t => t.type === 'withdraw' && parseISO(t.date) < tradeDate)
-      .reduce((sum, t) => sum + t.amount, 0);
-
-    const priorTradesPnl = filteredTrades
-      .filter(t => {
-        if (t.id === trade.id) return false;
-        const metrics = calculateTradeMetrics(t);
-        if (!metrics.closeDate || metrics.positionStatus !== 'CLOSED') return false;
-        return parseISO(metrics.closeDate) < tradeDate;
-      })
-      .reduce((sum, t) => sum + calculateTradeMetrics(t).netPnl, 0);
-
-    return account.startingBalance + depositTotal - withdrawTotal + priorTradesPnl;
-  };
+  // NOTE: Return (%) is now stored on each trade as savedReturnPercent
+  // We use the stored value directly - never recalculate it
 
   // Generate all possible buckets for a period
   const getAllBuckets = (periodType: PeriodType): { label: string; sortOrder: number }[] => {
@@ -281,10 +255,11 @@ const PerformanceByTime = () => {
       const date = parseISO(dateStr);
       const bucket = getBucket(date, period);
       
-      const accountBalanceBefore = getAccountBalanceBeforeTrade(trade, metrics.openDate);
-      const returnPercent = accountBalanceBefore > 0 
-        ? (metrics.netPnl / accountBalanceBefore) * 100 
-        : 0;
+      // Use stored Return % from trade - skip trades without stored value for percent mode
+      const returnPercent = trade.savedReturnPercent;
+      if (displayType === 'percent' && (returnPercent === undefined || returnPercent === null || !isFinite(returnPercent))) {
+        return; // Skip this trade for percent mode
+      }
 
       const isWin = metrics.netPnl > 0;
       const isLoss = metrics.netPnl < 0;
@@ -303,7 +278,7 @@ const PerformanceByTime = () => {
       timeMap.set(bucket.label, {
         sortOrder: bucket.sortOrder,
         totalPnl: existing.totalPnl + metrics.netPnl,
-        totalPercent: existing.totalPercent + returnPercent,
+        totalPercent: existing.totalPercent + (returnPercent ?? 0),
         tradeCount: existing.tradeCount + 1,
         winCount: existing.winCount + (isWin ? 1 : 0),
         lossCount: existing.lossCount + (isLoss ? 1 : 0),
@@ -346,7 +321,7 @@ const PerformanceByTime = () => {
       .sort((a, b) => a.sortOrder - b.sortOrder);
 
     return data;
-  }, [filteredTrades, displayType, dateSetting, period, accounts, transactions]);
+  }, [filteredTrades, displayType, dateSetting, period]);
 
   // Get period label for metrics cards
   const getPeriodLabel = (): string => {

@@ -65,7 +65,10 @@ export const MonthlyPerformanceCalendar = () => {
       
       map[dayKey].pnl += metrics.netPnl;
       map[dayKey].trades += 1;
-      map[dayKey].rMultiple += metrics.rFactor;
+      // Use stored R-Multiple if available
+      if (trade.savedRMultiple !== undefined && trade.savedRMultiple !== null && isFinite(trade.savedRMultiple)) {
+        map[dayKey].rMultiple += trade.savedRMultiple;
+      }
     });
 
     // Calculate win rates
