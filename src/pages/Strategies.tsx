@@ -88,12 +88,12 @@ const Strategies = () => {
     <div className="space-y-8 animate-fade-in">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground mb-2">Strategies</h1>
-          <p className="text-muted-foreground">Define and track your trading strategies</p>
+          <h1 className="text-3xl font-bold text-foreground mb-2">Setups</h1>
+          <p className="text-muted-foreground">Define and track your trading setups</p>
         </div>
         <Button onClick={() => setShowAddForm(true)} className="gap-2">
           <Plus className="w-4 h-4" />
-          Add Strategy
+          Add Setup
         </Button>
       </div>
 
@@ -106,12 +106,12 @@ const Strategies = () => {
             exit={{ opacity: 0, y: -10 }}
             className="glass-card rounded-2xl p-6"
           >
-            <h3 className="text-lg font-semibold mb-4">New Strategy</h3>
+            <h3 className="text-lg font-semibold mb-4">New Setup</h3>
             <div className="space-y-4">
               <div>
-                <label className="text-sm font-medium mb-1.5 block">Strategy Name</label>
+                <label className="text-sm font-medium mb-1.5 block">Setup Name</label>
                 <Input
-                  placeholder="Enter strategy name..."
+                  placeholder="Enter setup name..."
                   value={newName}
                   onChange={(e) => setNewName(e.target.value)}
                   className="bg-input border-border"
@@ -120,7 +120,7 @@ const Strategies = () => {
               <div>
                 <label className="text-sm font-medium mb-1.5 block">Description (optional)</label>
                 <Textarea
-                  placeholder="Describe your strategy..."
+                  placeholder="Describe your setup..."
                   value={newDescription}
                   onChange={(e) => setNewDescription(e.target.value)}
                   className="bg-input border-border resize-none"
@@ -132,7 +132,7 @@ const Strategies = () => {
                   Cancel
                 </Button>
                 <Button onClick={handleAddStrategy} disabled={!newName.trim()}>
-                  Create Strategy
+                  Create Setup
                 </Button>
               </div>
             </div>
@@ -147,16 +147,16 @@ const Strategies = () => {
             <Target className="w-5 h-5 text-primary" />
           </div>
           <div>
-            <h2 className="text-xl font-semibold">Your Strategies</h2>
-            <p className="text-sm text-muted-foreground">Click a strategy to view its performance</p>
+            <h2 className="text-xl font-semibold">Your Setups</h2>
+            <p className="text-sm text-muted-foreground">Click a setup to view its performance</p>
           </div>
         </div>
 
         {strategies.length === 0 ? (
           <div className="text-center py-12 text-muted-foreground">
             <Target className="w-12 h-12 mx-auto mb-4 opacity-30" />
-            <p>No strategies created yet</p>
-            <p className="text-sm">Add your first strategy to start organizing trades</p>
+            <p>No setups created yet</p>
+            <p className="text-sm">Add your first setup to start organizing trades</p>
           </div>
         ) : (
           <div className="overflow-x-auto">

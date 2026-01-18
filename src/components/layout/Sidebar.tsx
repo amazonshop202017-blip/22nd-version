@@ -10,7 +10,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 const navItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
   { icon: ListOrdered, label: 'Trades', path: '/trades' },
-  { icon: Target, label: 'Strategies', path: '/strategies' },
+  { icon: Target, label: 'Setups', path: '/strategies' },
   { icon: FileText, label: 'Reports', path: '/reports' },
 ];
 

@@ -76,7 +76,7 @@ const StrategyDetail = () => {
         <p className="text-muted-foreground mb-4">Strategy not found</p>
         <Button onClick={() => navigate('/strategies')}>
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Strategies
+          Back to Setups
         </Button>
       </div>
     );
@@ -226,9 +226,9 @@ const StrategyDetail = () => {
           {strategyTrades.length === 0 ? (
             <div className="glass-card rounded-2xl p-12 text-center">
               <Calendar className="w-12 h-12 mx-auto mb-4 text-muted-foreground opacity-30" />
-              <p className="text-muted-foreground">No trades linked to this strategy yet</p>
+              <p className="text-muted-foreground">No trades linked to this setup yet</p>
               <p className="text-sm text-muted-foreground mt-1">
-                Add trades and select this strategy to see them here
+                Add trades and select this setup to see them here
               </p>
             </div>
           ) : (
