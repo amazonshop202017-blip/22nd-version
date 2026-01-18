@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useRef } from 'react';
+import { useEffect, useState, useMemo, useRef, useCallback } from 'react';
 import { X, Calendar, Star, Settings2, Clock, ChevronDown, Check, Plus, Info } from 'lucide-react';
 import { ScaleInOutModal } from './ScaleInOutModal';
 import { TypeableCombobox } from './TypeableCombobox';
@@ -17,6 +17,7 @@ import { useTradesContext } from '@/contexts/TradesContext';
 import { useStrategiesContext } from '@/contexts/StrategiesContext';
 import { useAccountsContext } from '@/contexts/AccountsContext';
 import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { useCustomStats } from '@/contexts/CustomStatsContext';
 import { TradeFormData, TradeEntry, ScaleEntry, calculateTradeMetrics } from '@/types/trade';
 import { cn } from '@/lib/utils';
@@ -35,7 +36,7 @@ export const TradeModal = () => {
   const { addTrade, updateTrade } = useTradesContext();
   const { strategies, getStrategyById } = useStrategiesContext();
   const { accounts } = useAccountsContext();
-  const { currencyConfig } = useGlobalFilters();
+  const { currencyConfig, selectedAccounts: globalSelectedAccounts } = useGlobalFilters();
   const { 
     options: customStatsOptions,
     addTimeframe,
@@ -51,11 +52,16 @@ export const TradeModal = () => {
     addBias,
   } = useCustomStats();
 
+  // Refs
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
   // Form state
   const [activeTab, setActiveTab] = useState('regular');
   const [instrument, setInstrument] = useState<'Equity' | 'Futures' | 'Options' | 'Crypto'>('Equity');
   const [strategyId, setStrategyId] = useState<string>('');
   const [direction, setDirection] = useState<'LONG' | 'SHORT'>('LONG');
+  const [selectedAccountId, setSelectedAccountId] = useState<string>('');
+  const [accountError, setAccountError] = useState(false);
   
   // Trade Entry fields
   const [entryDate, setEntryDate] = useState('');
@@ -163,11 +169,32 @@ export const TradeModal = () => {
     }
   }, [strategyId]);
 
+  // Auto-select account when single account is selected in global filter
+  useEffect(() => {
+    if (!editingTrade && isOpen) {
+      if (globalSelectedAccounts.length === 1) {
+        setSelectedAccountId(globalSelectedAccounts[0]);
+      } else {
+        setSelectedAccountId('');
+      }
+    }
+  }, [globalSelectedAccounts, editingTrade, isOpen]);
+
+  // Clear account error when account is selected
+  useEffect(() => {
+    if (selectedAccountId) {
+      setAccountError(false);
+    }
+  }, [selectedAccountId]);
+
   useEffect(() => {
     if (editingTrade) {
       setSymbol(editingTrade.symbol);
       setInstrument(editingTrade.instrument);
       setAccountName(editingTrade.accountName);
+      // Set account ID from accountName
+      const matchedAccount = accounts.find(a => a.name === editingTrade.accountName);
+      setSelectedAccountId(matchedAccount?.id || '');
       setStrategyId(editingTrade.strategyId || '');
       setSelectedTags(editingTrade.tags);
       setSelectedChecklistItems(editingTrade.selectedChecklistItems || []);
@@ -251,6 +278,8 @@ export const TradeModal = () => {
     setSymbol('');
     setInstrument('Equity');
     setAccountName('');
+    setSelectedAccountId('');
+    setAccountError(false);
     setStrategyId('');
     setSelectedTags([]);
     setSelectedChecklistItems([]);
@@ -343,6 +372,21 @@ export const TradeModal = () => {
   const handleSubmit = () => {
     if (!canSave) return;
 
+    // Validate account is selected
+    if (!selectedAccountId) {
+      setAccountError(true);
+      setActiveTab('regular');
+      // Scroll to top
+      if (scrollContainerRef.current) {
+        scrollContainerRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+      return;
+    }
+
+    // Get the account name from selected account ID
+    const selectedAccount = accounts.find(a => a.id === selectedAccountId);
+    const resolvedAccountName = selectedAccount?.name || '';
+
     const tradeData: TradeFormData = {
       symbol: symbol.trim(),
       side: direction,
@@ -350,7 +394,7 @@ export const TradeModal = () => {
       entries,
       tradeRisk,
       tradeTarget,
-      accountName: accountName.trim(),
+      accountName: resolvedAccountName,
       strategyId: strategyId || undefined,
       selectedChecklistItems,
       tags: selectedTags,
@@ -530,13 +574,43 @@ export const TradeModal = () => {
         </div>
 
         {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto px-6 py-4">
+        <div ref={scrollContainerRef} className="flex-1 overflow-y-auto px-6 py-4">
           {activeTab === 'regular' && (
             <div className="space-y-6">
               {/* General Trade Data Section */}
               <div className="space-y-4">
                 <h3 className="text-sm font-medium text-foreground">General Trade Data</h3>
                 
+                {/* Account - Required field */}
+                <div className="space-y-1.5">
+                  <Label className={cn(
+                    "text-xs",
+                    accountError ? "text-destructive" : "text-muted-foreground"
+                  )}>Account *</Label>
+                  <Select 
+                    value={selectedAccountId || "none"} 
+                    onValueChange={(val) => setSelectedAccountId(val === "none" ? "" : val)}
+                  >
+                    <SelectTrigger className={cn(
+                      "h-10 bg-input",
+                      accountError 
+                        ? "border-destructive ring-1 ring-destructive" 
+                        : "border-border"
+                    )}>
+                      <SelectValue placeholder="Select account..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none" disabled>Select account...</SelectItem>
+                      {accounts.map((account) => (
+                        <SelectItem key={account.id} value={account.id}>{account.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {accountError && (
+                    <p className="text-xs text-destructive">Please select an account</p>
+                  )}
+                </div>
+
                 {/* Entry Date */}
                 <div className="space-y-1.5">
                   <Label className="text-xs text-muted-foreground">Entry Date *</Label>
