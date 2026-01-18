@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
-import { useTradesContext } from './TradesContext';
+import { useTradesContext } from '@/contexts/TradesContext';
 import { calculateTradeMetrics } from '@/types/trade';
 
 export interface Account {
