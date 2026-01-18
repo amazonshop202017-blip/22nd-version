@@ -49,29 +49,46 @@ const STORAGE_KEY = 'trading-journal-custom-stats';
 
 const CustomStatsContext = createContext<CustomStatsContextType | undefined>(undefined);
 
+const getDefaultOptions = (): CustomStatsOptions => ({
+  timeframes: defaultTimeframes,
+  confluences: [],
+  patterns: [],
+  preparations: [],
+  entryComments: defaultEntryComments,
+  tradeManagements: defaultTradeManagements,
+  exitComments: defaultExitComments,
+  mentals: [],
+  indicators: [],
+  marketGenerals: [],
+  biases: [],
+});
+
 export const CustomStatsProvider = ({ children }: { children: ReactNode }) => {
   const [options, setOptions] = useState<CustomStatsOptions>(() => {
+    const defaults = getDefaultOptions();
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
       try {
-        return JSON.parse(stored);
+        const parsed = JSON.parse(stored);
+        // Merge stored data with defaults to handle new fields
+        return {
+          timeframes: parsed.timeframes ?? defaults.timeframes,
+          confluences: parsed.confluences ?? defaults.confluences,
+          patterns: parsed.patterns ?? defaults.patterns,
+          preparations: parsed.preparations ?? defaults.preparations,
+          entryComments: parsed.entryComments ?? defaults.entryComments,
+          tradeManagements: parsed.tradeManagements ?? defaults.tradeManagements,
+          exitComments: parsed.exitComments ?? defaults.exitComments,
+          mentals: parsed.mentals ?? defaults.mentals,
+          indicators: parsed.indicators ?? defaults.indicators,
+          marketGenerals: parsed.marketGenerals ?? defaults.marketGenerals,
+          biases: parsed.biases ?? defaults.biases,
+        };
       } catch {
         // Return defaults if parse fails
       }
     }
-    return {
-      timeframes: defaultTimeframes,
-      confluences: [],
-      patterns: [],
-      preparations: [],
-      entryComments: defaultEntryComments,
-      tradeManagements: defaultTradeManagements,
-      exitComments: defaultExitComments,
-      mentals: [],
-      indicators: [],
-      marketGenerals: [],
-      biases: [],
-    };
+    return defaults;
   });
 
   useEffect(() => {
