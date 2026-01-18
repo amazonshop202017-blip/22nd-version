@@ -35,6 +35,8 @@ interface AccountsContextType {
   getAllAccountsWithStats: () => AccountWithStats[];
   addTransaction: (accountId: string, type: 'deposit' | 'withdraw', amount: number, note?: string) => void;
   getTransactionsForAccount: (accountId: string) => Transaction[];
+  // Get account balance BEFORE any trade P/L (starting balance + transactions only)
+  getAccountBalanceBeforeTrades: (id: string) => number;
 }
 
 const AccountsContext = createContext<AccountsContextType | undefined>(undefined);
@@ -175,6 +177,23 @@ export const AccountsProvider = ({ children }: { children: ReactNode }) => {
     });
   }, [accounts, trades, transactions]);
 
+  // Get account balance BEFORE any trade P/L is applied
+  // This is: startingBalance + deposits - withdrawals (NO trade P/L)
+  const getAccountBalanceBeforeTrades = useCallback((id: string): number => {
+    const account = accounts.find(a => a.id === id);
+    if (!account) return 0;
+
+    const accountTransactions = transactions.filter(t => t.accountId === id);
+    const depositTotal = accountTransactions
+      .filter(t => t.type === 'deposit')
+      .reduce((sum, t) => sum + t.amount, 0);
+    const withdrawTotal = accountTransactions
+      .filter(t => t.type === 'withdraw')
+      .reduce((sum, t) => sum + t.amount, 0);
+
+    return account.startingBalance + depositTotal - withdrawTotal;
+  }, [accounts, transactions]);
+
   return (
     <AccountsContext.Provider value={{
       accounts,
@@ -187,6 +206,7 @@ export const AccountsProvider = ({ children }: { children: ReactNode }) => {
       getAllAccountsWithStats,
       addTransaction,
       getTransactionsForAccount,
+      getAccountBalanceBeforeTrades,
     }}>
       {children}
     </AccountsContext.Provider>

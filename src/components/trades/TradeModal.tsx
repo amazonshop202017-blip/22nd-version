@@ -35,7 +35,7 @@ export const TradeModal = () => {
   const { isOpen, editingTrade, closeModal } = useTradeModal();
   const { addTrade, updateTrade } = useTradesContext();
   const { strategies, getStrategyById } = useStrategiesContext();
-  const { accounts, getAccountWithStats } = useAccountsContext();
+  const { accounts, getAccountWithStats, getAccountBalanceBeforeTrades } = useAccountsContext();
   const { currencyConfig, selectedAccounts: globalSelectedAccounts, isAllAccountsSelected } = useGlobalFilters();
   const { 
     options: customStatsOptions,
@@ -347,22 +347,30 @@ export const TradeModal = () => {
   const effectiveGrossPnl = manualGrossPnl !== '' ? parseFloat(manualGrossPnl) || 0 : metrics.grossPnl;
   const effectiveNetPnl = effectiveGrossPnl - (parseFloat(fees) || 0);
 
-  // Calculate Return (%) based on selected account's current balance
-  // For Add Trade: recalculates when account or P/L values change
-  // For Edit Trade: uses saved value unless P/L-affecting fields change
-  const calculatedReturnPercent = useMemo(() => {
+  // Calculate account balance snapshot (BEFORE any trade P/L)
+  // This is: startingBalance + deposits - withdrawals
+  const accountBalanceSnapshot = useMemo(() => {
     if (!selectedAccountId) return 0;
-    
-    const accountStats = getAccountWithStats(selectedAccountId);
-    if (!accountStats || accountStats.currentBalance <= 0) return 0;
-    
-    // Return % = Net P/L ÷ Account Balance × 100
-    return (effectiveNetPnl / accountStats.currentBalance) * 100;
-  }, [selectedAccountId, effectiveNetPnl, getAccountWithStats]);
+    return getAccountBalanceBeforeTrades(selectedAccountId);
+  }, [selectedAccountId, getAccountBalanceBeforeTrades]);
 
-  // For editing: track if P/L-affecting fields have changed from original
+  // Calculate Return (%) based on account balance BEFORE trade
+  // For Add Trade: recalculates when account or P/L values change
+  // For Edit Trade: uses saved value unless P/L-affecting fields change or account changes
+  const calculatedReturnPercent = useMemo(() => {
+    if (!selectedAccountId || accountBalanceSnapshot <= 0) return 0;
+    
+    // Return % = Net P/L ÷ Account Balance (before trade) × 100
+    return (effectiveNetPnl / accountBalanceSnapshot) * 100;
+  }, [selectedAccountId, effectiveNetPnl, accountBalanceSnapshot]);
+
+  // For editing: track if P/L-affecting fields or account have changed from original
   const pnlFieldsChanged = useMemo(() => {
     if (!editingTrade) return true; // Always calculate for new trades
+    
+    // Check if account changed
+    const accountChanged = editingTrade.accountId !== selectedAccountId;
+    if (accountChanged) return true;
     
     // Compare current values with original trade values
     const origMetrics = calculateTradeMetrics(editingTrade);
@@ -371,7 +379,7 @@ export const TradeModal = () => {
       : origMetrics.netPnl;
     
     return Math.abs(effectiveNetPnl - origNetPnl) > 0.001;
-  }, [editingTrade, effectiveNetPnl]);
+  }, [editingTrade, effectiveNetPnl, selectedAccountId]);
 
   // Final return percent to display - for edit, use saved unless P/L changed
   const displayReturnPercent = useMemo(() => {
@@ -458,7 +466,7 @@ export const TradeModal = () => {
       indicator: indicator || undefined,
       marketGeneral: marketGeneral || undefined,
       bias: bias || undefined,
-      // Save Return (%) - for new trades, always calculate; for edits, update if P/L changed
+      // Save Return (%) - for new trades, always calculate; for edits, update if P/L or account changed
       savedReturnPercent: editingTrade && !pnlFieldsChanged 
         ? editingTrade.savedReturnPercent 
         : calculatedReturnPercent,
@@ -466,6 +474,13 @@ export const TradeModal = () => {
       savedRMultiple: editingTrade && !pnlFieldsChanged
         ? editingTrade.savedRMultiple
         : (tradeRisk > 0 ? effectiveNetPnl / tradeRisk : 0),
+      // Account snapshot - save accountId and balance at trade creation time
+      accountId: editingTrade && !pnlFieldsChanged
+        ? editingTrade.accountId
+        : selectedAccountId,
+      accountBalanceSnapshot: editingTrade && !pnlFieldsChanged
+        ? editingTrade.accountBalanceSnapshot
+        : accountBalanceSnapshot,
     };
 
     if (editingTrade) {

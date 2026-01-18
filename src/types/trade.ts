@@ -64,6 +64,9 @@ export interface Trade {
   savedReturnPercent?: number;
   // Saved R-Multiple - calculated at trade creation based on trade risk
   savedRMultiple?: number;
+  // Account snapshot at trade creation time
+  accountId?: string;
+  accountBalanceSnapshot?: number;
 }
 
 // Calculated values (not stored, computed on-the-fly)
