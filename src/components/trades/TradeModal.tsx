@@ -462,6 +462,10 @@ export const TradeModal = () => {
       savedReturnPercent: editingTrade && !pnlFieldsChanged 
         ? editingTrade.savedReturnPercent 
         : calculatedReturnPercent,
+      // Save R-Multiple - for new trades, always calculate; for edits, update if P/L changed
+      savedRMultiple: editingTrade && !pnlFieldsChanged
+        ? editingTrade.savedRMultiple
+        : (tradeRisk > 0 ? effectiveNetPnl / tradeRisk : 0),
     };
 
     if (editingTrade) {

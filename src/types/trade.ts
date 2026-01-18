@@ -62,6 +62,8 @@ export interface Trade {
   bias?: string;
   // Saved Return (%) - calculated at trade creation based on account balance
   savedReturnPercent?: number;
+  // Saved R-Multiple - calculated at trade creation based on trade risk
+  savedRMultiple?: number;
 }
 
 // Calculated values (not stored, computed on-the-fly)

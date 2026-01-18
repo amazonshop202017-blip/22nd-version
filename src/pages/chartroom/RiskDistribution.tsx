@@ -66,16 +66,33 @@ const RiskDistribution = () => {
     });
   }, [filteredTrades]);
 
-  // Calculate trade values (R-Multiple or Return %)
+  // Get trade values from SAVED trade data (NOT recalculated)
+  // - R-Multiple: use trade.rMultiple (saved value from trade popup)
+  // - Return (%): use trade.savedReturnPercent (saved value based on account balance at trade time)
   const tradeValues = useMemo(() => {
-    return closedTrades.map(trade => {
-      const metrics = calculateTradeMetrics(trade);
-      const value = displayType === 'rMultiple' ? metrics.rFactor : metrics.returnPercent;
-      const isWin = metrics.netPnl > 0;
-      const isLoss = metrics.netPnl < 0;
-      const isBreakeven = metrics.netPnl === 0;
-      return { value, isWin, isLoss, isBreakeven };
-    });
+    return closedTrades
+      .map(trade => {
+        const metrics = calculateTradeMetrics(trade);
+        
+        // Use SAVED values - never recalculate here
+        let value: number | undefined;
+        if (displayType === 'rMultiple') {
+          value = trade.savedRMultiple;
+        } else {
+          value = trade.savedReturnPercent;
+        }
+        
+        // Exclude trades where the required value is missing
+        if (value === undefined || value === null || !isFinite(value)) {
+          return null;
+        }
+        
+        const isWin = metrics.netPnl > 0;
+        const isLoss = metrics.netPnl < 0;
+        const isBreakeven = metrics.netPnl === 0;
+        return { value, isWin, isLoss, isBreakeven };
+      })
+      .filter((item): item is { value: number; isWin: boolean; isLoss: boolean; isBreakeven: boolean } => item !== null);
   }, [closedTrades, displayType]);
 
   // Generate buckets based on display type
