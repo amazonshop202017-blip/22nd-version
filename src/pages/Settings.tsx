@@ -14,7 +14,7 @@ import { toast } from 'sonner';
 const Settings = () => {
   const { tags, addTag, removeTag, updateTag } = useTagsContext();
   const { accounts, addAccount, removeAccount, updateAccount, getAllAccountsWithStats, addTransaction, getTransactionsForAccount } = useAccountsContext();
-  const { addTrade } = useTradesContext();
+  const { bulkAddTrades } = useTradesContext();
   const {
     options: customStatsOptions,
     addTimeframe, removeTimeframe,
@@ -72,7 +72,7 @@ const Settings = () => {
         file,
         account.name,
         importAccountId,
-        addTrade
+        bulkAddTrades
       );
 
       if (result.success) {

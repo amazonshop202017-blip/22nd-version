@@ -25,6 +25,7 @@ interface TradesContextType {
     profitFactor: number;
   };
   addTrade: (data: TradeFormData) => Trade;
+  bulkAddTrades: (tradesData: TradeFormData[]) => Trade[];
   updateTrade: (id: string, data: TradeFormData) => void;
   deleteTrade: (id: string) => void;
   getTradeById: (id: string) => Trade | undefined;
@@ -58,7 +59,7 @@ export const useTradesContext = (): TradesContextType => {
 
 // Hook to get filtered trades and stats (must be used inside GlobalFiltersProvider)
 export const useFilteredTradesContext = () => {
-  const { trades, addTrade, updateTrade, deleteTrade, getTradeById } = useTradesContext();
+  const { trades, addTrade, bulkAddTrades, updateTrade, deleteTrade, getTradeById } = useTradesContext();
   const { dateRange, selectedAccounts } = useGlobalFilters();
 
   const filteredTrades = useMemo(() => {
@@ -141,6 +142,7 @@ export const useFilteredTradesContext = () => {
     filteredTrades,
     stats,
     addTrade,
+    bulkAddTrades,
     updateTrade,
     deleteTrade,
     getTradeById,
