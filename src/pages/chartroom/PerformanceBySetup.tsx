@@ -96,8 +96,11 @@ const PerformanceBySetup = () => {
 
     closedTrades.forEach(trade => {
       const metrics = calculateTradeMetrics(trade);
-      // Use pattern field for setup, default to "Unassigned" if empty
-      const setupName = trade.pattern?.trim() || 'Unassigned';
+      // Use pattern field for setup - only use "Unassigned" if null, undefined, or empty string
+      const rawPattern = trade.pattern;
+      const setupName = (rawPattern !== null && rawPattern !== undefined && rawPattern.trim() !== '') 
+        ? rawPattern.trim() 
+        : 'Unassigned';
       const accountBalanceBefore = getAccountBalanceBeforeTrade(trade, metrics.openDate);
       const returnPercent = accountBalanceBefore > 0 
         ? (metrics.netPnl / accountBalanceBefore) * 100 
