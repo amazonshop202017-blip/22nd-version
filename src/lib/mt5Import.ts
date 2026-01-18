@@ -350,7 +350,7 @@ export async function importMT5Trades(
   file: File,
   accountName: string,
   accountId: string,
-  addTrade: (data: TradeFormData) => void
+  bulkAddTrades: (tradesData: TradeFormData[]) => void
 ): Promise<MT5ImportResult> {
   const errors: string[] = [];
   
@@ -372,10 +372,8 @@ export async function importMT5Trades(
       };
     }
     
-    // Add all trades
-    for (const trade of trades) {
-      addTrade(trade);
-    }
+    // Add all trades at once (single state update)
+    bulkAddTrades(trades);
     
     return {
       success: true,
