@@ -190,6 +190,30 @@ function parseNumber(value: string): number {
   return isNaN(num) ? 0 : num;
 }
 
+function findHeaderRowIndex(lines: string[]): number {
+  for (let i = 0; i < lines.length; i++) {
+    const cells = parseCSVLine(lines[i]);
+    
+    // Normalize cells: remove quotes, trim whitespace
+    const normalizedCells = cells.map(c => c.replace(/^["']|["']$/g, '').trim());
+    
+    // Count non-empty cells
+    const nonEmptyCells = normalizedCells.filter(c => c.length > 0);
+    if (nonEmptyCells.length < 5) continue;
+    
+    // Check if row contains both "Time" and "Symbol" (case-insensitive)
+    const lowerCells = normalizedCells.map(c => c.toLowerCase());
+    const hasTime = lowerCells.includes('time');
+    const hasSymbol = lowerCells.includes('symbol');
+    
+    if (hasTime && hasSymbol) {
+      return i;
+    }
+  }
+  
+  return -1; // Header not found
+}
+
 export function parseCSVToTrades(
   csvContent: string,
   accountName: string,
@@ -201,14 +225,22 @@ export function parseCSVToTrades(
     throw new Error('CSV must have at least a header row and one data row');
   }
   
-  const headerLine = lines[0];
-  const headers = parseCSVLine(headerLine);
+  // Find the header row dynamically
+  const headerRowIndex = findHeaderRowIndex(lines);
+  
+  if (headerRowIndex === -1) {
+    throw new Error('Could not locate MT5 Positions header row in CSV.');
+  }
+  
+  const headerLine = lines[headerRowIndex];
+  const headers = parseCSVLine(headerLine).map(h => h.replace(/^["']|["']$/g, '').trim());
   const indexes = findColumnIndexes(headers);
   
   const trades: TradeFormData[] = [];
   let skipped = 0;
   
-  for (let i = 1; i < lines.length; i++) {
+  // Data rows start after the header row
+  for (let i = headerRowIndex + 1; i < lines.length; i++) {
     const line = lines[i];
     const values = parseCSVLine(line);
     
