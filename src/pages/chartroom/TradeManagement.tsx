@@ -88,22 +88,26 @@ const TradeManagement = () => {
       }
       
       // Potential R: Maximum favorable excursion (MFE in R)
+      // Uses farthestPriceInProfit for BOTH long and short trades
       let potentialR: number | null = null;
       
       if (trade.priceReachedFirst === 'stopLoss') {
         // If SL was hit first, potential is -1R
         potentialR = -1;
       } else {
-        // Calculate based on highest/lowest price
-        if (trade.side === 'LONG' && trade.highestPrice !== undefined && trade.highestPrice > 0) {
-          const risk = entry - sl;
-          if (risk > 0) {
-            potentialR = Math.max(-1, (trade.highestPrice - entry) / risk);
-          }
-        } else if (trade.side === 'SHORT' && trade.lowestPrice !== undefined && trade.lowestPrice > 0) {
-          const risk = sl - entry;
-          if (risk > 0) {
-            potentialR = Math.max(-1, (entry - trade.lowestPrice) / risk);
+        // Calculate based on farthestPriceInProfit (direction-aware)
+        if (trade.farthestPriceInProfit !== undefined && trade.farthestPriceInProfit > 0) {
+          if (trade.side === 'LONG') {
+            const risk = entry - sl;
+            if (risk > 0) {
+              potentialR = Math.max(-1, (trade.farthestPriceInProfit - entry) / risk);
+            }
+          } else {
+            // SHORT: profit = entry - farthestPriceInProfit
+            const risk = sl - entry;
+            if (risk > 0) {
+              potentialR = Math.max(-1, (entry - trade.farthestPriceInProfit) / risk);
+            }
           }
         }
       }

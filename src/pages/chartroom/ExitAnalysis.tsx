@@ -54,8 +54,8 @@ const ExitAnalysis = () => {
           metrics.closeDate &&
           trade.stopLoss !== undefined &&
           trade.takeProfit !== undefined &&
-          trade.highestPrice !== undefined &&
-          trade.lowestPrice !== undefined &&
+          trade.farthestPriceInProfit !== undefined &&
+          trade.farthestPriceInLoss !== undefined &&
           metrics.avgEntryPrice > 0 &&
           metrics.avgExitPrice > 0
         );
@@ -74,8 +74,8 @@ const ExitAnalysis = () => {
       const exitPrice = metrics.avgExitPrice;
       const stopLoss = trade.stopLoss!;
       const takeProfit = trade.takeProfit!;
-      const highestPrice = trade.highestPrice!;
-      const lowestPrice = trade.lowestPrice!;
+      const farthestPriceInProfit = trade.farthestPriceInProfit!;
+      const farthestPriceInLoss = trade.farthestPriceInLoss!;
       const side = trade.side;
 
       // Calculate Risk & Reward Ranges (Normalization)
@@ -100,18 +100,18 @@ const ExitAnalysis = () => {
       
       if (side === 'LONG') {
         // Check if TP was hit
-        if (highestPrice >= takeProfit) {
+        if (farthestPriceInProfit >= takeProfit) {
           updraw = 100;
         } else {
-          updraw = ((highestPrice - entryPrice) / rewardRange) * 100;
+          updraw = ((farthestPriceInProfit - entryPrice) / rewardRange) * 100;
           updraw = Math.max(0, Math.min(99, updraw)); // Clamp 0-99
         }
       } else {
         // SHORT
-        if (lowestPrice <= takeProfit) {
+        if (farthestPriceInProfit <= takeProfit) {
           updraw = 100;
         } else {
-          updraw = ((entryPrice - lowestPrice) / rewardRange) * 100;
+          updraw = ((entryPrice - farthestPriceInProfit) / rewardRange) * 100;
           updraw = Math.max(0, Math.min(99, updraw)); // Clamp 0-99
         }
       }
@@ -121,18 +121,18 @@ const ExitAnalysis = () => {
 
       if (side === 'LONG') {
         // Check if SL was hit
-        if (lowestPrice <= stopLoss) {
+        if (farthestPriceInLoss <= stopLoss) {
           drawdown = -100;
         } else {
-          drawdown = -((entryPrice - lowestPrice) / riskRange) * 100;
+          drawdown = -((entryPrice - farthestPriceInLoss) / riskRange) * 100;
           drawdown = Math.max(-99, Math.min(0, drawdown)); // Clamp -99 to 0
         }
       } else {
         // SHORT
-        if (highestPrice >= stopLoss) {
+        if (farthestPriceInLoss >= stopLoss) {
           drawdown = -100;
         } else {
-          drawdown = -((highestPrice - entryPrice) / riskRange) * 100;
+          drawdown = -((farthestPriceInLoss - entryPrice) / riskRange) * 100;
           drawdown = Math.max(-99, Math.min(0, drawdown)); // Clamp -99 to 0
         }
       }

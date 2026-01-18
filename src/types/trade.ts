@@ -47,8 +47,8 @@ export interface Trade {
   entryComment?: string;
   tradeManagement?: string;
   exitComment?: string;
-  highestPrice?: number;
-  lowestPrice?: number;
+  farthestPriceInProfit?: number;
+  farthestPriceInLoss?: number;
   priceReachedFirst?: 'takeProfit' | 'stopLoss';
   breakEven?: boolean;
   // Custom Stats

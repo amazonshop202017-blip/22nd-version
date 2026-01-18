@@ -103,8 +103,8 @@ export const TradeModal = () => {
   const [entryComment, setEntryComment] = useState('');
   const [tradeManagement, setTradeManagement] = useState('');
   const [exitComment, setExitComment] = useState('');
-  const [highestPrice, setHighestPrice] = useState<string>('');
-  const [lowestPrice, setLowestPrice] = useState<string>('');
+  const [farthestPriceInProfit, setFarthestPriceInProfit] = useState<string>('');
+  const [farthestPriceInLoss, setFarthestPriceInLoss] = useState<string>('');
   const [priceReachedFirst, setPriceReachedFirst] = useState<'takeProfit' | 'stopLoss' | ''>('');
   const [breakEven, setBreakEven] = useState<boolean | null>(null);
   
@@ -243,8 +243,8 @@ export const TradeModal = () => {
       setEntryComment(editingTrade.entryComment || '');
       setTradeManagement(editingTrade.tradeManagement || '');
       setExitComment(editingTrade.exitComment || '');
-      setHighestPrice(editingTrade.highestPrice !== undefined ? editingTrade.highestPrice.toString() : '');
-      setLowestPrice(editingTrade.lowestPrice !== undefined ? editingTrade.lowestPrice.toString() : '');
+      setFarthestPriceInProfit(editingTrade.farthestPriceInProfit !== undefined ? editingTrade.farthestPriceInProfit.toString() : '');
+      setFarthestPriceInLoss(editingTrade.farthestPriceInLoss !== undefined ? editingTrade.farthestPriceInLoss.toString() : '');
       setPriceReachedFirst(editingTrade.priceReachedFirst || '');
       setBreakEven(editingTrade.breakEven ?? null);
       
@@ -307,8 +307,8 @@ export const TradeModal = () => {
     setEntryComment('');
     setTradeManagement('');
     setExitComment('');
-    setHighestPrice('');
-    setLowestPrice('');
+    setFarthestPriceInProfit('');
+    setFarthestPriceInLoss('');
     setPriceReachedFirst('');
     setBreakEven(null);
     // Reset Custom Stats
@@ -453,8 +453,8 @@ export const TradeModal = () => {
       entryComment: entryComment || undefined,
       tradeManagement: tradeManagement || undefined,
       exitComment: exitComment || undefined,
-      highestPrice: highestPrice !== '' ? parseFloat(highestPrice) : undefined,
-      lowestPrice: lowestPrice !== '' ? parseFloat(lowestPrice) : undefined,
+      farthestPriceInProfit: farthestPriceInProfit !== '' ? parseFloat(farthestPriceInProfit) : undefined,
+      farthestPriceInLoss: farthestPriceInLoss !== '' ? parseFloat(farthestPriceInLoss) : undefined,
       priceReachedFirst: priceReachedFirst || undefined,
       breakEven: breakEven ?? undefined,
       // Custom Stats
@@ -1032,32 +1032,32 @@ export const TradeModal = () => {
                 <h4 className="text-sm font-medium text-foreground">Advanced Price Data</h4>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5">
-                    <Label className="text-xs text-muted-foreground">Highest Price</Label>
+                    <Label className="text-xs text-muted-foreground">Farthest Price in Profit</Label>
                     <Input
                       type="text"
                       inputMode="decimal"
                       placeholder="0.00"
-                      value={highestPrice}
+                      value={farthestPriceInProfit}
                       onChange={(e) => {
                         const val = e.target.value;
                         if (val === '' || /^\d*\.?\d*$/.test(val)) {
-                          setHighestPrice(val);
+                          setFarthestPriceInProfit(val);
                         }
                       }}
                       className="h-10 bg-input border-border"
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-xs text-muted-foreground">Lowest Price</Label>
+                    <Label className="text-xs text-muted-foreground">Farthest Price in Loss</Label>
                     <Input
                       type="text"
                       inputMode="decimal"
                       placeholder="0.00"
-                      value={lowestPrice}
+                      value={farthestPriceInLoss}
                       onChange={(e) => {
                         const val = e.target.value;
                         if (val === '' || /^\d*\.?\d*$/.test(val)) {
-                          setLowestPrice(val);
+                          setFarthestPriceInLoss(val);
                         }
                       }}
                       className="h-10 bg-input border-border"
