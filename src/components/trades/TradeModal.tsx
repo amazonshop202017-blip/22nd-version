@@ -105,7 +105,6 @@ export const TradeModal = () => {
   const [exitComment, setExitComment] = useState('');
   const [farthestPriceInProfit, setFarthestPriceInProfit] = useState<string>('');
   const [farthestPriceInLoss, setFarthestPriceInLoss] = useState<string>('');
-  const [priceReachedFirst, setPriceReachedFirst] = useState<'takeProfit' | 'stopLoss' | ''>('');
   const [breakEven, setBreakEven] = useState<boolean | null>(null);
   
   // Custom Stats fields
@@ -245,7 +244,6 @@ export const TradeModal = () => {
       setExitComment(editingTrade.exitComment || '');
       setFarthestPriceInProfit(editingTrade.farthestPriceInProfit !== undefined ? editingTrade.farthestPriceInProfit.toString() : '');
       setFarthestPriceInLoss(editingTrade.farthestPriceInLoss !== undefined ? editingTrade.farthestPriceInLoss.toString() : '');
-      setPriceReachedFirst(editingTrade.priceReachedFirst || '');
       setBreakEven(editingTrade.breakEven ?? null);
       
       // Load Custom Stats
@@ -309,7 +307,6 @@ export const TradeModal = () => {
     setExitComment('');
     setFarthestPriceInProfit('');
     setFarthestPriceInLoss('');
-    setPriceReachedFirst('');
     setBreakEven(null);
     // Reset Custom Stats
     setTimeframe('');
@@ -404,6 +401,44 @@ export const TradeModal = () => {
     
     return `${days}D ${hours}H ${mins}M`;
   }, [entryDate, exitDate]);
+
+  // Derived TP Hit / SL Hit based on price data
+  const priceReachedFirst = useMemo((): 'takeProfit' | 'stopLoss' | '' => {
+    const entry = parseFloat(entryPrice);
+    const sl = parseFloat(stopLoss);
+    const tp = parseFloat(takeProfit);
+    const farthestProfit = parseFloat(farthestPriceInProfit);
+    const farthestLoss = parseFloat(farthestPriceInLoss);
+    
+    // Validate all required inputs are present
+    if (isNaN(entry) || isNaN(sl) || isNaN(tp) || isNaN(farthestProfit) || isNaN(farthestLoss)) {
+      return '';
+    }
+    
+    if (direction === 'LONG') {
+      // TP Hit = Yes if Farthest Price in Profit >= Take Profit
+      if (farthestProfit >= tp) {
+        return 'takeProfit';
+      }
+      // SL Hit = Yes if Farthest Price in Profit < Take Profit AND Farthest Price in Loss <= Stop Loss
+      if (farthestProfit < tp && farthestLoss <= sl) {
+        return 'stopLoss';
+      }
+    } else {
+      // SHORT trade
+      // TP Hit = Yes if Farthest Price in Profit <= Take Profit
+      if (farthestProfit <= tp) {
+        return 'takeProfit';
+      }
+      // SL Hit = Yes if Farthest Price in Profit > Take Profit AND Farthest Price in Loss >= Stop Loss
+      if (farthestProfit > tp && farthestLoss >= sl) {
+        return 'stopLoss';
+      }
+    }
+    
+    // Neither condition met
+    return '';
+  }, [direction, entryPrice, stopLoss, takeProfit, farthestPriceInProfit, farthestPriceInLoss]);
 
   // Validation - minimum required fields
   const canSave = symbol.trim() && entryDate && (parseFloat(entryPrice) >= 0) && (parseFloat(quantity) > 0);
@@ -1071,40 +1106,40 @@ export const TradeModal = () => {
                 {/* Price Reached First */}
                 <div className="space-y-1.5">
                   <div className="flex items-center gap-1">
-                    <Label className="text-xs text-muted-foreground">Which level did the price reach first?</Label>
+                    <Label className="text-xs text-muted-foreground">TP Hit / SL Hit</Label>
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Info className="w-3.5 h-3.5 text-muted-foreground cursor-help" />
                       </TooltipTrigger>
                       <TooltipContent>
-                        <p className="text-xs">Did the price hit your take profit or stop loss first?</p>
+                        <p className="text-xs">Auto-derived from price data. TP/SL hit status based on farthest prices reached.</p>
                       </TooltipContent>
                     </Tooltip>
                   </div>
-                  <div className="grid grid-cols-2 gap-0 border border-border rounded-lg overflow-hidden">
+                  <div className="grid grid-cols-2 gap-0 border border-border rounded-lg overflow-hidden opacity-75">
                     <button
                       type="button"
-                      onClick={() => setPriceReachedFirst(priceReachedFirst === 'takeProfit' ? '' : 'takeProfit')}
+                      disabled
                       className={cn(
-                        "h-10 px-4 text-sm font-medium transition-colors",
+                        "h-10 px-4 text-sm font-medium transition-colors cursor-not-allowed",
                         priceReachedFirst === 'takeProfit'
                           ? "bg-foreground text-background"
-                          : "bg-background text-foreground hover:bg-muted/50"
+                          : "bg-background text-foreground"
                       )}
                     >
-                      Take Profit
+                      TP Hit
                     </button>
                     <button
                       type="button"
-                      onClick={() => setPriceReachedFirst(priceReachedFirst === 'stopLoss' ? '' : 'stopLoss')}
+                      disabled
                       className={cn(
-                        "h-10 px-4 text-sm font-medium transition-colors border-l border-border",
+                        "h-10 px-4 text-sm font-medium transition-colors border-l border-border cursor-not-allowed",
                         priceReachedFirst === 'stopLoss'
                           ? "bg-foreground text-background"
-                          : "bg-background text-foreground hover:bg-muted/50"
+                          : "bg-background text-foreground"
                       )}
                     >
-                      Stop Loss
+                      SL Hit
                     </button>
                   </div>
                 </div>
