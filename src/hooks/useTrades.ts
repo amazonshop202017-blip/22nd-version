@@ -11,18 +11,45 @@ export const useTrades = () => {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
         const parsed = JSON.parse(stored);
-        // Migrate old trades that don't have the entries array
+        // Migrate old trades
         const migrated = parsed.map((trade: any) => {
-          if (!trade.entries) {
-            // Old format - convert to new format
-            return {
-              ...trade,
-              instrument: trade.instrument || 'Equity',
+          let updated = trade;
+          
+          // Migration 1: Convert trades without entries array
+          if (!updated.entries) {
+            updated = {
+              ...updated,
+              instrument: updated.instrument || 'Equity',
               entries: [],
-              notes: trade.notes || '',
+              notes: updated.notes || '',
             };
           }
-          return trade;
+          
+          // Migration 2: Backfill savedRMultiple for trades that don't have it
+          // Only calculate if trade has tradeRisk > 0 and we can compute netPnl
+          if (updated.savedRMultiple === undefined || updated.savedRMultiple === null) {
+            const metrics = calculateTradeMetrics(updated);
+            if (updated.tradeRisk > 0 && metrics.positionStatus === 'CLOSED') {
+              updated = {
+                ...updated,
+                savedRMultiple: metrics.netPnl / updated.tradeRisk,
+              };
+            }
+          }
+          
+          // Migration 3: Backfill savedReturnPercent for trades that don't have it
+          // This uses the calculated returnPercent from metrics as a fallback
+          if (updated.savedReturnPercent === undefined || updated.savedReturnPercent === null) {
+            const metrics = calculateTradeMetrics(updated);
+            if (metrics.positionStatus === 'CLOSED' && metrics.returnPercent !== undefined) {
+              updated = {
+                ...updated,
+                savedReturnPercent: metrics.returnPercent,
+              };
+            }
+          }
+          
+          return updated;
         });
         setTrades(migrated);
         // Save migrated trades back to localStorage
