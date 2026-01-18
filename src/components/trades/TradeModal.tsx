@@ -402,7 +402,7 @@ export const TradeModal = () => {
     return `${days}D ${hours}H ${mins}M`;
   }, [entryDate, exitDate]);
 
-  // Derived TP Hit / SL Hit based on price data
+  // Derived "Which level did price reach first?" based on price data
   const priceReachedFirst = useMemo((): 'takeProfit' | 'stopLoss' | '' => {
     const entry = parseFloat(entryPrice);
     const sl = parseFloat(stopLoss);
@@ -416,27 +416,41 @@ export const TradeModal = () => {
     }
     
     if (direction === 'LONG') {
-      // TP Hit = Yes if Farthest Price in Profit >= Take Profit
-      if (farthestProfit >= tp) {
+      const tpTouched = farthestProfit >= tp;
+      const slTouched = farthestLoss <= sl;
+      
+      // TP first if: farthestProfit >= TP AND farthestLoss > SL (didn't touch SL)
+      if (tpTouched && farthestLoss > sl) {
         return 'takeProfit';
       }
-      // SL Hit = Yes if Farthest Price in Profit < Take Profit AND Farthest Price in Loss <= Stop Loss
-      if (farthestProfit < tp && farthestLoss <= sl) {
+      // SL first if: farthestLoss <= SL AND farthestProfit < TP (didn't touch TP)
+      if (slTouched && farthestProfit < tp) {
+        return 'stopLoss';
+      }
+      // Both levels touched - default to Stop Loss
+      if (tpTouched && slTouched) {
         return 'stopLoss';
       }
     } else {
       // SHORT trade
-      // TP Hit = Yes if Farthest Price in Profit <= Take Profit
-      if (farthestProfit <= tp) {
+      const tpTouched = farthestProfit <= tp;
+      const slTouched = farthestLoss >= sl;
+      
+      // TP first if: farthestProfit <= TP AND farthestLoss < SL (didn't touch SL)
+      if (tpTouched && farthestLoss < sl) {
         return 'takeProfit';
       }
-      // SL Hit = Yes if Farthest Price in Profit > Take Profit AND Farthest Price in Loss >= Stop Loss
-      if (farthestProfit > tp && farthestLoss >= sl) {
+      // SL first if: farthestLoss >= SL AND farthestProfit > TP (didn't touch TP)
+      if (slTouched && farthestProfit > tp) {
+        return 'stopLoss';
+      }
+      // Both levels touched - default to Stop Loss
+      if (tpTouched && slTouched) {
         return 'stopLoss';
       }
     }
     
-    // Neither condition met
+    // Neither level touched
     return '';
   }, [direction, entryPrice, stopLoss, takeProfit, farthestPriceInProfit, farthestPriceInLoss]);
 
@@ -1106,28 +1120,28 @@ export const TradeModal = () => {
                 {/* Price Reached First */}
                 <div className="space-y-1.5">
                   <div className="flex items-center gap-1">
-                    <Label className="text-xs text-muted-foreground">TP Hit / SL Hit</Label>
+                    <Label className="text-xs text-muted-foreground">Which level reached first?</Label>
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Info className="w-3.5 h-3.5 text-muted-foreground cursor-help" />
                       </TooltipTrigger>
                       <TooltipContent>
-                        <p className="text-xs">Auto-derived from price data. TP/SL hit status based on farthest prices reached.</p>
+                        <p className="text-xs">Auto-derived from farthest prices. Shows which level (TP or SL) was reached first.</p>
                       </TooltipContent>
                     </Tooltip>
                   </div>
-                  <div className="grid grid-cols-2 gap-0 border border-border rounded-lg overflow-hidden opacity-75">
+                  <div className="grid grid-cols-2 gap-0 border border-border rounded-lg overflow-hidden">
                     <button
                       type="button"
                       disabled
                       className={cn(
                         "h-10 px-4 text-sm font-medium transition-colors cursor-not-allowed",
                         priceReachedFirst === 'takeProfit'
-                          ? "bg-foreground text-background"
-                          : "bg-background text-foreground"
+                          ? "bg-green-500 text-white ring-2 ring-green-500/50 ring-inset"
+                          : "bg-muted/30 text-muted-foreground"
                       )}
                     >
-                      TP Hit
+                      Take Profit
                     </button>
                     <button
                       type="button"
@@ -1135,11 +1149,11 @@ export const TradeModal = () => {
                       className={cn(
                         "h-10 px-4 text-sm font-medium transition-colors border-l border-border cursor-not-allowed",
                         priceReachedFirst === 'stopLoss'
-                          ? "bg-foreground text-background"
-                          : "bg-background text-foreground"
+                          ? "bg-red-500 text-white ring-2 ring-red-500/50 ring-inset"
+                          : "bg-muted/30 text-muted-foreground"
                       )}
                     >
-                      SL Hit
+                      Stop Loss
                     </button>
                   </div>
                 </div>
