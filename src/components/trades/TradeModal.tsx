@@ -169,19 +169,6 @@ export const TradeModal = () => {
     }
   }, [strategyId]);
 
-  // Auto-select account when exactly one account is selected in global filter (Add Trade only)
-  useEffect(() => {
-    if (!editingTrade && isOpen) {
-      // Only auto-select if exactly ONE account is selected (not "All" and not multiple)
-      if (!isAllAccountsSelected && globalSelectedAccounts.length === 1) {
-        setSelectedAccountId(globalSelectedAccounts[0]);
-      } else {
-        // "All accounts" or multiple accounts selected - leave empty
-        setSelectedAccountId('');
-      }
-    }
-  }, [globalSelectedAccounts, isAllAccountsSelected, editingTrade, isOpen]);
-
   // Clear account error when account is selected
   useEffect(() => {
     if (selectedAccountId) {
@@ -272,6 +259,10 @@ export const TradeModal = () => {
       setBias(editingTrade.bias || '');
     } else {
       resetForm();
+      // Auto-select account when exactly one account is selected in global filter (Add Trade only)
+      if (!isAllAccountsSelected && globalSelectedAccounts.length === 1) {
+        setSelectedAccountId(globalSelectedAccounts[0]);
+      }
     }
   }, [editingTrade, isOpen]);
 
