@@ -45,6 +45,10 @@ export const TradeModal = () => {
     addEntryComment,
     addTradeManagement,
     addExitComment,
+    addMental,
+    addIndicator,
+    addMarketGeneral,
+    addBias,
   } = useCustomStats();
 
   // Form state
@@ -103,6 +107,10 @@ export const TradeModal = () => {
   const [confluence, setConfluence] = useState('');
   const [pattern, setPattern] = useState('');
   const [preparation, setPreparation] = useState('');
+  const [mental, setMental] = useState('');
+  const [indicator, setIndicator] = useState('');
+  const [marketGeneral, setMarketGeneral] = useState('');
+  const [bias, setBias] = useState('');
 
   // Get current strategy's checklist items
   const currentStrategyChecklist = useMemo(() => {
@@ -229,6 +237,10 @@ export const TradeModal = () => {
       setConfluence(editingTrade.confluence || '');
       setPattern(editingTrade.pattern || '');
       setPreparation(editingTrade.preparation || '');
+      setMental(editingTrade.mental || '');
+      setIndicator(editingTrade.indicator || '');
+      setMarketGeneral(editingTrade.marketGeneral || '');
+      setBias(editingTrade.bias || '');
     } else {
       resetForm();
     }
@@ -278,6 +290,10 @@ export const TradeModal = () => {
     setConfluence('');
     setPattern('');
     setPreparation('');
+    setMental('');
+    setIndicator('');
+    setMarketGeneral('');
+    setBias('');
   };
 
   const metrics = useMemo(() => {
@@ -363,6 +379,10 @@ export const TradeModal = () => {
       confluence: confluence || undefined,
       pattern: pattern || undefined,
       preparation: preparation || undefined,
+      mental: mental || undefined,
+      indicator: indicator || undefined,
+      marketGeneral: marketGeneral || undefined,
+      bias: bias || undefined,
     };
 
     if (editingTrade) {
@@ -1040,6 +1060,52 @@ export const TradeModal = () => {
                       onChange={setPreparation}
                       options={customStatsOptions.preparations}
                       onAddNew={addPreparation}
+                      placeholder="Select..."
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs text-muted-foreground">Mental</Label>
+                    <TypeableCombobox
+                      value={mental}
+                      onChange={setMental}
+                      options={customStatsOptions.mentals}
+                      onAddNew={addMental}
+                      placeholder="Select..."
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs text-muted-foreground">Indicator</Label>
+                    <TypeableCombobox
+                      value={indicator}
+                      onChange={setIndicator}
+                      options={customStatsOptions.indicators}
+                      onAddNew={addIndicator}
+                      placeholder="Select..."
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs text-muted-foreground">Market General</Label>
+                    <TypeableCombobox
+                      value={marketGeneral}
+                      onChange={setMarketGeneral}
+                      options={customStatsOptions.marketGenerals}
+                      onAddNew={addMarketGeneral}
+                      placeholder="Select..."
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs text-muted-foreground">Bias</Label>
+                    <TypeableCombobox
+                      value={bias}
+                      onChange={setBias}
+                      options={customStatsOptions.biases}
+                      onAddNew={addBias}
                       placeholder="Select..."
                     />
                   </div>
