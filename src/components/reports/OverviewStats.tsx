@@ -171,13 +171,16 @@ const OverviewStats = () => {
       ? closedTrades.length / totalTradingDays 
       : 0;
 
-    // R-Multiples
+    // R-Multiples - use stored values only
+    const tradesWithStoredR = closedTrades.filter(({ trade }) => 
+      trade.savedRMultiple !== undefined && trade.savedRMultiple !== null && isFinite(trade.savedRMultiple)
+    );
     const tradesWithRisk = closedTrades.filter(({ trade }) => trade.tradeRisk > 0);
     const avgPlannedR = tradesWithRisk.length > 0
       ? tradesWithRisk.reduce((sum, { trade }) => sum + (trade.tradeTarget / trade.tradeRisk), 0) / tradesWithRisk.length
       : 0;
-    const avgRealizedR = tradesWithRisk.length > 0
-      ? tradesWithRisk.reduce((sum, { metrics }) => sum + metrics.rFactor, 0) / tradesWithRisk.length
+    const avgRealizedR = tradesWithStoredR.length > 0
+      ? tradesWithStoredR.reduce((sum, { trade }) => sum + (trade.savedRMultiple ?? 0), 0) / tradesWithStoredR.length
       : 0;
 
     // Trade expectancy

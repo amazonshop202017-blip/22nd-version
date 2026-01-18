@@ -55,7 +55,13 @@ const StrategyDetail = () => {
     const avgWin = wins.length > 0 ? wins.reduce((sum, t) => sum + t.metrics.netPnl, 0) / wins.length : 0;
     const avgLoss = losses.length > 0 ? Math.abs(losses.reduce((sum, t) => sum + t.metrics.netPnl, 0) / losses.length) : 0;
     const profitFactor = avgLoss > 0 ? (avgWin * wins.length) / (avgLoss * losses.length) : 0;
-    const avgRFactor = tradesWithMetrics.reduce((sum, t) => sum + t.metrics.rFactor, 0) / tradesWithMetrics.length;
+    // Use stored R-Multiple - only include trades that have stored value
+    const tradesWithStoredR = tradesWithMetrics.filter(t => 
+      t.trade.savedRMultiple !== undefined && t.trade.savedRMultiple !== null && isFinite(t.trade.savedRMultiple)
+    );
+    const avgRFactor = tradesWithStoredR.length > 0 
+      ? tradesWithStoredR.reduce((sum, t) => sum + (t.trade.savedRMultiple ?? 0), 0) / tradesWithStoredR.length 
+      : 0;
 
     return {
       totalTrades: strategyTrades.length,
@@ -271,7 +277,9 @@ const StrategyDetail = () => {
                           {formatCurrency(metrics.netPnl)}
                         </TableCell>
                         <TableCell className="text-right font-mono">
-                          {metrics.rFactor.toFixed(2)}R
+                          {trade.savedRMultiple !== undefined && trade.savedRMultiple !== null 
+                            ? `${trade.savedRMultiple.toFixed(2)}R`
+                            : '-'}
                         </TableCell>
                       </TableRow>
                     );

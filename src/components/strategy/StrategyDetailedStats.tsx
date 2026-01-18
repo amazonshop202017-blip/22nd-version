@@ -167,8 +167,13 @@ const StrategyDetailedStats = ({ trades }: StrategyDetailedStatsProps) => {
     // Win/Loss ratio
     const avgTradeWinLoss = avgLoser > 0 ? avgWinner / avgLoser : avgWinner > 0 ? avgWinner : 0;
 
-    // R-Multiple stats
-    const avgRealizedR = tradesWithMetrics.reduce((sum, t) => sum + t.metrics.rFactor, 0) / trades.length;
+    // R-Multiple stats - use stored values only
+    const tradesWithStoredR = tradesWithMetrics.filter(t => 
+      t.trade.savedRMultiple !== undefined && t.trade.savedRMultiple !== null && isFinite(t.trade.savedRMultiple)
+    );
+    const avgRealizedR = tradesWithStoredR.length > 0 
+      ? tradesWithStoredR.reduce((sum, t) => sum + (t.trade.savedRMultiple ?? 0), 0) / tradesWithStoredR.length 
+      : 0;
     
     // Average daily volume
     const avgDailyVolume = dailyVolumes.length > 0 
