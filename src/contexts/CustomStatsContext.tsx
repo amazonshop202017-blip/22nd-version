@@ -8,6 +8,10 @@ export interface CustomStatsOptions {
   entryComments: string[];
   tradeManagements: string[];
   exitComments: string[];
+  mentals: string[];
+  indicators: string[];
+  marketGenerals: string[];
+  biases: string[];
 }
 
 interface CustomStatsContextType {
@@ -26,6 +30,14 @@ interface CustomStatsContextType {
   removeTradeManagement: (value: string) => void;
   addExitComment: (value: string) => void;
   removeExitComment: (value: string) => void;
+  addMental: (value: string) => void;
+  removeMental: (value: string) => void;
+  addIndicator: (value: string) => void;
+  removeIndicator: (value: string) => void;
+  addMarketGeneral: (value: string) => void;
+  removeMarketGeneral: (value: string) => void;
+  addBias: (value: string) => void;
+  removeBias: (value: string) => void;
 }
 
 const defaultTimeframes = ['1M', '5M', '15M', '30M', '1H', '4H', '1D', '1W'];
@@ -55,6 +67,10 @@ export const CustomStatsProvider = ({ children }: { children: ReactNode }) => {
       entryComments: defaultEntryComments,
       tradeManagements: defaultTradeManagements,
       exitComments: defaultExitComments,
+      mentals: [],
+      indicators: [],
+      marketGenerals: [],
+      biases: [],
     };
   });
 
@@ -94,6 +110,14 @@ export const CustomStatsProvider = ({ children }: { children: ReactNode }) => {
       removeTradeManagement: (v) => removeFromList('tradeManagements', v),
       addExitComment: (v) => addToList('exitComments', v),
       removeExitComment: (v) => removeFromList('exitComments', v),
+      addMental: (v) => addToList('mentals', v),
+      removeMental: (v) => removeFromList('mentals', v),
+      addIndicator: (v) => addToList('indicators', v),
+      removeIndicator: (v) => removeFromList('indicators', v),
+      addMarketGeneral: (v) => addToList('marketGenerals', v),
+      removeMarketGeneral: (v) => removeFromList('marketGenerals', v),
+      addBias: (v) => addToList('biases', v),
+      removeBias: (v) => removeFromList('biases', v),
     }}>
       {children}
     </CustomStatsContext.Provider>

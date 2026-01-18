@@ -56,6 +56,10 @@ export interface Trade {
   confluence?: string;
   pattern?: string;
   preparation?: string;
+  mental?: string;
+  indicator?: string;
+  marketGeneral?: string;
+  bias?: string;
 }
 
 // Calculated values (not stored, computed on-the-fly)

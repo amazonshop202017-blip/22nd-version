@@ -21,6 +21,10 @@ const Settings = () => {
     addEntryComment, removeEntryComment,
     addTradeManagement, removeTradeManagement,
     addExitComment, removeExitComment,
+    addMental, removeMental,
+    addIndicator, removeIndicator,
+    addMarketGeneral, removeMarketGeneral,
+    addBias, removeBias,
   } = useCustomStats();
 
   // Settings tab state
@@ -48,6 +52,10 @@ const Settings = () => {
   const [newEntryComment, setNewEntryComment] = useState('');
   const [newTradeManagement, setNewTradeManagement] = useState('');
   const [newExitComment, setNewExitComment] = useState('');
+  const [newMental, setNewMental] = useState('');
+  const [newIndicator, setNewIndicator] = useState('');
+  const [newMarketGeneral, setNewMarketGeneral] = useState('');
+  const [newBias, setNewBias] = useState('');
 
   const accountsWithStats = getAllAccountsWithStats();
   const handleAddTag = () => {
@@ -164,6 +172,34 @@ const Settings = () => {
     if (newExitComment.trim()) {
       addExitComment(newExitComment.trim());
       setNewExitComment('');
+    }
+  };
+
+  const handleAddMental = () => {
+    if (newMental.trim()) {
+      addMental(newMental.trim());
+      setNewMental('');
+    }
+  };
+
+  const handleAddIndicator = () => {
+    if (newIndicator.trim()) {
+      addIndicator(newIndicator.trim());
+      setNewIndicator('');
+    }
+  };
+
+  const handleAddMarketGeneral = () => {
+    if (newMarketGeneral.trim()) {
+      addMarketGeneral(newMarketGeneral.trim());
+      setNewMarketGeneral('');
+    }
+  };
+
+  const handleAddBias = () => {
+    if (newBias.trim()) {
+      addBias(newBias.trim());
+      setNewBias('');
     }
   };
 
@@ -602,6 +638,154 @@ const Settings = () => {
                         <span className="text-sm">{item}</span>
                         <button
                           onClick={() => removePreparation(item)}
+                          className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 hover:text-destructive"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Mental */}
+              <div className="space-y-3">
+                <h3 className="text-sm font-medium text-foreground">Mental</h3>
+                <div className="flex gap-3">
+                  <Input
+                    placeholder="Add new mental state..."
+                    value={newMental}
+                    onChange={(e) => setNewMental(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleAddMental()}
+                    className="bg-input border-border flex-1"
+                  />
+                  <Button onClick={handleAddMental} disabled={!newMental.trim()} size="sm">
+                    <Plus className="w-4 h-4" />
+                  </Button>
+                </div>
+                {customStatsOptions.mentals.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">No mental options added yet</p>
+                ) : (
+                  <div className="flex flex-wrap gap-2">
+                    {customStatsOptions.mentals.map((item) => (
+                      <div
+                        key={item}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-muted/50 rounded-lg border border-border group"
+                      >
+                        <span className="text-sm">{item}</span>
+                        <button
+                          onClick={() => removeMental(item)}
+                          className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 hover:text-destructive"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Indicator */}
+              <div className="space-y-3">
+                <h3 className="text-sm font-medium text-foreground">Indicator</h3>
+                <div className="flex gap-3">
+                  <Input
+                    placeholder="Add new indicator..."
+                    value={newIndicator}
+                    onChange={(e) => setNewIndicator(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleAddIndicator()}
+                    className="bg-input border-border flex-1"
+                  />
+                  <Button onClick={handleAddIndicator} disabled={!newIndicator.trim()} size="sm">
+                    <Plus className="w-4 h-4" />
+                  </Button>
+                </div>
+                {customStatsOptions.indicators.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">No indicator options added yet</p>
+                ) : (
+                  <div className="flex flex-wrap gap-2">
+                    {customStatsOptions.indicators.map((item) => (
+                      <div
+                        key={item}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-muted/50 rounded-lg border border-border group"
+                      >
+                        <span className="text-sm">{item}</span>
+                        <button
+                          onClick={() => removeIndicator(item)}
+                          className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 hover:text-destructive"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Market General */}
+              <div className="space-y-3">
+                <h3 className="text-sm font-medium text-foreground">Market General</h3>
+                <div className="flex gap-3">
+                  <Input
+                    placeholder="Add new market general..."
+                    value={newMarketGeneral}
+                    onChange={(e) => setNewMarketGeneral(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleAddMarketGeneral()}
+                    className="bg-input border-border flex-1"
+                  />
+                  <Button onClick={handleAddMarketGeneral} disabled={!newMarketGeneral.trim()} size="sm">
+                    <Plus className="w-4 h-4" />
+                  </Button>
+                </div>
+                {customStatsOptions.marketGenerals.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">No market general options added yet</p>
+                ) : (
+                  <div className="flex flex-wrap gap-2">
+                    {customStatsOptions.marketGenerals.map((item) => (
+                      <div
+                        key={item}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-muted/50 rounded-lg border border-border group"
+                      >
+                        <span className="text-sm">{item}</span>
+                        <button
+                          onClick={() => removeMarketGeneral(item)}
+                          className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 hover:text-destructive"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Bias */}
+              <div className="space-y-3">
+                <h3 className="text-sm font-medium text-foreground">Bias</h3>
+                <div className="flex gap-3">
+                  <Input
+                    placeholder="Add new bias..."
+                    value={newBias}
+                    onChange={(e) => setNewBias(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleAddBias()}
+                    className="bg-input border-border flex-1"
+                  />
+                  <Button onClick={handleAddBias} disabled={!newBias.trim()} size="sm">
+                    <Plus className="w-4 h-4" />
+                  </Button>
+                </div>
+                {customStatsOptions.biases.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">No bias options added yet</p>
+                ) : (
+                  <div className="flex flex-wrap gap-2">
+                    {customStatsOptions.biases.map((item) => (
+                      <div
+                        key={item}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-muted/50 rounded-lg border border-border group"
+                      >
+                        <span className="text-sm">{item}</span>
+                        <button
+                          onClick={() => removeBias(item)}
                           className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 hover:text-destructive"
                         >
                           <Trash2 className="w-3 h-3" />
