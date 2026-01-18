@@ -3,6 +3,7 @@ import { useFilteredTradesContext } from '@/contexts/TradesContext';
 import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { calculateTradeMetrics, Trade } from '@/types/trade';
 import { useAccountsContext } from '@/contexts/AccountsContext';
+import { useStrategiesContext } from '@/contexts/StrategiesContext';
 import { parseISO } from 'date-fns';
 import {
   BarChart,
@@ -48,6 +49,7 @@ const PerformanceBySetup = () => {
   const { filteredTrades } = useFilteredTradesContext();
   const { currencyConfig } = useGlobalFilters();
   const { accounts, transactions } = useAccountsContext();
+  const { strategies } = useStrategiesContext();
   const [displayType, setDisplayType] = useState<DisplayType>('dollar');
 
   // Calculate account balance before each trade for % calculations
@@ -77,7 +79,7 @@ const PerformanceBySetup = () => {
     return account.startingBalance + depositTotal - withdrawTotal + priorTradesPnl;
   };
 
-  // Calculate setup data
+  // Calculate setup data - SETUP-CENTRIC approach
   const setupData = useMemo(() => {
     const closedTrades = filteredTrades.filter((trade: Trade) => {
       const metrics = calculateTradeMetrics(trade);
@@ -86,7 +88,13 @@ const PerformanceBySetup = () => {
 
     if (closedTrades.length === 0) return [];
 
-    // Group trades by setup (pattern field)
+    // Build a map of setup ID -> setup name for quick lookup
+    const setupIdToName = new Map<string, string>();
+    strategies.forEach(strategy => {
+      setupIdToName.set(strategy.id, strategy.name);
+    });
+
+    // SETUP-CENTRIC: First, iterate over all setups and collect their trades
     const setupMap = new Map<string, {
       totalPnl: number;
       totalPercent: number;
@@ -94,13 +102,27 @@ const PerformanceBySetup = () => {
       winCount: number;
     }>();
 
+    // Initialize all setups with zero values (so setups with no trades still appear)
+    // Actually, per requirements, we only show setups that have trades
+    
+    // Group trades by their strategyId (setup)
     closedTrades.forEach(trade => {
       const metrics = calculateTradeMetrics(trade);
-      // Use pattern field for setup - only use "Unassigned" if null, undefined, or empty string
-      const rawPattern = trade.pattern;
-      const setupName = (rawPattern !== null && rawPattern !== undefined && rawPattern.trim() !== '') 
-        ? rawPattern.trim() 
-        : 'Unassigned';
+      
+      // Determine setup name from strategyId
+      let setupName: string;
+      if (trade.strategyId && setupIdToName.has(trade.strategyId)) {
+        // Trade has a valid strategyId that matches an existing setup
+        setupName = setupIdToName.get(trade.strategyId)!;
+      } else if (!trade.strategyId || trade.strategyId.trim() === '') {
+        // Trade has no strategyId - goes to Unassigned
+        setupName = 'Unassigned';
+      } else {
+        // Trade has a strategyId but it doesn't match any existing setup
+        // This could happen if the setup was deleted - treat as Unassigned
+        setupName = 'Unassigned';
+      }
+
       const accountBalanceBefore = getAccountBalanceBeforeTrade(trade, metrics.openDate);
       const returnPercent = accountBalanceBefore > 0 
         ? (metrics.netPnl / accountBalanceBefore) * 100 
@@ -136,7 +158,7 @@ const PerformanceBySetup = () => {
       .sort((a, b) => b.displayValue - a.displayValue);
 
     return data;
-  }, [filteredTrades, displayType, accounts, transactions]);
+  }, [filteredTrades, displayType, accounts, transactions, strategies]);
 
   // Calculate metrics
   const metrics = useMemo(() => {
