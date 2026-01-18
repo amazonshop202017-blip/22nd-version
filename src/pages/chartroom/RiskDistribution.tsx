@@ -40,7 +40,23 @@ const RiskDistribution = () => {
   const { filteredTrades } = useFilteredTradesContext();
   const { currencyConfig } = useGlobalFilters();
   
-  const [displayType, setDisplayType] = useState<DisplayType>('rMultiple');
+  const [displayType, setDisplayType] = useState<DisplayType>('returnPercent');
+
+  // Labels to show on X-axis for Return (%) mode - every 0.5% interval
+  const returnPercentLabelsToShow = new Set([
+    '< -10',
+    '-9.75 to -9.50', '-9.25 to -9.00', '-8.75 to -8.50', '-8.25 to -8.00',
+    '-7.75 to -7.50', '-7.25 to -7.00', '-6.75 to -6.50', '-6.25 to -6.00',
+    '-5.75 to -5.50', '-5.25 to -5.00', '-4.75 to -4.50', '-4.25 to -4.00',
+    '-3.75 to -3.50', '-3.25 to -3.00', '-2.75 to -2.50', '-2.25 to -2.00',
+    '-1.75 to -1.50', '-1.25 to -1.00', '-0.75 to -0.50', '-0.25 to 0.00',
+    '0.25 to 0.50', '0.75 to 1.00', '1.25 to 1.50', '1.75 to 2.00',
+    '2.25 to 2.50', '2.75 to 3.00', '3.25 to 3.50', '3.75 to 4.00',
+    '4.25 to 4.50', '4.75 to 5.00', '5.25 to 5.50', '5.75 to 6.00',
+    '6.25 to 6.50', '6.75 to 7.00', '7.25 to 7.50', '7.75 to 8.00',
+    '8.25 to 8.50', '8.75 to 9.00', '9.25 to 9.50', '9.75 to 10.00',
+    '> 10'
+  ]);
 
   // Get closed trades only
   const closedTrades = useMemo(() => {
@@ -212,11 +228,14 @@ const RiskDistribution = () => {
     return `${sign}${value.toFixed(2)}%`;
   };
 
-  // Custom tooltip
+  // Custom tooltip - only show for buckets with trades
   const CustomTooltip = ({ active, payload }: any) => {
     if (!active || !payload?.length) return null;
     
     const data = payload[0].payload as BucketData;
+    
+    // Don't show tooltip for empty buckets
+    if (data.tradeCount === 0) return null;
     
     return (
       <div className="bg-popover border border-border rounded-lg p-3 shadow-lg">
@@ -239,6 +258,52 @@ const RiskDistribution = () => {
     );
   };
 
+  // Custom X-axis tick for Return (%) - only show specific labels
+  const renderCustomXAxisTick = (props: any) => {
+    const { x, y, payload } = props;
+    const label = payload.value;
+    
+    // For R Multiple mode, show all labels
+    if (displayType === 'rMultiple') {
+      return (
+        <g transform={`translate(${x},${y})`}>
+          <text
+            x={0}
+            y={0}
+            dy={16}
+            textAnchor="end"
+            fill="hsl(var(--muted-foreground))"
+            fontSize={10}
+            transform="rotate(-45)"
+          >
+            {label}
+          </text>
+        </g>
+      );
+    }
+    
+    // For Return (%) mode, only show specific labels
+    if (!returnPercentLabelsToShow.has(label)) {
+      return null;
+    }
+    
+    return (
+      <g transform={`translate(${x},${y})`}>
+        <text
+          x={0}
+          y={0}
+          dy={16}
+          textAnchor="end"
+          fill="hsl(var(--muted-foreground))"
+          fontSize={10}
+          transform="rotate(-45)"
+        >
+          {label}
+        </text>
+      </g>
+    );
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -257,8 +322,8 @@ const RiskDistribution = () => {
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="bg-popover border-border z-50">
-              <SelectItem value="rMultiple">R Multiple</SelectItem>
               <SelectItem value="returnPercent">Return (%)</SelectItem>
+              <SelectItem value="rMultiple">R Multiple</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -273,9 +338,7 @@ const RiskDistribution = () => {
                 <CartesianGrid strokeDasharray="3 3" className="stroke-border/50" />
                 <XAxis 
                   dataKey="label" 
-                  tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }}
-                  angle={-45}
-                  textAnchor="end"
+                  tick={renderCustomXAxisTick}
                   height={80}
                   interval={0}
                 />
