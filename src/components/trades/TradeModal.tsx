@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo, useRef, useCallback } from 'react';
-import { X, Calendar, Star, Settings2, Clock, ChevronDown, Check, Plus, Info } from 'lucide-react';
+import { X, Calendar, Star, Settings2, Clock, ChevronDown, Check, Plus, Info, Tags } from 'lucide-react';
 import { ScaleInOutModal } from './ScaleInOutModal';
+import { AssignTagsModal } from './AssignTagsModal';
 import { TypeableCombobox } from './TypeableCombobox';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Input } from '@/components/ui/input';
@@ -19,6 +20,7 @@ import { useAccountsContext } from '@/contexts/AccountsContext';
 import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useCustomStats } from '@/contexts/CustomStatsContext';
+import { useTagsContext } from '@/contexts/TagsContext';
 import { TradeFormData, TradeEntry, ScaleEntry, calculateTradeMetrics } from '@/types/trade';
 import { cn } from '@/lib/utils';
 
@@ -98,6 +100,9 @@ export const TradeModal = () => {
   const [scaleEntries, setScaleEntries] = useState<ScaleEntry[]>([]);
   const [scaleExits, setScaleExits] = useState<ScaleEntry[]>([]);
   const [openQuantity, setOpenQuantity] = useState(0);
+
+  // Assign Tags modal state
+  const [assignTagsModalOpen, setAssignTagsModalOpen] = useState(false);
 
   // Advanced Data fields
   const [entryComment, setEntryComment] = useState('');
@@ -1148,12 +1153,16 @@ export const TradeModal = () => {
                 <Button
                   type="button"
                   variant="outline"
-                  className="w-full h-10"
-                  onClick={() => {
-                    // Placeholder - functionality to be added later
-                  }}
+                  className="w-full h-10 gap-2"
+                  onClick={() => setAssignTagsModalOpen(true)}
                 >
+                  <Tags className="w-4 h-4" />
                   Assign Tags
+                  {selectedTags.length > 0 && (
+                    <span className="ml-auto bg-muted px-2 py-0.5 rounded-full text-xs">
+                      {selectedTags.length}
+                    </span>
+                  )}
                 </Button>
               </div>
             </div>
@@ -1223,6 +1232,16 @@ export const TradeModal = () => {
         initialExitQuantity={quantity}
         existingScaleEntries={scaleEntries}
         existingScaleExits={scaleExits}
+      />
+
+      {/* Assign Tags Modal */}
+      <AssignTagsModal
+        isOpen={assignTagsModalOpen}
+        onClose={() => setAssignTagsModalOpen(false)}
+        selectedTagIds={selectedTags}
+        onTagsChange={setSelectedTags}
+        symbol={symbol}
+        entryDate={entryDate}
       />
     </Sheet>
   );

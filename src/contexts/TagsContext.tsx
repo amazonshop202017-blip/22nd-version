@@ -10,7 +10,7 @@ export interface Tag {
 
 interface TagsContextType {
   tags: Tag[];
-  addTag: (name: string, categoryId: string, description: string) => void;
+  addTag: (name: string, categoryId: string, description: string) => Tag | null;
   removeTag: (id: string) => void;
   updateTag: (id: string, name: string, categoryId: string, description: string) => void;
   removeTagsByCategory: (categoryId: string) => void;
@@ -55,7 +55,7 @@ export const TagsProvider = ({ children }: { children: ReactNode }) => {
     return unsubscribe;
   }, [onCategoryRemove, removeTagsByCategory]);
 
-  const addTag = useCallback((name: string, categoryId: string, description: string) => {
+  const addTag = useCallback((name: string, categoryId: string, description: string): Tag | null => {
     const trimmed = name.trim();
     if (trimmed && categoryId) {
       const newTag: Tag = {
@@ -65,7 +65,9 @@ export const TagsProvider = ({ children }: { children: ReactNode }) => {
         description: description.trim(),
       };
       saveTags([...tags, newTag]);
+      return newTag;
     }
+    return null;
   }, [tags, saveTags]);
 
   const removeTag = useCallback((id: string) => {
