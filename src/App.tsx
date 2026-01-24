@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { TradeModalProvider } from "@/contexts/TradeModalContext";
 import { TradesProvider } from "@/contexts/TradesContext";
 import { TagsProvider } from "@/contexts/TagsContext";
+import { CategoriesProvider } from "@/contexts/CategoriesContext";
 import { StrategiesProvider } from "@/contexts/StrategiesContext";
 import { AccountsProvider } from "@/contexts/AccountsContext";
 import { GlobalFiltersProvider } from "@/contexts/GlobalFiltersContext";
@@ -37,44 +38,46 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <TagsProvider>
-        <StrategiesProvider>
-          <TradesProvider>
-            <AccountsProvider>
-              <GlobalFiltersProvider>
-                <CustomStatsProvider>
-                  <TradeModalProvider>
-                    <BrowserRouter>
-                      <Toaster />
-                      <Sonner />
-                      <AppLayout>
-                        <Routes>
-                          <Route path="/" element={<Dashboard />} />
-                          <Route path="/trades" element={<Trades />} />
-                          <Route path="/day-view" element={<DayView />} />
-                          <Route path="/strategies" element={<Strategies />} />
-                          <Route path="/strategies/:id" element={<StrategyDetail />} />
-                          <Route path="/reports/*" element={<Reports />} />
-                          <Route path="/chart-room/drawdown" element={<Drawdown />} />
-                          <Route path="/chart-room/exit-analysis" element={<ExitAnalysis />} />
-                          <Route path="/chart-room/holding-time" element={<HoldingTime />} />
-                          <Route path="/chart-room/performance-by-instrument" element={<PerformanceByInstrument />} />
-                          <Route path="/chart-room/performance-by-setup" element={<PerformanceBySetup />} />
-                          <Route path="/chart-room/performance-by-time" element={<PerformanceByTime />} />
-                          <Route path="/chart-room/performance-ratio" element={<PerformanceRatio />} />
-                          <Route path="/chart-room/risk-distribution" element={<RiskDistribution />} />
-                          <Route path="/chart-room/trade-management" element={<TradeManagement />} />
-                          <Route path="/settings" element={<Settings />} />
-                          <Route path="*" element={<NotFound />} />
-                        </Routes>
-                      </AppLayout>
-                      <TradeModal />
-                    </BrowserRouter>
-                  </TradeModalProvider>
-                </CustomStatsProvider>
-              </GlobalFiltersProvider>
-            </AccountsProvider>
-          </TradesProvider>
-        </StrategiesProvider>
+        <CategoriesProvider>
+          <StrategiesProvider>
+            <TradesProvider>
+              <AccountsProvider>
+                <GlobalFiltersProvider>
+                  <CustomStatsProvider>
+                    <TradeModalProvider>
+                      <BrowserRouter>
+                        <Toaster />
+                        <Sonner />
+                        <AppLayout>
+                          <Routes>
+                            <Route path="/" element={<Dashboard />} />
+                            <Route path="/trades" element={<Trades />} />
+                            <Route path="/day-view" element={<DayView />} />
+                            <Route path="/strategies" element={<Strategies />} />
+                            <Route path="/strategies/:id" element={<StrategyDetail />} />
+                            <Route path="/reports/*" element={<Reports />} />
+                            <Route path="/chart-room/drawdown" element={<Drawdown />} />
+                            <Route path="/chart-room/exit-analysis" element={<ExitAnalysis />} />
+                            <Route path="/chart-room/holding-time" element={<HoldingTime />} />
+                            <Route path="/chart-room/performance-by-instrument" element={<PerformanceByInstrument />} />
+                            <Route path="/chart-room/performance-by-setup" element={<PerformanceBySetup />} />
+                            <Route path="/chart-room/performance-by-time" element={<PerformanceByTime />} />
+                            <Route path="/chart-room/performance-ratio" element={<PerformanceRatio />} />
+                            <Route path="/chart-room/risk-distribution" element={<RiskDistribution />} />
+                            <Route path="/chart-room/trade-management" element={<TradeManagement />} />
+                            <Route path="/settings" element={<Settings />} />
+                            <Route path="*" element={<NotFound />} />
+                          </Routes>
+                        </AppLayout>
+                        <TradeModal />
+                      </BrowserRouter>
+                    </TradeModalProvider>
+                  </CustomStatsProvider>
+                </GlobalFiltersProvider>
+              </AccountsProvider>
+            </TradesProvider>
+          </StrategiesProvider>
+        </CategoriesProvider>
       </TagsProvider>
     </TooltipProvider>
   </QueryClientProvider>
