@@ -30,7 +30,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 
-type DisplayType = 'dollar' | 'percent';
+type DisplayType = 'dollar' | 'percent' | 'winrate' | 'tradecount';
 
 interface InstrumentData {
   symbol: string;
@@ -38,7 +38,10 @@ interface InstrumentData {
   totalPercent: number;
   tradeCount: number;
   winCount: number;
+  lossCount: number;
+  beCount: number;
   avgPnl: number;
+  winrate: number;
   displayValue: number;
 }
 
@@ -65,6 +68,8 @@ const PerformanceByInstrument = () => {
       totalPercent: number;
       tradeCount: number;
       winCount: number;
+      lossCount: number;
+      beCount: number;
     }>();
 
     closedTrades.forEach(trade => {
@@ -81,28 +86,62 @@ const PerformanceByInstrument = () => {
         totalPnl: 0, 
         totalPercent: 0,
         tradeCount: 0, 
-        winCount: 0 
+        winCount: 0,
+        lossCount: 0,
+        beCount: 0
       };
+      
+      // Determine win/loss/breakeven
+      const isWin = metrics.netPnl > 0;
+      const isLoss = metrics.netPnl < 0;
+      const isBe = metrics.netPnl === 0;
       
       instrumentMap.set(normalizedSymbol, {
         totalPnl: existing.totalPnl + metrics.netPnl,
         totalPercent: existing.totalPercent + (returnPercent ?? 0),
         tradeCount: existing.tradeCount + 1,
-        winCount: existing.winCount + (metrics.netPnl > 0 ? 1 : 0),
+        winCount: existing.winCount + (isWin ? 1 : 0),
+        lossCount: existing.lossCount + (isLoss ? 1 : 0),
+        beCount: existing.beCount + (isBe ? 1 : 0),
       });
     });
 
     // Convert to array and calculate averages
     const data: InstrumentData[] = Array.from(instrumentMap.entries())
-      .map(([symbol, data]) => ({
-        symbol,
-        totalPnl: data.totalPnl,
-        totalPercent: data.totalPercent,
-        tradeCount: data.tradeCount,
-        winCount: data.winCount,
-        avgPnl: data.totalPnl / data.tradeCount,
-        displayValue: displayType === 'dollar' ? data.totalPnl : data.totalPercent,
-      }))
+      .map(([symbol, data]) => {
+        const winrate = data.tradeCount > 0 ? (data.winCount / data.tradeCount) * 100 : 0;
+        let displayValue: number;
+        
+        switch (displayType) {
+          case 'dollar':
+            displayValue = data.totalPnl;
+            break;
+          case 'percent':
+            displayValue = data.totalPercent;
+            break;
+          case 'winrate':
+            displayValue = winrate;
+            break;
+          case 'tradecount':
+            displayValue = data.tradeCount;
+            break;
+          default:
+            displayValue = data.totalPnl;
+        }
+        
+        return {
+          symbol,
+          totalPnl: data.totalPnl,
+          totalPercent: data.totalPercent,
+          tradeCount: data.tradeCount,
+          winCount: data.winCount,
+          lossCount: data.lossCount,
+          beCount: data.beCount,
+          avgPnl: data.totalPnl / data.tradeCount,
+          winrate,
+          displayValue,
+        };
+      })
       // Sort by value descending (best first)
       .sort((a, b) => b.displayValue - a.displayValue);
 
@@ -209,6 +248,8 @@ const PerformanceByInstrument = () => {
                 <SelectContent>
                   <SelectItem value="dollar">Return ($)</SelectItem>
                   <SelectItem value="percent">Return (%)</SelectItem>
+                  <SelectItem value="winrate">Winrate (%)</SelectItem>
+                  <SelectItem value="tradecount">Trade Count</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -225,17 +266,19 @@ const PerformanceByInstrument = () => {
               </Select>
             </div>
 
-            {/* Legend */}
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-sm bg-green-500" />
-                <span className="text-sm text-muted-foreground">Profit</span>
+            {/* Legend - only show for profit/loss modes */}
+            {(displayType === 'dollar' || displayType === 'percent') && (
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-sm bg-profit" />
+                  <span className="text-sm text-muted-foreground">Profit</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-sm bg-loss" />
+                  <span className="text-sm text-muted-foreground">Loss</span>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-sm bg-red-500" />
-                <span className="text-sm text-muted-foreground">Loss</span>
-              </div>
-            </div>
+            )}
           </div>
 
           {/* Chart */}
@@ -263,42 +306,86 @@ const PerformanceByInstrument = () => {
                     axisLine={{ stroke: 'hsl(var(--border))' }}
                     tickLine={false}
                     tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
-                    tickFormatter={(value) => 
-                      displayType === 'dollar' 
-                        ? `${currencyConfig.symbol}${value.toFixed(0)}` 
-                        : `${value.toFixed(1)}%`
-                    }
+                    tickFormatter={(value) => {
+                      switch (displayType) {
+                        case 'dollar':
+                          return `${currencyConfig.symbol}${value.toFixed(0)}`;
+                        case 'percent':
+                        case 'winrate':
+                          return `${value.toFixed(0)}%`;
+                        case 'tradecount':
+                          return `${Math.round(value)}`;
+                        default:
+                          return `${value}`;
+                      }
+                    }}
                     width={60}
                   />
                   
-                  {/* Reference Line at 0 */}
-                  <ReferenceLine 
-                    y={0} 
-                    stroke="hsl(var(--muted-foreground))" 
-                    strokeWidth={1}
-                    strokeDasharray="3 3"
-                  />
+                  {/* Reference Line at 0 - only for dollar/percent modes */}
+                  {(displayType === 'dollar' || displayType === 'percent') && (
+                    <ReferenceLine 
+                      y={0} 
+                      stroke="hsl(var(--muted-foreground))" 
+                      strokeWidth={1}
+                      strokeDasharray="3 3"
+                    />
+                  )}
 
                   <Tooltip
                     cursor={{ fill: 'hsl(var(--muted))', opacity: 0.3 }}
                     content={({ active, payload }) => {
                       if (!active || !payload || payload.length === 0) return null;
                       const data = payload[0].payload as InstrumentData;
+                      
+                      if (displayType === 'tradecount') {
+                        return (
+                          <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
+                            <p className="text-foreground font-medium mb-2">{data.symbol}</p>
+                            <p className="text-sm text-foreground">
+                              Trade Count: {data.tradeCount}
+                            </p>
+                          </div>
+                        );
+                      }
+                      
+                      if (displayType === 'winrate') {
+                        return (
+                          <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
+                            <p className="text-foreground font-medium mb-2">{data.symbol}</p>
+                            <div className="space-y-1 text-sm">
+                              <p className="text-foreground">
+                                Winrate: {data.winrate.toFixed(1)}%
+                              </p>
+                              <p className="text-muted-foreground">
+                                Wins: {data.winCount}
+                              </p>
+                              <p className="text-muted-foreground">
+                                Losses: {data.lossCount}
+                              </p>
+                              <p className="text-muted-foreground">
+                                Breakeven: {data.beCount}
+                              </p>
+                            </div>
+                          </div>
+                        );
+                      }
+                      
                       return (
                         <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
                           <p className="text-foreground font-medium mb-2">{data.symbol}</p>
                           <div className="space-y-1 text-sm">
-                            <p className={data.totalPnl >= 0 ? 'text-green-500' : 'text-red-500'}>
+                            <p className={data.totalPnl >= 0 ? 'text-profit' : 'text-loss'}>
                               Total P&L: {formatValue(data.totalPnl, 'dollar')}
                             </p>
-                            <p className={data.totalPercent >= 0 ? 'text-green-500' : 'text-red-500'}>
+                            <p className={data.totalPercent >= 0 ? 'text-profit' : 'text-loss'}>
                               Total Return: {formatValue(data.totalPercent, 'percent')}
                             </p>
                             <p className="text-muted-foreground">
                               Trades: {data.tradeCount}
                             </p>
                             <p className="text-muted-foreground">
-                              Win Rate: {((data.winCount / data.tradeCount) * 100).toFixed(1)}%
+                              Win Rate: {data.winrate.toFixed(1)}%
                             </p>
                           </div>
                         </div>
@@ -311,12 +398,20 @@ const PerformanceByInstrument = () => {
                     radius={[4, 4, 0, 0]}
                     maxBarSize={50}
                   >
-                    {instrumentData.map((entry, index) => (
-                      <Cell 
-                        key={`cell-${index}`}
-                        fill={entry.displayValue >= 0 ? 'hsl(142, 71%, 45%)' : 'hsl(0, 84%, 60%)'}
-                      />
-                    ))}
+                    {instrumentData.map((entry, index) => {
+                      let fillColor: string;
+                      if (displayType === 'winrate' || displayType === 'tradecount') {
+                        fillColor = 'hsl(var(--primary))';
+                      } else {
+                        fillColor = entry.displayValue >= 0 ? 'hsl(var(--profit))' : 'hsl(var(--loss))';
+                      }
+                      return (
+                        <Cell 
+                          key={`cell-${index}`}
+                          fill={fillColor}
+                        />
+                      );
+                    })}
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
