@@ -371,25 +371,44 @@ export const PerformanceByTimeChart = ({
                   content={({ active, payload }) => {
                     if (!active || !payload || payload.length === 0) return null;
                     const data = payload[0].payload as TimeData;
+                    const winrate = data.tradeCount > 0 ? (data.winCount / data.tradeCount) * 100 : 0;
+                    
                     return (
                       <div className="bg-card border border-border rounded-lg p-3 shadow-lg z-50">
                         <p className="text-foreground font-medium mb-2">{data.label}</p>
                         <div className="space-y-1 text-sm">
-                          {displayType === 'tradecount' ? (
+                          {displayType === 'winrate' ? (
+                            <>
+                              <p className={winrate >= 50 ? 'text-green-500 font-semibold' : 'text-red-500 font-semibold'}>
+                                Winrate: {winrate.toFixed(2)}%
+                              </p>
+                              <p className="text-muted-foreground">
+                                Wins: {data.winCount}
+                              </p>
+                              <p className="text-muted-foreground">
+                                Loss: {data.lossCount}
+                              </p>
+                              <p className="text-muted-foreground">
+                                BE: {data.breakevenCount}
+                              </p>
+                            </>
+                          ) : displayType === 'tradecount' ? (
                             <p className="text-foreground font-semibold">
                               Trade Count: {data.tradeCount}
                             </p>
                           ) : (
-                            <p className={data.totalPnl >= 0 ? 'text-green-500' : 'text-red-500'}>
-                              {formatValue(data.totalPnl, 'dollar')}
-                            </p>
+                            <>
+                              <p className={data.totalPnl >= 0 ? 'text-green-500' : 'text-red-500'}>
+                                {formatValue(data.totalPnl, 'dollar')}
+                              </p>
+                              <p className="text-muted-foreground">
+                                Trades: {data.tradeCount}
+                              </p>
+                              <p className="text-muted-foreground">
+                                Win: {data.winCount} | Loss: {data.lossCount} | BE: {data.breakevenCount}
+                              </p>
+                            </>
                           )}
-                          <p className="text-muted-foreground">
-                            Trades: {data.tradeCount}
-                          </p>
-                          <p className="text-muted-foreground">
-                            Win: {data.winCount} | Loss: {data.lossCount} | BE: {data.breakevenCount}
-                          </p>
                         </div>
                       </div>
                     );
