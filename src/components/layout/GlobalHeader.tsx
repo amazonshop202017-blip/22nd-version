@@ -32,6 +32,7 @@ import {
 } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
+import { AdvancedFiltersPanel } from './AdvancedFiltersPanel';
 
 const DATE_PRESETS: { value: DatePreset; label: string }[] = [
   { value: 'today', label: 'Today' },
@@ -125,6 +126,7 @@ export const GlobalHeader = () => {
     setSelectedReturnRanges,
     selectedRMultipleRanges,
     setSelectedRMultipleRanges,
+    hasActiveTagFilters,
   } = useGlobalFilters();
   
   const { accounts } = useAccountsContext();
@@ -802,35 +804,23 @@ export const GlobalHeader = () => {
       </DropdownMenu>
 
       {/* Advanced Filters Dropdown */}
-      <DropdownMenu open={advancedFiltersOpen} onOpenChange={setAdvancedFiltersOpen}>
-        <DropdownMenuTrigger asChild>
+      <Popover open={advancedFiltersOpen} onOpenChange={setAdvancedFiltersOpen}>
+        <PopoverTrigger asChild>
           <Button variant="outline" className="gap-2 bg-background border-border">
             <SlidersHorizontal className="w-4 h-4 text-muted-foreground" />
             <span>Advanced Filters</span>
+            {hasActiveTagFilters && (
+              <span className="ml-1 px-1.5 py-0.5 text-xs rounded-full bg-primary text-primary-foreground">
+                Tags
+              </span>
+            )}
             <ChevronDown className="w-4 h-4 text-muted-foreground" />
           </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-[250px] p-4 bg-popover border-border z-50">
-          <div className="space-y-1.5">
-            <label className="text-xs text-muted-foreground flex items-center gap-1.5">
-              <CalendarIcon2 className="w-3 h-3" />
-              Date Range
-            </label>
-            <Select>
-              <SelectTrigger className="h-9 bg-background border-border">
-                <SelectValue placeholder="All" />
-              </SelectTrigger>
-              <SelectContent className="bg-popover border-border z-[60]">
-                <SelectItem value="all">All Time</SelectItem>
-                <SelectItem value="today">Today</SelectItem>
-                <SelectItem value="week">This Week</SelectItem>
-                <SelectItem value="month">This Month</SelectItem>
-                <SelectItem value="custom">Custom</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </DropdownMenuContent>
-      </DropdownMenu>
+        </PopoverTrigger>
+        <PopoverContent align="start" className="w-auto p-0 bg-popover border-border z-50">
+          <AdvancedFiltersPanel />
+        </PopoverContent>
+      </Popover>
 
       <div className="flex-1" />
 

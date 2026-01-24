@@ -1,7 +1,7 @@
 import { createContext, useContext, ReactNode, useMemo, useCallback } from 'react';
 import { useTrades } from '@/hooks/useTrades';
 import { Trade, TradeFormData, calculateTradeMetrics } from '@/types/trade';
-import { useGlobalFilters, OutcomeFilter, DayFilter, DirectionFilter, ReturnPercentRange, RMultipleRange } from '@/contexts/GlobalFiltersContext';
+import { useGlobalFilters, OutcomeFilter, DayFilter, DirectionFilter, ReturnPercentRange, RMultipleRange, TagFilters } from '@/contexts/GlobalFiltersContext';
 import { isWithinInterval, parseISO, startOfDay, endOfDay, getDay, getHours } from 'date-fns';
 
 // Helper function to check if return % falls within a range
@@ -111,6 +111,7 @@ export const useFilteredTradesContext = () => {
     selectedDirections,
     selectedReturnRanges,
     selectedRMultipleRanges,
+    selectedTagsByCategory,
   } = useGlobalFilters();
 
   const filteredTrades = useMemo(() => {
@@ -215,6 +216,22 @@ export const useFilteredTradesContext = () => {
       });
     }
 
+    // Filter by Tags (AND across categories, OR within category)
+    const activeCategoryIds = Object.keys(selectedTagsByCategory).filter(
+      categoryId => selectedTagsByCategory[categoryId]?.length > 0
+    );
+    
+    if (activeCategoryIds.length > 0) {
+      filtered = filtered.filter(trade => {
+        // Trade must match at least one tag from EACH active category (AND logic)
+        return activeCategoryIds.every(categoryId => {
+          const selectedTagIds = selectedTagsByCategory[categoryId];
+          // Within a category, trade matches if it has at least one of the selected tags (OR logic)
+          return selectedTagIds.some(tagId => trade.tags?.includes(tagId));
+        });
+      });
+    }
+
     // Apply "Last Trades" filter LAST - take most recent N trades after all other filters
     if (lastTradesFilter !== null) {
       // Sort by entry date descending
@@ -229,7 +246,7 @@ export const useFilteredTradesContext = () => {
     }
 
     return filtered;
-  }, [trades, dateRange, selectedAccounts, selectedInstruments, selectedOutcomes, selectedHours, selectedSetups, selectedDays, lastTradesFilter, selectedDirections, selectedReturnRanges, selectedRMultipleRanges]);
+  }, [trades, dateRange, selectedAccounts, selectedInstruments, selectedOutcomes, selectedHours, selectedSetups, selectedDays, lastTradesFilter, selectedDirections, selectedReturnRanges, selectedRMultipleRanges, selectedTagsByCategory]);
 
   const stats = useMemo(() => {
     const winningTrades = filteredTrades.filter(t => calculateTradeMetrics(t).netPnl > 0);
