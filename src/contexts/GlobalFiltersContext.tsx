@@ -29,6 +29,9 @@ export type DirectionFilter = 'long' | 'short';
 export type ReturnPercentRange = '<0' | '0-1' | '1-2' | '3-5' | '5-10' | '>10';
 export type RMultipleRange = '<-2' | '-2-0' | '0-1' | '1-2' | '2-4' | '>4';
 
+// Tag filter: Map of categoryId -> array of selected tagIds
+export type TagFilters = Record<string, string[]>;
+
 interface GlobalFiltersContextType {
   // Currency
   currency: CurrencyCode;
@@ -67,6 +70,14 @@ interface GlobalFiltersContextType {
   setSelectedReturnRanges: (ranges: ReturnPercentRange[]) => void;
   selectedRMultipleRanges: RMultipleRange[];
   setSelectedRMultipleRanges: (ranges: RMultipleRange[]) => void;
+  
+  // Advanced Filters - Tags
+  selectedTagsByCategory: TagFilters;
+  setSelectedTagsByCategory: (tags: TagFilters) => void;
+  toggleCategoryTagFilter: (categoryId: string, tagId: string) => void;
+  selectAllTagsInCategory: (categoryId: string, tagIds: string[]) => void;
+  clearCategoryTags: (categoryId: string) => void;
+  hasActiveTagFilters: boolean;
 }
 
 const GlobalFiltersContext = createContext<GlobalFiltersContextType | undefined>(undefined);
@@ -92,6 +103,44 @@ export const GlobalFiltersProvider = ({ children }: { children: ReactNode }) => 
   const [selectedDirections, setSelectedDirections] = useState<DirectionFilter[]>([]);
   const [selectedReturnRanges, setSelectedReturnRanges] = useState<ReturnPercentRange[]>([]);
   const [selectedRMultipleRanges, setSelectedRMultipleRanges] = useState<RMultipleRange[]>([]);
+  
+  // Advanced Filters - Tags
+  const [selectedTagsByCategory, setSelectedTagsByCategory] = useState<TagFilters>({});
+  
+  // Toggle a single tag in a category
+  const toggleCategoryTagFilter = (categoryId: string, tagId: string) => {
+    setSelectedTagsByCategory(prev => {
+      const categoryTags = prev[categoryId] || [];
+      if (categoryTags.includes(tagId)) {
+        const newCategoryTags = categoryTags.filter(id => id !== tagId);
+        if (newCategoryTags.length === 0) {
+          const { [categoryId]: _, ...rest } = prev;
+          return rest;
+        }
+        return { ...prev, [categoryId]: newCategoryTags };
+      } else {
+        return { ...prev, [categoryId]: [...categoryTags, tagId] };
+      }
+    });
+  };
+  
+  // Select all tags in a category
+  const selectAllTagsInCategory = (categoryId: string, tagIds: string[]) => {
+    setSelectedTagsByCategory(prev => ({ ...prev, [categoryId]: tagIds }));
+  };
+  
+  // Clear all tags in a category
+  const clearCategoryTags = (categoryId: string) => {
+    setSelectedTagsByCategory(prev => {
+      const { [categoryId]: _, ...rest } = prev;
+      return rest;
+    });
+  };
+  
+  // Check if any tag filters are active
+  const hasActiveTagFilters = Object.keys(selectedTagsByCategory).some(
+    categoryId => selectedTagsByCategory[categoryId]?.length > 0
+  );
 
   const currencyConfig = CURRENCIES[currency];
 
@@ -187,6 +236,13 @@ export const GlobalFiltersProvider = ({ children }: { children: ReactNode }) => 
     setSelectedReturnRanges,
     selectedRMultipleRanges,
     setSelectedRMultipleRanges,
+    // Advanced Filters - Tags
+    selectedTagsByCategory,
+    setSelectedTagsByCategory,
+    toggleCategoryTagFilter,
+    selectAllTagsInCategory,
+    clearCategoryTags,
+    hasActiveTagFilters,
   }), [
     currency, 
     currencyConfig, 
@@ -202,6 +258,8 @@ export const GlobalFiltersProvider = ({ children }: { children: ReactNode }) => 
     selectedDirections,
     selectedReturnRanges,
     selectedRMultipleRanges,
+    selectedTagsByCategory,
+    hasActiveTagFilters,
   ]);
 
   return (
