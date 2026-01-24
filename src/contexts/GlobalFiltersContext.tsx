@@ -25,6 +25,9 @@ export interface DateRange {
 export type OutcomeFilter = 'win' | 'loss' | 'breakeven';
 export type DayFilter = 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday';
 export type LastTradesFilter = 10 | 25 | 50 | 100 | null;
+export type DirectionFilter = 'long' | 'short';
+export type ReturnPercentRange = '<0' | '0-1' | '1-2' | '3-5' | '5-10' | '>10';
+export type RMultipleRange = '<-2' | '-2-0' | '0-1' | '1-2' | '2-4' | '>4';
 
 interface GlobalFiltersContextType {
   // Currency
@@ -58,6 +61,12 @@ interface GlobalFiltersContextType {
   setSelectedDays: (days: DayFilter[]) => void;
   lastTradesFilter: LastTradesFilter;
   setLastTradesFilter: (count: LastTradesFilter) => void;
+  selectedDirections: DirectionFilter[];
+  setSelectedDirections: (directions: DirectionFilter[]) => void;
+  selectedReturnRanges: ReturnPercentRange[];
+  setSelectedReturnRanges: (ranges: ReturnPercentRange[]) => void;
+  selectedRMultipleRanges: RMultipleRange[];
+  setSelectedRMultipleRanges: (ranges: RMultipleRange[]) => void;
 }
 
 const GlobalFiltersContext = createContext<GlobalFiltersContextType | undefined>(undefined);
@@ -80,6 +89,9 @@ export const GlobalFiltersProvider = ({ children }: { children: ReactNode }) => 
   const [selectedSetups, setSelectedSetups] = useState<string[]>([]);
   const [selectedDays, setSelectedDays] = useState<DayFilter[]>([]);
   const [lastTradesFilter, setLastTradesFilter] = useState<LastTradesFilter>(null);
+  const [selectedDirections, setSelectedDirections] = useState<DirectionFilter[]>([]);
+  const [selectedReturnRanges, setSelectedReturnRanges] = useState<ReturnPercentRange[]>([]);
+  const [selectedRMultipleRanges, setSelectedRMultipleRanges] = useState<RMultipleRange[]>([]);
 
   const currencyConfig = CURRENCIES[currency];
 
@@ -169,6 +181,12 @@ export const GlobalFiltersProvider = ({ children }: { children: ReactNode }) => 
     setSelectedDays,
     lastTradesFilter,
     setLastTradesFilter,
+    selectedDirections,
+    setSelectedDirections,
+    selectedReturnRanges,
+    setSelectedReturnRanges,
+    selectedRMultipleRanges,
+    setSelectedRMultipleRanges,
   }), [
     currency, 
     currencyConfig, 
@@ -181,6 +199,9 @@ export const GlobalFiltersProvider = ({ children }: { children: ReactNode }) => 
     selectedSetups,
     selectedDays,
     lastTradesFilter,
+    selectedDirections,
+    selectedReturnRanges,
+    selectedRMultipleRanges,
   ]);
 
   return (

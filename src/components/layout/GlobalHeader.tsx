@@ -17,7 +17,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { useGlobalFilters, DatePreset, OutcomeFilter, DayFilter, LastTradesFilter } from '@/contexts/GlobalFiltersContext';
+import { useGlobalFilters, DatePreset, OutcomeFilter, DayFilter, LastTradesFilter, DirectionFilter, ReturnPercentRange, RMultipleRange } from '@/contexts/GlobalFiltersContext';
 import { useAccountsContext } from '@/contexts/AccountsContext';
 import { useTradesContext } from '@/contexts/TradesContext';
 import { useStrategiesContext } from '@/contexts/StrategiesContext';
@@ -72,6 +72,29 @@ const LAST_TRADES_OPTIONS: { value: LastTradesFilter; label: string }[] = [
   { value: 100, label: 'Last 100' },
 ];
 
+const DIRECTION_OPTIONS: { value: DirectionFilter; label: string }[] = [
+  { value: 'long', label: 'Long' },
+  { value: 'short', label: 'Short' },
+];
+
+const RETURN_PERCENT_OPTIONS: { value: ReturnPercentRange; label: string }[] = [
+  { value: '<0', label: '< 0%' },
+  { value: '0-1', label: '0% – 1%' },
+  { value: '1-2', label: '1% – 2%' },
+  { value: '3-5', label: '3% – 5%' },
+  { value: '5-10', label: '5% – 10%' },
+  { value: '>10', label: '> 10%' },
+];
+
+const R_MULTIPLE_OPTIONS: { value: RMultipleRange; label: string }[] = [
+  { value: '<-2', label: '< -2R' },
+  { value: '-2-0', label: '-2R to 0R' },
+  { value: '0-1', label: '0R to 1R' },
+  { value: '1-2', label: '1R to 2R' },
+  { value: '2-4', label: '2R to 4R' },
+  { value: '>4', label: '> 4R' },
+];
+
 export const GlobalHeader = () => {
   const navigate = useNavigate();
   const { 
@@ -96,6 +119,12 @@ export const GlobalHeader = () => {
     setSelectedDays,
     lastTradesFilter,
     setLastTradesFilter,
+    selectedDirections,
+    setSelectedDirections,
+    selectedReturnRanges,
+    setSelectedReturnRanges,
+    selectedRMultipleRanges,
+    setSelectedRMultipleRanges,
   } = useGlobalFilters();
   
   const { accounts } = useAccountsContext();
@@ -180,6 +209,33 @@ export const GlobalHeader = () => {
     }
   };
 
+  // Direction filter handlers
+  const handleDirectionToggle = (direction: DirectionFilter) => {
+    if (selectedDirections.includes(direction)) {
+      setSelectedDirections(selectedDirections.filter(d => d !== direction));
+    } else {
+      setSelectedDirections([...selectedDirections, direction]);
+    }
+  };
+
+  // Return % filter handlers
+  const handleReturnRangeToggle = (range: ReturnPercentRange) => {
+    if (selectedReturnRanges.includes(range)) {
+      setSelectedReturnRanges(selectedReturnRanges.filter(r => r !== range));
+    } else {
+      setSelectedReturnRanges([...selectedReturnRanges, range]);
+    }
+  };
+
+  // R-Multiple filter handlers
+  const handleRMultipleRangeToggle = (range: RMultipleRange) => {
+    if (selectedRMultipleRanges.includes(range)) {
+      setSelectedRMultipleRanges(selectedRMultipleRanges.filter(r => r !== range));
+    } else {
+      setSelectedRMultipleRanges([...selectedRMultipleRanges, range]);
+    }
+  };
+
   const getDateRangeLabel = () => {
     if (datePreset === 'all' || (!dateRange.from && !dateRange.to)) {
       return 'All time';
@@ -215,8 +271,11 @@ export const GlobalHeader = () => {
     if (selectedSetups.length > 0) count++;
     if (selectedDays.length > 0) count++;
     if (lastTradesFilter !== null) count++;
+    if (selectedDirections.length > 0) count++;
+    if (selectedReturnRanges.length > 0) count++;
+    if (selectedRMultipleRanges.length > 0) count++;
     return count;
-  }, [selectedInstruments, selectedOutcomes, selectedHours, selectedSetups, selectedDays, lastTradesFilter]);
+  }, [selectedInstruments, selectedOutcomes, selectedHours, selectedSetups, selectedDays, lastTradesFilter, selectedDirections, selectedReturnRanges, selectedRMultipleRanges]);
 
   return (
     <div className="flex items-center gap-3 px-8 py-4 border-b border-border bg-card/50 backdrop-blur-sm">
@@ -484,22 +543,47 @@ export const GlobalHeader = () => {
               </Popover>
             </div>
 
-            {/* Direction - UI only (not wired) */}
+            {/* Direction - Multi-select */}
             <div className="space-y-1.5">
               <label className="text-xs text-muted-foreground flex items-center gap-1.5">
                 <TrendingUp className="w-3 h-3" />
                 Direction
               </label>
-              <Select>
-                <SelectTrigger className="h-9 bg-background border-border">
-                  <SelectValue placeholder="All" />
-                </SelectTrigger>
-                <SelectContent className="bg-popover border-border z-[60]">
-                  <SelectItem value="all">All</SelectItem>
-                  <SelectItem value="long">Long</SelectItem>
-                  <SelectItem value="short">Short</SelectItem>
-                </SelectContent>
-              </Select>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="w-full h-9 justify-between text-sm font-normal bg-background border-border">
+                    {selectedDirections.length === 0 ? 'All' : `${selectedDirections.length} selected`}
+                    <ChevronDown className="w-3 h-3 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-36 p-2 bg-popover border-border z-[70]" align="start">
+                  <div className="space-y-1">
+                    {DIRECTION_OPTIONS.map((option) => (
+                      <div 
+                        key={option.value} 
+                        className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-accent cursor-pointer"
+                        onClick={() => handleDirectionToggle(option.value)}
+                      >
+                        <Checkbox checked={selectedDirections.includes(option.value)} />
+                        <span className="text-sm">{option.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                  {selectedDirections.length > 0 && (
+                    <>
+                      <DropdownMenuSeparator className="my-2" />
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="w-full text-xs"
+                        onClick={() => setSelectedDirections([])}
+                      >
+                        Clear selection
+                      </Button>
+                    </>
+                  )}
+                </PopoverContent>
+              </Popover>
             </div>
 
             {/* Day - Multi-select */}
@@ -545,24 +629,47 @@ export const GlobalHeader = () => {
               </Popover>
             </div>
 
-            {/* Return % - UI only (not wired) */}
+            {/* Return % - Multi-select */}
             <div className="space-y-1.5">
               <label className="text-xs text-muted-foreground flex items-center gap-1.5">
                 <Percent className="w-3 h-3" />
                 Return %
               </label>
-              <Select>
-                <SelectTrigger className="h-9 bg-background border-border">
-                  <SelectValue placeholder="All" />
-                </SelectTrigger>
-                <SelectContent className="bg-popover border-border z-[60]">
-                  <SelectItem value="all">All</SelectItem>
-                  <SelectItem value="positive">&gt; 0%</SelectItem>
-                  <SelectItem value="negative">&lt; 0%</SelectItem>
-                  <SelectItem value="high">&gt; 2%</SelectItem>
-                  <SelectItem value="vhigh">&gt; 5%</SelectItem>
-                </SelectContent>
-              </Select>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="w-full h-9 justify-between text-sm font-normal bg-background border-border">
+                    {selectedReturnRanges.length === 0 ? 'All' : `${selectedReturnRanges.length} selected`}
+                    <ChevronDown className="w-3 h-3 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-36 p-2 bg-popover border-border z-[70]" align="start">
+                  <div className="space-y-1">
+                    {RETURN_PERCENT_OPTIONS.map((option) => (
+                      <div 
+                        key={option.value} 
+                        className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-accent cursor-pointer"
+                        onClick={() => handleReturnRangeToggle(option.value)}
+                      >
+                        <Checkbox checked={selectedReturnRanges.includes(option.value)} />
+                        <span className="text-sm">{option.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                  {selectedReturnRanges.length > 0 && (
+                    <>
+                      <DropdownMenuSeparator className="my-2" />
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="w-full text-xs"
+                        onClick={() => setSelectedReturnRanges([])}
+                      >
+                        Clear selection
+                      </Button>
+                    </>
+                  )}
+                </PopoverContent>
+              </Popover>
             </div>
 
             {/* Starred - UI only (not wired) */}
@@ -648,24 +755,47 @@ export const GlobalHeader = () => {
               </Select>
             </div>
 
-            {/* R-Multiple Gain - UI only (not wired) */}
+            {/* R-Multiple Gain - Multi-select */}
             <div className="space-y-1.5">
               <label className="text-xs text-muted-foreground flex items-center gap-1.5">
                 <Hash className="w-3 h-3" />
                 R-Multiple Gain
               </label>
-              <Select>
-                <SelectTrigger className="h-9 bg-background border-border">
-                  <SelectValue placeholder="All" />
-                </SelectTrigger>
-                <SelectContent className="bg-popover border-border z-[60]">
-                  <SelectItem value="all">All</SelectItem>
-                  <SelectItem value="positive">&gt; 0R</SelectItem>
-                  <SelectItem value="negative">&lt; 0R</SelectItem>
-                  <SelectItem value="1r">&gt; 1R</SelectItem>
-                  <SelectItem value="2r">&gt; 2R</SelectItem>
-                </SelectContent>
-              </Select>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="w-full h-9 justify-between text-sm font-normal bg-background border-border">
+                    {selectedRMultipleRanges.length === 0 ? 'All' : `${selectedRMultipleRanges.length} selected`}
+                    <ChevronDown className="w-3 h-3 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-36 p-2 bg-popover border-border z-[70]" align="start">
+                  <div className="space-y-1">
+                    {R_MULTIPLE_OPTIONS.map((option) => (
+                      <div 
+                        key={option.value} 
+                        className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-accent cursor-pointer"
+                        onClick={() => handleRMultipleRangeToggle(option.value)}
+                      >
+                        <Checkbox checked={selectedRMultipleRanges.includes(option.value)} />
+                        <span className="text-sm">{option.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                  {selectedRMultipleRanges.length > 0 && (
+                    <>
+                      <DropdownMenuSeparator className="my-2" />
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="w-full text-xs"
+                        onClick={() => setSelectedRMultipleRanges([])}
+                      >
+                        Clear selection
+                      </Button>
+                    </>
+                  )}
+                </PopoverContent>
+              </Popover>
             </div>
           </div>
         </DropdownMenuContent>

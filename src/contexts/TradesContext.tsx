@@ -1,8 +1,36 @@
 import { createContext, useContext, ReactNode, useMemo, useCallback } from 'react';
 import { useTrades } from '@/hooks/useTrades';
 import { Trade, TradeFormData, calculateTradeMetrics } from '@/types/trade';
-import { useGlobalFilters, OutcomeFilter, DayFilter } from '@/contexts/GlobalFiltersContext';
+import { useGlobalFilters, OutcomeFilter, DayFilter, DirectionFilter, ReturnPercentRange, RMultipleRange } from '@/contexts/GlobalFiltersContext';
 import { isWithinInterval, parseISO, startOfDay, endOfDay, getDay, getHours } from 'date-fns';
+
+// Helper function to check if return % falls within a range
+const matchesReturnRange = (returnPercent: number | undefined, range: ReturnPercentRange): boolean => {
+  if (returnPercent === undefined) return false;
+  switch (range) {
+    case '<0': return returnPercent < 0;
+    case '0-1': return returnPercent >= 0 && returnPercent < 1;
+    case '1-2': return returnPercent >= 1 && returnPercent < 2;
+    case '3-5': return returnPercent >= 3 && returnPercent < 5;
+    case '5-10': return returnPercent >= 5 && returnPercent < 10;
+    case '>10': return returnPercent >= 10;
+    default: return false;
+  }
+};
+
+// Helper function to check if R-Multiple falls within a range
+const matchesRMultipleRange = (rMultiple: number | undefined, range: RMultipleRange): boolean => {
+  if (rMultiple === undefined) return false;
+  switch (range) {
+    case '<-2': return rMultiple < -2;
+    case '-2-0': return rMultiple >= -2 && rMultiple < 0;
+    case '0-1': return rMultiple >= 0 && rMultiple < 1;
+    case '1-2': return rMultiple >= 1 && rMultiple < 2;
+    case '2-4': return rMultiple >= 2 && rMultiple < 4;
+    case '>4': return rMultiple >= 4;
+    default: return false;
+  }
+};
 
 interface TradesContextType {
   trades: Trade[]; // All trades (unfiltered)
@@ -80,6 +108,9 @@ export const useFilteredTradesContext = () => {
     selectedSetups,
     selectedDays,
     lastTradesFilter,
+    selectedDirections,
+    selectedReturnRanges,
+    selectedRMultipleRanges,
   } = useGlobalFilters();
 
   const filteredTrades = useMemo(() => {
@@ -158,6 +189,32 @@ export const useFilteredTradesContext = () => {
       });
     }
 
+    // Filter by direction (Long/Short)
+    if (selectedDirections.length > 0) {
+      filtered = filtered.filter(trade => {
+        const tradeSide = trade.side?.toLowerCase() as DirectionFilter;
+        return selectedDirections.includes(tradeSide);
+      });
+    }
+
+    // Filter by Return % ranges
+    if (selectedReturnRanges.length > 0) {
+      filtered = filtered.filter(trade => {
+        const returnPercent = trade.savedReturnPercent;
+        // Match if trade falls within ANY of the selected ranges (OR logic)
+        return selectedReturnRanges.some(range => matchesReturnRange(returnPercent, range));
+      });
+    }
+
+    // Filter by R-Multiple ranges
+    if (selectedRMultipleRanges.length > 0) {
+      filtered = filtered.filter(trade => {
+        const rMultiple = trade.savedRMultiple;
+        // Match if trade falls within ANY of the selected ranges (OR logic)
+        return selectedRMultipleRanges.some(range => matchesRMultipleRange(rMultiple, range));
+      });
+    }
+
     // Apply "Last Trades" filter LAST - take most recent N trades after all other filters
     if (lastTradesFilter !== null) {
       // Sort by entry date descending
@@ -172,7 +229,7 @@ export const useFilteredTradesContext = () => {
     }
 
     return filtered;
-  }, [trades, dateRange, selectedAccounts, selectedInstruments, selectedOutcomes, selectedHours, selectedSetups, selectedDays, lastTradesFilter]);
+  }, [trades, dateRange, selectedAccounts, selectedInstruments, selectedOutcomes, selectedHours, selectedSetups, selectedDays, lastTradesFilter, selectedDirections, selectedReturnRanges, selectedRMultipleRanges]);
 
   const stats = useMemo(() => {
     const winningTrades = filteredTrades.filter(t => calculateTradeMetrics(t).netPnl > 0);
