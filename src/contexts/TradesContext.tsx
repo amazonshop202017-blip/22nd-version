@@ -121,6 +121,7 @@ export const useFilteredTradesContext = () => {
     selectedReturnRanges,
     selectedRMultipleRanges,
     selectedTagsByCategory,
+    classifyTradeOutcome,
   } = useGlobalFilters();
 
   // Get active account names (excluding archived)
@@ -163,16 +164,12 @@ export const useFilteredTradesContext = () => {
       );
     }
 
-    // Filter by outcome
+    // Filter by outcome (using global breakeven tolerance)
     if (selectedOutcomes.length > 0) {
       filtered = filtered.filter(trade => {
         const metrics = calculateTradeMetrics(trade);
-        const netPnl = metrics.netPnl;
-        
-        if (netPnl > 0 && selectedOutcomes.includes('win')) return true;
-        if (netPnl < 0 && selectedOutcomes.includes('loss')) return true;
-        if (netPnl === 0 && selectedOutcomes.includes('breakeven')) return true;
-        return false;
+        const outcome = classifyTradeOutcome(metrics.netPnl, trade.savedReturnPercent);
+        return selectedOutcomes.includes(outcome);
       });
     }
 
@@ -264,28 +261,39 @@ export const useFilteredTradesContext = () => {
     }
 
     return filtered;
-  }, [trades, dateRange, selectedAccounts, activeAccountNames, selectedInstruments, selectedOutcomes, selectedHours, selectedSetups, selectedDays, lastTradesFilter, selectedDirections, selectedReturnRanges, selectedRMultipleRanges, selectedTagsByCategory]);
+  }, [trades, dateRange, selectedAccounts, activeAccountNames, selectedInstruments, selectedOutcomes, selectedHours, selectedSetups, selectedDays, lastTradesFilter, selectedDirections, selectedReturnRanges, selectedRMultipleRanges, selectedTagsByCategory, classifyTradeOutcome]);
 
   const stats = useMemo(() => {
-    const winningTrades = filteredTrades.filter(t => calculateTradeMetrics(t).netPnl > 0);
-    const losingTrades = filteredTrades.filter(t => calculateTradeMetrics(t).netPnl < 0);
-    const breakevenTrades = filteredTrades.filter(t => calculateTradeMetrics(t).netPnl === 0);
+    // Classify trades using breakeven tolerance
+    const classifiedTrades = filteredTrades.map(t => {
+      const metrics = calculateTradeMetrics(t);
+      const outcome = classifyTradeOutcome(metrics.netPnl, t.savedReturnPercent);
+      return { trade: t, metrics, outcome };
+    });
     
-    const totalProfits = winningTrades.reduce((sum, t) => sum + calculateTradeMetrics(t).netPnl, 0);
-    const totalLosses = Math.abs(losingTrades.reduce((sum, t) => sum + calculateTradeMetrics(t).netPnl, 0));
+    const winningTrades = classifiedTrades.filter(({ outcome }) => outcome === 'win');
+    const losingTrades = classifiedTrades.filter(({ outcome }) => outcome === 'loss');
+    const breakevenTrades = classifiedTrades.filter(({ outcome }) => outcome === 'breakeven');
     
-    // Calculate day-based stats
-    const dayPnl = filteredTrades.reduce((acc, t) => {
+    const totalProfits = winningTrades.reduce((sum, { metrics }) => sum + metrics.netPnl, 0);
+    const totalLosses = Math.abs(losingTrades.reduce((sum, { metrics }) => sum + metrics.netPnl, 0));
+    
+    // Calculate day-based stats using tolerance
+    const dayData = filteredTrades.reduce((acc, t) => {
       const metrics = calculateTradeMetrics(t);
       const day = metrics.closeDate ? metrics.closeDate.split('T')[0] : 'unknown';
-      acc[day] = (acc[day] || 0) + metrics.netPnl;
+      if (!acc[day]) {
+        acc[day] = { pnl: 0, returnPercent: 0 };
+      }
+      acc[day].pnl += metrics.netPnl;
+      acc[day].returnPercent += t.savedReturnPercent || 0;
       return acc;
-    }, {} as Record<string, number>);
+    }, {} as Record<string, { pnl: number; returnPercent: number }>);
     
-    const days = Object.values(dayPnl);
-    const winningDaysCount = days.filter(p => p > 0).length;
-    const losingDaysCount = days.filter(p => p < 0).length;
-    const breakevenDaysCount = days.filter(p => p === 0).length;
+    const dayOutcomes = Object.values(dayData).map(d => classifyTradeOutcome(d.pnl, d.returnPercent));
+    const winningDaysCount = dayOutcomes.filter(o => o === 'win').length;
+    const losingDaysCount = dayOutcomes.filter(o => o === 'loss').length;
+    const breakevenDaysCount = dayOutcomes.filter(o => o === 'breakeven').length;
     
     return {
       netPnl: filteredTrades.reduce((sum, t) => sum + calculateTradeMetrics(t).netPnl, 0),
@@ -296,8 +304,8 @@ export const useFilteredTradesContext = () => {
       tradeWinRate: filteredTrades.length > 0 
         ? (winningTrades.length / filteredTrades.length) * 100 
         : 0,
-      dayWinRate: days.length > 0 
-        ? (winningDaysCount / days.length) * 100 
+      dayWinRate: dayOutcomes.length > 0 
+        ? (winningDaysCount / dayOutcomes.length) * 100 
         : 0,
       winningDays: winningDaysCount,
       losingDays: losingDaysCount,
@@ -312,7 +320,7 @@ export const useFilteredTradesContext = () => {
       totalLosses,
       profitFactor: totalLosses > 0 ? totalProfits / totalLosses : (totalProfits > 0 ? Infinity : 0),
     };
-  }, [filteredTrades]);
+  }, [filteredTrades, classifyTradeOutcome]);
 
   return {
     trades,

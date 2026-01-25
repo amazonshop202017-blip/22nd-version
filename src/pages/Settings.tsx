@@ -1,11 +1,11 @@
 import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Trash2, Edit2, Check, X, Tag, Wallet, TrendingUp, TrendingDown, Settings as SettingsIcon, Download, DollarSign, FolderOpen, Archive, ArchiveRestore, ChevronDown, ChevronUp } from 'lucide-react';
+import { Plus, Trash2, Edit2, Check, X, Tag, Wallet, TrendingUp, TrendingDown, Settings as SettingsIcon, Download, DollarSign, FolderOpen, Archive, ArchiveRestore, ChevronDown, ChevronUp, Target } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAccountsContext } from '@/contexts/AccountsContext';
 import { useTradesContext } from '@/contexts/TradesContext';
-import { useGlobalFilters, CurrencyCode, CURRENCIES } from '@/contexts/GlobalFiltersContext';
+import { useGlobalFilters, CurrencyCode, CURRENCIES, BreakevenToleranceType } from '@/contexts/GlobalFiltersContext';
 import { cn } from '@/lib/utils';
 import DepositWithdrawModal from '@/components/settings/DepositWithdrawModal';
 import { CategoriesManagement } from '@/components/settings/CategoriesManagement';
@@ -18,14 +18,40 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 const Settings = () => {
   const { accounts, addAccount, removeAccount, updateAccount, getActiveAccountsWithStats, getArchivedAccountsWithStats, archiveAccount, unarchiveAccount, deleteAccountPermanently, addTransaction, getTransactionsForAccount } = useAccountsContext();
   const { bulkAddTrades, trades, deleteTradesByAccountId, deleteTradesByAccountName } = useTradesContext();
-  const { currency, setCurrency, currencyConfig } = useGlobalFilters();
+  const { currency, setCurrency, currencyConfig, breakevenTolerance, setBreakevenTolerance } = useGlobalFilters();
 
   const handleCurrencyChange = (newCurrency: CurrencyCode) => {
     setCurrency(newCurrency);
+  };
+
+  // Breakeven tolerance local state for input
+  const [toleranceValue, setToleranceValue] = useState(breakevenTolerance.value.toString());
+  
+  const handleToleranceTypeChange = (type: BreakevenToleranceType) => {
+    setBreakevenTolerance({
+      type,
+      value: breakevenTolerance.value,
+    });
+  };
+  
+  const handleToleranceValueChange = (value: string) => {
+    setToleranceValue(value);
+    const numValue = parseFloat(value) || 0;
+    setBreakevenTolerance({
+      type: breakevenTolerance.type,
+      value: Math.max(0, numValue), // Ensure non-negative
+    });
   };
 
   // Settings tab state
@@ -212,6 +238,72 @@ const Settings = () => {
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
+            </div>
+          </div>
+
+          {/* Breakeven Tolerance Section */}
+          <div className="glass-card rounded-2xl p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
+                <Target className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <h2 className="text-xl font-semibold">Breakeven Tolerance</h2>
+                <p className="text-sm text-muted-foreground">Define how close to zero a trade can be and still count as breakeven</p>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center gap-4">
+                <span className="text-sm text-muted-foreground min-w-[100px]">Tolerance Type:</span>
+                <Select
+                  value={breakevenTolerance.type}
+                  onValueChange={(value) => handleToleranceTypeChange(value as BreakevenToleranceType)}
+                >
+                  <SelectTrigger className="w-[180px] bg-background">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="amount">Amount ({currencyConfig.symbol})</SelectItem>
+                    <SelectItem value="percentage">Percentage (%)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="flex items-center gap-4">
+                <span className="text-sm text-muted-foreground min-w-[100px]">Tolerance Value:</span>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                    {breakevenTolerance.type === 'amount' ? `±${currencyConfig.symbol}` : '±'}
+                  </span>
+                  <Input
+                    type="number"
+                    min="0"
+                    step={breakevenTolerance.type === 'amount' ? '1' : '0.01'}
+                    placeholder="0"
+                    value={toleranceValue}
+                    onChange={(e) => handleToleranceValueChange(e.target.value)}
+                    className="bg-input border-border w-40 pl-10"
+                  />
+                  {breakevenTolerance.type === 'percentage' && (
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">%</span>
+                  )}
+                </div>
+              </div>
+              
+              <div className="mt-2 p-3 bg-muted/30 rounded-lg">
+                <p className="text-xs text-muted-foreground">
+                  {breakevenTolerance.type === 'amount' ? (
+                    <>
+                      Trades with P/L between <span className="font-mono text-foreground">-{currencyConfig.symbol}{breakevenTolerance.value}</span> and <span className="font-mono text-foreground">+{currencyConfig.symbol}{breakevenTolerance.value}</span> will be classified as <span className="text-primary font-medium">breakeven</span>.
+                    </>
+                  ) : (
+                    <>
+                      Trades with Return between <span className="font-mono text-foreground">-{breakevenTolerance.value}%</span> and <span className="font-mono text-foreground">+{breakevenTolerance.value}%</span> will be classified as <span className="text-primary font-medium">breakeven</span>.
+                    </>
+                  )}
+                </p>
+              </div>
             </div>
           </div>
 

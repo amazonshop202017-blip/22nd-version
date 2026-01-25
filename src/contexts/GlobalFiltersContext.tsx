@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode, useMemo } from 'react';
+import { createContext, useContext, useState, ReactNode, useMemo, useEffect, useCallback } from 'react';
 import { startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, subDays, startOfQuarter, startOfYear } from 'date-fns';
 
 export type CurrencyCode = 'USD' | 'EUR' | 'INR';
@@ -29,8 +29,19 @@ export type DirectionFilter = 'long' | 'short';
 export type ReturnPercentRange = '<0' | '0-1' | '1-2' | '3-5' | '5-10' | '>10';
 export type RMultipleRange = '<-2' | '-2-0' | '0-1' | '1-2' | '2-4' | '>4';
 
+// Breakeven Tolerance types
+export type BreakevenToleranceType = 'amount' | 'percentage';
+
+export interface BreakevenTolerance {
+  type: BreakevenToleranceType;
+  value: number; // Amount in currency OR percentage value
+}
+
 // Tag filter: Map of categoryId -> array of selected tagIds
 export type TagFilters = Record<string, string[]>;
+
+// Trade outcome classification result
+export type TradeOutcome = 'win' | 'loss' | 'breakeven';
 
 interface GlobalFiltersContextType {
   // Currency
@@ -38,6 +49,11 @@ interface GlobalFiltersContextType {
   setCurrency: (currency: CurrencyCode) => void;
   currencyConfig: CurrencyConfig;
   formatCurrency: (value: number, showSign?: boolean) => string;
+  
+  // Breakeven Tolerance
+  breakevenTolerance: BreakevenTolerance;
+  setBreakevenTolerance: (tolerance: BreakevenTolerance) => void;
+  classifyTradeOutcome: (netPnl: number, returnPercent?: number) => TradeOutcome;
   
   // Date Range
   dateRange: DateRange;
@@ -82,9 +98,51 @@ interface GlobalFiltersContextType {
 
 const GlobalFiltersContext = createContext<GlobalFiltersContextType | undefined>(undefined);
 
+// LocalStorage keys
+const CURRENCY_STORAGE_KEY = 'trading-journal-currency';
+const BREAKEVEN_TOLERANCE_STORAGE_KEY = 'trading-journal-breakeven-tolerance';
+
+// Default breakeven tolerance
+const DEFAULT_BREAKEVEN_TOLERANCE: BreakevenTolerance = {
+  type: 'amount',
+  value: 0,
+};
+
+// Load persisted currency from localStorage
+const loadPersistedCurrency = (): CurrencyCode => {
+  try {
+    const stored = localStorage.getItem(CURRENCY_STORAGE_KEY);
+    if (stored && (stored === 'USD' || stored === 'EUR' || stored === 'INR')) {
+      return stored as CurrencyCode;
+    }
+  } catch (e) {
+    console.warn('Failed to load currency preference:', e);
+  }
+  return 'USD';
+};
+
+// Load persisted breakeven tolerance from localStorage
+const loadPersistedBreakevenTolerance = (): BreakevenTolerance => {
+  try {
+    const stored = localStorage.getItem(BREAKEVEN_TOLERANCE_STORAGE_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      if (parsed.type && typeof parsed.value === 'number') {
+        return parsed as BreakevenTolerance;
+      }
+    }
+  } catch (e) {
+    console.warn('Failed to load breakeven tolerance:', e);
+  }
+  return DEFAULT_BREAKEVEN_TOLERANCE;
+};
+
 export const GlobalFiltersProvider = ({ children }: { children: ReactNode }) => {
-  // Currency state - default to USD
-  const [currency, setCurrency] = useState<CurrencyCode>('USD');
+  // Currency state - load from localStorage
+  const [currency, setCurrencyState] = useState<CurrencyCode>(loadPersistedCurrency);
+  
+  // Breakeven tolerance state - load from localStorage
+  const [breakevenTolerance, setBreakevenToleranceState] = useState<BreakevenTolerance>(loadPersistedBreakevenTolerance);
   
   // Date range state - default to all time (undefined)
   const [dateRange, setDateRange] = useState<DateRange>({ from: undefined, to: undefined });
@@ -106,6 +164,48 @@ export const GlobalFiltersProvider = ({ children }: { children: ReactNode }) => 
   
   // Advanced Filters - Tags
   const [selectedTagsByCategory, setSelectedTagsByCategory] = useState<TagFilters>({});
+
+  // Persist currency to localStorage
+  const setCurrency = useCallback((newCurrency: CurrencyCode) => {
+    setCurrencyState(newCurrency);
+    try {
+      localStorage.setItem(CURRENCY_STORAGE_KEY, newCurrency);
+    } catch (e) {
+      console.warn('Failed to save currency preference:', e);
+    }
+  }, []);
+
+  // Persist breakeven tolerance to localStorage
+  const setBreakevenTolerance = useCallback((tolerance: BreakevenTolerance) => {
+    setBreakevenToleranceState(tolerance);
+    try {
+      localStorage.setItem(BREAKEVEN_TOLERANCE_STORAGE_KEY, JSON.stringify(tolerance));
+    } catch (e) {
+      console.warn('Failed to save breakeven tolerance:', e);
+    }
+  }, []);
+
+  // Classify trade outcome based on tolerance
+  const classifyTradeOutcome = useCallback((netPnl: number, returnPercent?: number): TradeOutcome => {
+    const { type, value } = breakevenTolerance;
+    
+    if (type === 'amount') {
+      // Amount-based tolerance: P/L between -value and +value is breakeven
+      if (netPnl >= -value && netPnl <= value) {
+        return 'breakeven';
+      }
+    } else if (type === 'percentage' && returnPercent !== undefined) {
+      // Percentage-based tolerance: Return % between -value and +value is breakeven
+      if (returnPercent >= -value && returnPercent <= value) {
+        return 'breakeven';
+      }
+    }
+    
+    // If outside tolerance range
+    if (netPnl > 0) return 'win';
+    if (netPnl < 0) return 'loss';
+    return 'breakeven'; // Exactly zero is always breakeven
+  }, [breakevenTolerance]);
   
   // Toggle a single tag in a category
   const toggleCategoryTagFilter = (categoryId: string, tagId: string) => {
@@ -209,6 +309,9 @@ export const GlobalFiltersProvider = ({ children }: { children: ReactNode }) => 
     setCurrency,
     currencyConfig,
     formatCurrency,
+    breakevenTolerance,
+    setBreakevenTolerance,
+    classifyTradeOutcome,
     dateRange,
     setDateRange,
     datePreset,
@@ -245,7 +348,11 @@ export const GlobalFiltersProvider = ({ children }: { children: ReactNode }) => 
     hasActiveTagFilters,
   }), [
     currency, 
+    setCurrency,
     currencyConfig, 
+    breakevenTolerance,
+    setBreakevenTolerance,
+    classifyTradeOutcome,
     dateRange, 
     datePreset, 
     selectedAccounts,
