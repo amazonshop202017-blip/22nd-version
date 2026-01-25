@@ -102,6 +102,14 @@ export const useTrades = () => {
     saveTrades(trades.filter(trade => trade.id !== id));
   }, [trades, saveTrades]);
 
+  const deleteTradesByAccountId = useCallback((accountId: string) => {
+    saveTrades(trades.filter(trade => trade.accountId !== accountId));
+  }, [trades, saveTrades]);
+
+  const deleteTradesByAccountName = useCallback((accountName: string) => {
+    saveTrades(trades.filter(trade => trade.accountName !== accountName));
+  }, [trades, saveTrades]);
+
   const getTradeById = useCallback((id: string) => {
     return trades.find(trade => trade.id === id);
   }, [trades]);
@@ -160,6 +168,8 @@ export const useTrades = () => {
     bulkAddTrades,
     updateTrade,
     deleteTrade,
+    deleteTradesByAccountId,
+    deleteTradesByAccountName,
     getTradeById,
   };
 };
