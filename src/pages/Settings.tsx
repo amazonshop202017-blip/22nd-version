@@ -21,7 +21,7 @@ import {
 
 const Settings = () => {
   const { accounts, addAccount, removeAccount, updateAccount, getActiveAccountsWithStats, getArchivedAccountsWithStats, archiveAccount, unarchiveAccount, deleteAccountPermanently, addTransaction, getTransactionsForAccount } = useAccountsContext();
-  const { bulkAddTrades, trades } = useTradesContext();
+  const { bulkAddTrades, trades, deleteTradesByAccountId, deleteTradesByAccountName } = useTradesContext();
   const { currency, setCurrency, currencyConfig } = useGlobalFilters();
 
   const handleCurrencyChange = (newCurrency: CurrencyCode) => {
@@ -445,6 +445,11 @@ const Settings = () => {
                                     variant="ghost"
                                     onClick={() => {
                                       if (window.confirm(`Are you sure you want to permanently delete "${account.name}"? This will also delete ALL trades and data associated with this account. This action cannot be undone.`)) {
+                                        // Delete trades by account ID first (for trades that have accountId)
+                                        deleteTradesByAccountId(account.id);
+                                        // Also delete by account name as fallback (for legacy trades without accountId)
+                                        deleteTradesByAccountName(account.name);
+                                        // Then delete the account and its transactions
                                         deleteAccountPermanently(account.id);
                                       }
                                     }}
