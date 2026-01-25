@@ -16,6 +16,7 @@ import { TradeModal } from "@/components/trades/TradeModal";
 import Dashboard from "./pages/Dashboard";
 import Trades from "./pages/Trades";
 import DayView from "./pages/DayView";
+import Diary from "./pages/Diary";
 import Strategies from "./pages/Strategies";
 import StrategyDetail from "./pages/StrategyDetail";
 import Reports from "./pages/Reports";
@@ -53,6 +54,7 @@ const App = () => (
                             <Route path="/" element={<Dashboard />} />
                             <Route path="/trades" element={<Trades />} />
                             <Route path="/day-view" element={<DayView />} />
+                            <Route path="/diary" element={<Diary />} />
                             <Route path="/strategies" element={<Strategies />} />
                             <Route path="/strategies/:id" element={<StrategyDetail />} />
                             <Route path="/reports/*" element={<Reports />} />
