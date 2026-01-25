@@ -88,6 +88,13 @@ export const AdvancedFiltersPanel = () => {
     return (selectedTagsByCategory[categoryId]?.length || 0) > 0;
   };
 
+  // Check if category is in "Select All" mode (all tags are selected)
+  const isCategorySelectAllMode = (categoryId: string) => {
+    const categoryTags = tagsByCategory[categoryId] || [];
+    const selectedTags = selectedTagsByCategory[categoryId] || [];
+    return categoryTags.length > 0 && selectedTags.length === categoryTags.length;
+  };
+
   const handleCategoryCheckToggle = (categoryId: string) => {
     if (isCategoryChecked(categoryId)) {
       clearCategoryTags(categoryId);
@@ -105,17 +112,31 @@ export const AdvancedFiltersPanel = () => {
     }
   };
 
-  const handleSelectAll = (categoryId: string) => {
+  const handleSelectAllTags = (categoryId: string) => {
     const categoryTags = tagsByCategory[categoryId] || [];
     const allTagIds = categoryTags.map(t => t.id);
     selectAllTagsInCategory(categoryId, allTagIds);
   };
 
-  const handleDeselectAll = (categoryId: string) => {
-    clearCategoryTags(categoryId);
+  const handleTagClick = (categoryId: string, tagId: string) => {
+    const categoryTags = tagsByCategory[categoryId] || [];
+    const isSelectAll = isCategorySelectAllMode(categoryId);
+    
+    if (isSelectAll) {
+      // Transitioning from "Select All" to individual selection
+      // Clear all and select only the clicked item
+      selectAllTagsInCategory(categoryId, [tagId]);
+    } else {
+      // Normal toggle behavior
+      toggleCategoryTagFilter(categoryId, tagId);
+    }
   };
 
-  const isTagSelected = (categoryId: string, tagId: string) => {
+  // Visual check: in "Select All" mode, individual items appear unchecked
+  const isTagVisuallySelected = (categoryId: string, tagId: string) => {
+    if (isCategorySelectAllMode(categoryId)) {
+      return false; // In "Select All" mode, individual items are not visually checked
+    }
     return selectedTagsByCategory[categoryId]?.includes(tagId) || false;
   };
 
@@ -130,6 +151,12 @@ export const AdvancedFiltersPanel = () => {
   // Comment category handlers
   const isCommentCategoryChecked = (category: TradeCommentCategory) => {
     return selectedTradeComments[category].length > 0;
+  };
+
+  // Check if comment category is in "Select All" mode
+  const isCommentCategorySelectAllMode = (category: TradeCommentCategory, allComments: string[]) => {
+    const selectedComments = selectedTradeComments[category];
+    return allComments.length > 0 && selectedComments.length === allComments.length;
   };
 
   const handleCommentCategoryCheckToggle = (category: TradeCommentCategory, allComments: string[]) => {
@@ -151,11 +178,24 @@ export const AdvancedFiltersPanel = () => {
     selectAllCommentsInCategory(category, comments);
   };
 
-  const handleDeselectAllComments = (category: TradeCommentCategory) => {
-    clearTradeCommentCategory(category);
+  const handleCommentClick = (category: TradeCommentCategory, comment: string, allComments: string[]) => {
+    const isSelectAll = isCommentCategorySelectAllMode(category, allComments);
+    
+    if (isSelectAll) {
+      // Transitioning from "Select All" to individual selection
+      // Clear all and select only the clicked item
+      selectAllCommentsInCategory(category, [comment]);
+    } else {
+      // Normal toggle behavior
+      toggleTradeComment(category, comment);
+    }
   };
 
-  const isCommentSelected = (category: TradeCommentCategory, comment: string) => {
+  // Visual check: in "Select All" mode, individual items appear unchecked
+  const isCommentVisuallySelected = (category: TradeCommentCategory, comment: string, allComments: string[]) => {
+    if (isCommentCategorySelectAllMode(category, allComments)) {
+      return false; // In "Select All" mode, individual items are not visually checked
+    }
     return selectedTradeComments[category].includes(comment);
   };
 
@@ -208,7 +248,7 @@ export const AdvancedFiltersPanel = () => {
               <div className="space-y-2">
                 {commentCategories.map(({ key, label, comments }) => {
                   const isExpanded = expandedCommentCategories.has(key) || isCommentCategoryChecked(key);
-                  const selectedComments = selectedTradeComments[key];
+                  const isSelectAllMode = isCommentCategorySelectAllMode(key, comments);
                   
                   return (
                     <div key={key} className="space-y-2">
@@ -250,22 +290,16 @@ export const AdvancedFiltersPanel = () => {
                                   <CommandGroup>
                                     {/* Select All Option */}
                                     <CommandItem
-                                      onSelect={() => {
-                                        if (selectedComments.length === comments.length) {
-                                          handleDeselectAllComments(key);
-                                        } else {
-                                          handleSelectAllComments(key, comments);
-                                        }
-                                      }}
+                                      onSelect={() => handleSelectAllComments(key, comments)}
                                       className="cursor-pointer"
                                     >
                                       <div className={cn(
                                         "mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary",
-                                        selectedComments.length === comments.length
+                                        isSelectAllMode
                                           ? "bg-primary text-primary-foreground"
                                           : "opacity-50"
                                       )}>
-                                        {selectedComments.length === comments.length && (
+                                        {isSelectAllMode && (
                                           <Check className="h-3 w-3" />
                                         )}
                                       </div>
@@ -277,16 +311,16 @@ export const AdvancedFiltersPanel = () => {
                                     {comments.map((comment) => (
                                       <CommandItem
                                         key={comment}
-                                        onSelect={() => toggleTradeComment(key, comment)}
+                                        onSelect={() => handleCommentClick(key, comment, comments)}
                                         className="cursor-pointer"
                                       >
                                         <div className={cn(
                                           "mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary",
-                                          isCommentSelected(key, comment)
+                                          isCommentVisuallySelected(key, comment, comments)
                                             ? "bg-primary text-primary-foreground"
                                             : "opacity-50"
                                         )}>
-                                          {isCommentSelected(key, comment) && (
+                                          {isCommentVisuallySelected(key, comment, comments) && (
                                             <Check className="h-3 w-3" />
                                           )}
                                         </div>
@@ -324,7 +358,7 @@ export const AdvancedFiltersPanel = () => {
               categories.map((category) => {
                 const categoryTags = tagsByCategory[category.id] || [];
                 const isExpanded = expandedCategories.has(category.id) || isCategoryChecked(category.id);
-                const selectedTags = selectedTagsByCategory[category.id] || [];
+                const isSelectAllMode = isCategorySelectAllMode(category.id);
                 
                 return (
                   <div key={category.id} className="space-y-2">
@@ -366,22 +400,16 @@ export const AdvancedFiltersPanel = () => {
                                 <CommandGroup>
                                   {/* Select All Option */}
                                   <CommandItem
-                                    onSelect={() => {
-                                      if (selectedTags.length === categoryTags.length) {
-                                        handleDeselectAll(category.id);
-                                      } else {
-                                        handleSelectAll(category.id);
-                                      }
-                                    }}
+                                    onSelect={() => handleSelectAllTags(category.id)}
                                     className="cursor-pointer"
                                   >
                                     <div className={cn(
                                       "mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary",
-                                      selectedTags.length === categoryTags.length
+                                      isSelectAllMode
                                         ? "bg-primary text-primary-foreground"
                                         : "opacity-50"
                                     )}>
-                                      {selectedTags.length === categoryTags.length && (
+                                      {isSelectAllMode && (
                                         <Check className="h-3 w-3" />
                                       )}
                                     </div>
@@ -393,16 +421,16 @@ export const AdvancedFiltersPanel = () => {
                                   {categoryTags.map((tag) => (
                                     <CommandItem
                                       key={tag.id}
-                                      onSelect={() => toggleCategoryTagFilter(category.id, tag.id)}
+                                      onSelect={() => handleTagClick(category.id, tag.id)}
                                       className="cursor-pointer"
                                     >
                                       <div className={cn(
                                         "mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary",
-                                        isTagSelected(category.id, tag.id)
+                                        isTagVisuallySelected(category.id, tag.id)
                                           ? "bg-primary text-primary-foreground"
                                           : "opacity-50"
                                       )}>
-                                        {isTagSelected(category.id, tag.id) && (
+                                        {isTagVisuallySelected(category.id, tag.id) && (
                                           <Check className="h-3 w-3" />
                                         )}
                                       </div>
