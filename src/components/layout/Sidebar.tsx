@@ -24,7 +24,7 @@ const chartRoomItems = [
   { label: 'Performance by Instrument', path: '/chart-room/performance-by-instrument' },
   { label: 'Performance by Setup', path: '/chart-room/performance-by-setup' },
   { label: 'Performance by Time', path: '/chart-room/performance-by-time' },
-  { label: 'Performance Ratio', path: '/chart-room/performance-ratio' },
+  { label: 'Tags/Comments Analysis', path: '/chart-room/performance-ratio' },
   { label: 'Risk Distribution', path: '/chart-room/risk-distribution' },
   { label: 'Trade Management', path: '/chart-room/trade-management' },
 ];
