@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Trash2, Edit2, Check, X, Tag, Wallet, TrendingUp, TrendingDown, Settings as SettingsIcon, Download, DollarSign, FolderOpen } from 'lucide-react';
+import { Plus, Trash2, Edit2, Check, X, Tag, Wallet, TrendingUp, TrendingDown, Settings as SettingsIcon, Download, DollarSign, FolderOpen, Archive, ArchiveRestore, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAccountsContext } from '@/contexts/AccountsContext';
@@ -20,8 +20,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 const Settings = () => {
-  const { accounts, addAccount, removeAccount, updateAccount, getAllAccountsWithStats, addTransaction, getTransactionsForAccount } = useAccountsContext();
-  const { bulkAddTrades } = useTradesContext();
+  const { accounts, addAccount, removeAccount, updateAccount, getActiveAccountsWithStats, getArchivedAccountsWithStats, archiveAccount, unarchiveAccount, deleteAccountPermanently, addTransaction, getTransactionsForAccount } = useAccountsContext();
+  const { bulkAddTrades, trades } = useTradesContext();
   const { currency, setCurrency, currencyConfig } = useGlobalFilters();
 
   const handleCurrencyChange = (newCurrency: CurrencyCode) => {
@@ -47,6 +47,9 @@ const Settings = () => {
   // Import file state
   const [importAccountId, setImportAccountId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Archived accounts toggle
+  const [showArchivedAccounts, setShowArchivedAccounts] = useState(false);
 
   const handleImportClick = (accountId: string) => {
     setImportAccountId(accountId);
@@ -85,7 +88,8 @@ const Settings = () => {
     setImportAccountId(null);
   };
 
-  const accountsWithStats = getAllAccountsWithStats();
+  const activeAccountsWithStats = getActiveAccountsWithStats();
+  const archivedAccountsWithStats = getArchivedAccountsWithStats();
 
   // Account handlers
   const handleAddAccount = () => {
@@ -248,121 +252,217 @@ const Settings = () => {
               </Button>
             </div>
 
-            {accountsWithStats.length === 0 ? (
+            {activeAccountsWithStats.length === 0 && archivedAccountsWithStats.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">
                 <Wallet className="w-12 h-12 mx-auto mb-4 opacity-30" />
                 <p>No accounts created yet</p>
                 <p className="text-sm">Add your first account above to start tracking balances</p>
               </div>
             ) : (
-              <div className="space-y-2">
-                <AnimatePresence>
-                  {accountsWithStats.map((account) => (
-                    <motion.div
-                      key={account.id}
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, x: -20 }}
-                      className="flex items-center justify-between p-4 bg-input rounded-lg border border-border group"
-                    >
-                      {editingAccount === account.id ? (
-                        <div className="flex items-center gap-2 flex-1">
-                          <Input
-                            value={editAccountName}
-                            onChange={(e) => setEditAccountName(e.target.value)}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') saveAccountEdit();
-                              if (e.key === 'Escape') cancelAccountEdit();
-                            }}
-                            className="bg-background border-border h-8 flex-1"
-                            autoFocus
-                          />
-                          <div className="relative">
-                            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">{currencyConfig.symbol}</span>
+              <div className="space-y-4">
+                {/* Active Accounts */}
+                <div className="space-y-2">
+                  <AnimatePresence>
+                    {activeAccountsWithStats.map((account) => (
+                      <motion.div
+                        key={account.id}
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, x: -20 }}
+                        className="flex items-center justify-between p-4 bg-input rounded-lg border border-border"
+                      >
+                        {editingAccount === account.id ? (
+                          <div className="flex items-center gap-2 flex-1">
                             <Input
-                              type="number"
-                              value={editAccountBalance}
-                              onChange={(e) => setEditAccountBalance(e.target.value)}
-                              className="bg-background border-border h-8 w-32 pl-6"
+                              value={editAccountName}
+                              onChange={(e) => setEditAccountName(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') saveAccountEdit();
+                                if (e.key === 'Escape') cancelAccountEdit();
+                              }}
+                              className="bg-background border-border h-8 flex-1"
+                              autoFocus
                             />
+                            <div className="relative">
+                              <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">{currencyConfig.symbol}</span>
+                              <Input
+                                type="number"
+                                value={editAccountBalance}
+                                onChange={(e) => setEditAccountBalance(e.target.value)}
+                                className="bg-background border-border h-8 w-32 pl-6"
+                              />
+                            </div>
+                            <Button size="sm" variant="ghost" onClick={saveAccountEdit}>
+                              <Check className="w-4 h-4 text-profit" />
+                            </Button>
+                            <Button size="sm" variant="ghost" onClick={cancelAccountEdit}>
+                              <X className="w-4 h-4 text-loss" />
+                            </Button>
                           </div>
-                          <Button size="sm" variant="ghost" onClick={saveAccountEdit}>
-                            <Check className="w-4 h-4 text-profit" />
-                          </Button>
-                          <Button size="sm" variant="ghost" onClick={cancelAccountEdit}>
-                            <X className="w-4 h-4 text-loss" />
-                          </Button>
-                        </div>
+                        ) : (
+                          <>
+                            <div className="flex items-center gap-4 flex-1">
+                              <div className="flex items-center gap-3">
+                                <div className="w-2 h-2 rounded-full bg-primary" />
+                                <span className="font-medium">{account.name}</span>
+                              </div>
+                              <div className="flex items-center gap-6 text-sm">
+                                <div className="text-muted-foreground">
+                                  <span className="text-xs">Starting:</span>{' '}
+                                  <span className="font-mono text-foreground">{currencyConfig.symbol}{account.startingBalance.toLocaleString()}</span>
+                                </div>
+                                <div className="text-muted-foreground">
+                                  <span className="text-xs">Current:</span>{' '}
+                                  <span className="font-mono text-foreground">{currencyConfig.symbol}{account.currentBalance.toLocaleString()}</span>
+                                </div>
+                                <div className={cn(
+                                  "flex items-center gap-1",
+                                  account.pnl >= 0 ? "text-profit" : "text-loss"
+                                )}>
+                                  {account.pnl >= 0 ? (
+                                    <TrendingUp className="w-3 h-3" />
+                                  ) : (
+                                    <TrendingDown className="w-3 h-3" />
+                                  )}
+                                  <span className="font-mono text-sm">
+                                    {account.roi >= 0 ? '+' : ''}{account.roi.toFixed(2)}%
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                            {/* Always visible action buttons */}
+                            <div className="flex items-center gap-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleImportClick(account.id)}
+                                className="h-7 text-xs gap-1"
+                              >
+                                <Download className="w-3 h-3" />
+                                Import
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => setDepositWithdrawAccountId(account.id)}
+                                className="h-7 text-xs"
+                              >
+                                Deposit / Withdraw
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => startEditingAccount(account)}
+                              >
+                                <Edit2 className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => archiveAccount(account.id)}
+                                className="text-muted-foreground hover:text-foreground"
+                                title="Archive account"
+                              >
+                                <Archive className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </>
+                        )}
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+                </div>
+
+                {/* Archived Accounts Section */}
+                {archivedAccountsWithStats.length > 0 && (
+                  <div className="mt-6">
+                    <Button
+                      variant="outline"
+                      onClick={() => setShowArchivedAccounts(!showArchivedAccounts)}
+                      className="w-full justify-between h-10 mb-2"
+                    >
+                      <div className="flex items-center gap-2">
+                        <Archive className="w-4 h-4" />
+                        <span>Archived Accounts ({archivedAccountsWithStats.length})</span>
+                      </div>
+                      {showArchivedAccounts ? (
+                        <ChevronUp className="w-4 h-4" />
                       ) : (
-                        <>
-                          <div className="flex items-center gap-4 flex-1">
-                            <div className="flex items-center gap-3">
-                              <div className="w-2 h-2 rounded-full bg-primary" />
-                              <span className="font-medium">{account.name}</span>
-                            </div>
-                            <div className="flex items-center gap-6 text-sm">
-                              <div className="text-muted-foreground">
-                                <span className="text-xs">Starting:</span>{' '}
-                                <span className="font-mono text-foreground">{currencyConfig.symbol}{account.startingBalance.toLocaleString()}</span>
-                              </div>
-                              <div className="text-muted-foreground">
-                                <span className="text-xs">Current:</span>{' '}
-                                <span className="font-mono text-foreground">{currencyConfig.symbol}{account.currentBalance.toLocaleString()}</span>
-                              </div>
-                              <div className={cn(
-                                "flex items-center gap-1",
-                                account.pnl >= 0 ? "text-profit" : "text-loss"
-                              )}>
-                                {account.pnl >= 0 ? (
-                                  <TrendingUp className="w-3 h-3" />
-                                ) : (
-                                  <TrendingDown className="w-3 h-3" />
-                                )}
-                                <span className="font-mono text-sm">
-                                  {account.roi >= 0 ? '+' : ''}{account.roi.toFixed(2)}%
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleImportClick(account.id)}
-                              className="h-7 text-xs gap-1"
-                            >
-                              <Download className="w-3 h-3" />
-                              Import
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => setDepositWithdrawAccountId(account.id)}
-                              className="h-7 text-xs"
-                            >
-                              Deposit / Withdraw
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => startEditingAccount(account)}
-                            >
-                              <Edit2 className="w-4 h-4" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => removeAccount(account.id)}
-                              className="text-loss hover:text-loss"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        </>
+                        <ChevronDown className="w-4 h-4" />
                       )}
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
+                    </Button>
+                    
+                    {showArchivedAccounts && (
+                      <div className="space-y-2 mt-2">
+                        <AnimatePresence>
+                          {archivedAccountsWithStats.map((account) => {
+                            // Count trades for this account
+                            const tradeCount = trades.filter(t => t.accountName === account.name).length;
+                            
+                            return (
+                              <motion.div
+                                key={account.id}
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: 'auto' }}
+                                exit={{ opacity: 0, height: 0 }}
+                                className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border border-border/50"
+                              >
+                                <div className="flex items-center gap-4 flex-1">
+                                  <div className="flex items-center gap-3">
+                                    <div className="w-2 h-2 rounded-full bg-muted-foreground" />
+                                    <span className="font-medium text-muted-foreground">{account.name}</span>
+                                  </div>
+                                  <div className="flex items-center gap-6 text-sm text-muted-foreground">
+                                    <div>
+                                      <span className="text-xs">Total P/L:</span>{' '}
+                                      <span className={cn(
+                                        "font-mono",
+                                        account.pnl >= 0 ? "text-profit" : "text-loss"
+                                      )}>
+                                        {account.pnl >= 0 ? '+' : ''}{currencyConfig.symbol}{account.pnl.toLocaleString()}
+                                      </span>
+                                    </div>
+                                    <div>
+                                      <span className="text-xs">Trades:</span>{' '}
+                                      <span className="font-mono">{tradeCount}</span>
+                                    </div>
+                                  </div>
+                                </div>
+                                {/* Archived account actions */}
+                                <div className="flex items-center gap-2">
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => unarchiveAccount(account.id)}
+                                    className="h-7 text-xs gap-1"
+                                    title="Unarchive account"
+                                  >
+                                    <ArchiveRestore className="w-3 h-3" />
+                                    Unarchive
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() => {
+                                      if (window.confirm(`Are you sure you want to permanently delete "${account.name}"? This will also delete ALL trades and data associated with this account. This action cannot be undone.`)) {
+                                        deleteAccountPermanently(account.id);
+                                      }
+                                    }}
+                                    className="text-loss hover:text-loss h-7 text-xs gap-1"
+                                    title="Permanently delete"
+                                  >
+                                    <Trash2 className="w-3 h-3" />
+                                    Delete
+                                  </Button>
+                                </div>
+                              </motion.div>
+                            );
+                          })}
+                        </AnimatePresence>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             )}
           </div>

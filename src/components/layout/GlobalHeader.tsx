@@ -129,13 +129,16 @@ export const GlobalHeader = () => {
     hasActiveTagFilters,
   } = useGlobalFilters();
   
-  const { accounts } = useAccountsContext();
+  const { accounts, getActiveAccountsWithStats } = useAccountsContext();
   const { trades } = useTradesContext();
   const { strategies } = useStrategiesContext();
   
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [basicFiltersOpen, setBasicFiltersOpen] = useState(false);
   const [advancedFiltersOpen, setAdvancedFiltersOpen] = useState(false);
+
+  // Get active accounts (excluding archived)
+  const activeAccounts = useMemo(() => getActiveAccountsWithStats(), [getActiveAccountsWithStats]);
 
   // Get unique instruments from trades
   const availableInstruments = useMemo(() => {
@@ -910,13 +913,13 @@ export const GlobalHeader = () => {
             All accounts
           </DropdownMenuCheckboxItem>
           
-          {accounts.length > 0 && (
+          {activeAccounts.length > 0 && (
             <>
               <DropdownMenuSeparator />
               <DropdownMenuLabel className="text-xs text-muted-foreground font-normal">
                 My accounts
               </DropdownMenuLabel>
-              {accounts.map((account) => (
+              {activeAccounts.map((account) => (
                 <DropdownMenuCheckboxItem
                   key={account.id}
                   checked={selectedAccounts.includes(account.name)}

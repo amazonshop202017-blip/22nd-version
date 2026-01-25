@@ -7,6 +7,7 @@ export interface Account {
   name: string;
   startingBalance: number;
   createdAt: string;
+  isArchived?: boolean;
 }
 
 export interface Transaction {
@@ -33,8 +34,14 @@ interface AccountsContextType {
   getAccountById: (id: string) => Account | undefined;
   getAccountWithStats: (id: string) => AccountWithStats | undefined;
   getAllAccountsWithStats: () => AccountWithStats[];
+  getActiveAccountsWithStats: () => AccountWithStats[];
+  getArchivedAccountsWithStats: () => AccountWithStats[];
+  archiveAccount: (id: string) => void;
+  unarchiveAccount: (id: string) => void;
+  deleteAccountPermanently: (id: string) => void;
   addTransaction: (accountId: string, type: 'deposit' | 'withdraw', amount: number, note?: string) => void;
   getTransactionsForAccount: (accountId: string) => Transaction[];
+  getActiveAccountNames: () => string[];
   // Get account balance BEFORE any trade P/L (starting balance + transactions only)
   getAccountBalanceBeforeTrades: (id: string) => number;
 }
@@ -80,6 +87,7 @@ export const AccountsProvider = ({ children }: { children: ReactNode }) => {
       name: name.trim(),
       startingBalance,
       createdAt: new Date().toISOString(),
+      isArchived: false,
     };
     saveAccounts([...accounts, newAccount]);
     return newAccount;
@@ -101,6 +109,28 @@ export const AccountsProvider = ({ children }: { children: ReactNode }) => {
     return accounts.find(a => a.id === id);
   }, [accounts]);
 
+  const archiveAccount = useCallback((id: string) => {
+    saveAccounts(accounts.map(a => 
+      a.id === id ? { ...a, isArchived: true } : a
+    ));
+  }, [accounts, saveAccounts]);
+
+  const unarchiveAccount = useCallback((id: string) => {
+    saveAccounts(accounts.map(a => 
+      a.id === id ? { ...a, isArchived: false } : a
+    ));
+  }, [accounts, saveAccounts]);
+
+  const deleteAccountPermanently = useCallback((id: string) => {
+    // Only allow deletion of archived accounts
+    const account = accounts.find(a => a.id === id);
+    if (!account?.isArchived) return;
+    
+    saveAccounts(accounts.filter(a => a.id !== id));
+    // Also remove transactions for this account
+    saveTransactions(transactions.filter(t => t.accountId !== id));
+  }, [accounts, transactions, saveAccounts, saveTransactions]);
+
   const addTransaction = useCallback((accountId: string, type: 'deposit' | 'withdraw', amount: number, note?: string) => {
     const newTransaction: Transaction = {
       id: crypto.randomUUID(),
@@ -117,16 +147,12 @@ export const AccountsProvider = ({ children }: { children: ReactNode }) => {
     return transactions.filter(t => t.accountId === accountId);
   }, [transactions]);
 
-  const getAccountWithStats = useCallback((id: string): AccountWithStats | undefined => {
-    const account = accounts.find(a => a.id === id);
-    if (!account) return undefined;
-
-    // Calculate P&L from all trades linked to this account
+  // Helper function to calculate account stats
+  const calculateAccountStats = useCallback((account: Account): AccountWithStats => {
     const accountTrades = trades.filter(t => t.accountName === account.name);
     const tradePnl = accountTrades.reduce((sum, t) => sum + calculateTradeMetrics(t).netPnl, 0);
     
-    // Add transaction adjustments
-    const accountTransactions = transactions.filter(t => t.accountId === id);
+    const accountTransactions = transactions.filter(t => t.accountId === account.id);
     const depositTotal = accountTransactions
       .filter(t => t.type === 'deposit')
       .reduce((sum, t) => sum + t.amount, 0);
@@ -146,36 +172,33 @@ export const AccountsProvider = ({ children }: { children: ReactNode }) => {
       pnl: tradePnl,
       roi,
     };
-  }, [accounts, trades, transactions]);
+  }, [trades, transactions]);
+
+  const getAccountWithStats = useCallback((id: string): AccountWithStats | undefined => {
+    const account = accounts.find(a => a.id === id);
+    if (!account) return undefined;
+    return calculateAccountStats(account);
+  }, [accounts, calculateAccountStats]);
 
   const getAllAccountsWithStats = useCallback((): AccountWithStats[] => {
-    return accounts.map(account => {
-      const accountTrades = trades.filter(t => t.accountName === account.name);
-      const tradePnl = accountTrades.reduce((sum, t) => sum + calculateTradeMetrics(t).netPnl, 0);
-      
-      // Add transaction adjustments
-      const accountTransactions = transactions.filter(t => t.accountId === account.id);
-      const depositTotal = accountTransactions
-        .filter(t => t.type === 'deposit')
-        .reduce((sum, t) => sum + t.amount, 0);
-      const withdrawTotal = accountTransactions
-        .filter(t => t.type === 'withdraw')
-        .reduce((sum, t) => sum + t.amount, 0);
-      
-      const adjustedStartingBalance = account.startingBalance + depositTotal - withdrawTotal;
-      const currentBalance = adjustedStartingBalance + tradePnl;
-      const roi = adjustedStartingBalance > 0 
-        ? ((currentBalance - adjustedStartingBalance) / adjustedStartingBalance) * 100 
-        : 0;
+    return accounts.map(account => calculateAccountStats(account));
+  }, [accounts, calculateAccountStats]);
 
-      return {
-        ...account,
-        currentBalance,
-        pnl: tradePnl,
-        roi,
-      };
-    });
-  }, [accounts, trades, transactions]);
+  const getActiveAccountsWithStats = useCallback((): AccountWithStats[] => {
+    return accounts
+      .filter(a => !a.isArchived)
+      .map(account => calculateAccountStats(account));
+  }, [accounts, calculateAccountStats]);
+
+  const getArchivedAccountsWithStats = useCallback((): AccountWithStats[] => {
+    return accounts
+      .filter(a => a.isArchived)
+      .map(account => calculateAccountStats(account));
+  }, [accounts, calculateAccountStats]);
+
+  const getActiveAccountNames = useCallback((): string[] => {
+    return accounts.filter(a => !a.isArchived).map(a => a.name);
+  }, [accounts]);
 
   // Get account balance BEFORE any trade P/L is applied
   // This is: startingBalance + deposits - withdrawals (NO trade P/L)
@@ -204,8 +227,14 @@ export const AccountsProvider = ({ children }: { children: ReactNode }) => {
       getAccountById,
       getAccountWithStats,
       getAllAccountsWithStats,
+      getActiveAccountsWithStats,
+      getArchivedAccountsWithStats,
+      archiveAccount,
+      unarchiveAccount,
+      deleteAccountPermanently,
       addTransaction,
       getTransactionsForAccount,
+      getActiveAccountNames,
       getAccountBalanceBeforeTrades,
     }}>
       {children}
