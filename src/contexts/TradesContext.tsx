@@ -278,22 +278,43 @@ export const useFilteredTradesContext = () => {
     const totalProfits = winningTrades.reduce((sum, { metrics }) => sum + metrics.netPnl, 0);
     const totalLosses = Math.abs(losingTrades.reduce((sum, { metrics }) => sum + metrics.netPnl, 0));
     
-    // Calculate day-based stats using tolerance
-    const dayData = filteredTrades.reduce((acc, t) => {
-      const metrics = calculateTradeMetrics(t);
+    // Calculate day-based stats using trade-level outcomes (not aggregated P/L)
+    // Day classification rules:
+    // 1. If ALL trades on a day are Breakeven → Breakeven Day
+    // 2. If day has Wins and NO Losses → Win Day
+    // 3. If day has Losses and NO Wins → Loss Day
+    // 4. If day has both Wins and Losses → Loss Day (loss dominance)
+    const dayTradeOutcomes = classifiedTrades.reduce((acc, { metrics, outcome }) => {
       const day = metrics.closeDate ? metrics.closeDate.split('T')[0] : 'unknown';
       if (!acc[day]) {
-        acc[day] = { pnl: 0, returnPercent: 0 };
+        acc[day] = { wins: 0, losses: 0, breakevens: 0 };
       }
-      acc[day].pnl += metrics.netPnl;
-      acc[day].returnPercent += t.savedReturnPercent || 0;
+      if (outcome === 'win') acc[day].wins += 1;
+      else if (outcome === 'loss') acc[day].losses += 1;
+      else acc[day].breakevens += 1;
       return acc;
-    }, {} as Record<string, { pnl: number; returnPercent: number }>);
+    }, {} as Record<string, { wins: number; losses: number; breakevens: number }>);
     
-    const dayOutcomes = Object.values(dayData).map(d => classifyTradeOutcome(d.pnl, d.returnPercent));
-    const winningDaysCount = dayOutcomes.filter(o => o === 'win').length;
-    const losingDaysCount = dayOutcomes.filter(o => o === 'loss').length;
-    const breakevenDaysCount = dayOutcomes.filter(o => o === 'breakeven').length;
+    // Classify each day based on its trade outcomes
+    let winningDaysCount = 0;
+    let losingDaysCount = 0;
+    let breakevenDaysCount = 0;
+    
+    Object.values(dayTradeOutcomes).forEach(dayStats => {
+      const { wins, losses, breakevens } = dayStats;
+      const totalTradesOnDay = wins + losses + breakevens;
+      
+      if (breakevens === totalTradesOnDay) {
+        // All trades are breakeven → Breakeven Day
+        breakevenDaysCount += 1;
+      } else if (losses > 0) {
+        // Has any losses → Loss Day (loss dominance)
+        losingDaysCount += 1;
+      } else if (wins > 0) {
+        // Has wins and NO losses → Win Day
+        winningDaysCount += 1;
+      }
+    });
     
     // Win Rate = Wins / (Wins + Losses) - excludes breakeven trades
     const winsAndLosses = winningTrades.length + losingTrades.length;
