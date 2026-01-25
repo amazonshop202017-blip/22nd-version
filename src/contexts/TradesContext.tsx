@@ -2,6 +2,7 @@ import { createContext, useContext, ReactNode, useMemo, useCallback } from 'reac
 import { useTrades } from '@/hooks/useTrades';
 import { Trade, TradeFormData, calculateTradeMetrics } from '@/types/trade';
 import { useGlobalFilters, OutcomeFilter, DayFilter, DirectionFilter, ReturnPercentRange, RMultipleRange, TagFilters } from '@/contexts/GlobalFiltersContext';
+import { useAccountsContext } from '@/contexts/AccountsContext';
 import { isWithinInterval, parseISO, startOfDay, endOfDay, getDay, getHours } from 'date-fns';
 
 // Helper function to check if return % falls within a range
@@ -99,6 +100,7 @@ const dayIndexToFilter: Record<number, DayFilter> = {
 // Hook to get filtered trades and stats (must be used inside GlobalFiltersProvider)
 export const useFilteredTradesContext = () => {
   const { trades, addTrade, bulkAddTrades, updateTrade, deleteTrade, getTradeById } = useTradesContext();
+  const { getActiveAccountNames } = useAccountsContext();
   const { 
     dateRange, 
     selectedAccounts,
@@ -114,8 +116,24 @@ export const useFilteredTradesContext = () => {
     selectedTagsByCategory,
   } = useGlobalFilters();
 
+  // Get active account names (excluding archived)
+  const activeAccountNames = useMemo(() => getActiveAccountNames(), [getActiveAccountNames]);
+
   const filteredTrades = useMemo(() => {
     let filtered = trades;
+
+    // When "All Accounts" is selected (selectedAccounts is empty), 
+    // filter to only include trades from ACTIVE (non-archived) accounts
+    if (selectedAccounts.length === 0) {
+      filtered = filtered.filter(trade => 
+        activeAccountNames.includes(trade.accountName)
+      );
+    } else {
+      // Filter by specifically selected accounts
+      filtered = filtered.filter(trade => 
+        selectedAccounts.includes(trade.accountName)
+      );
+    }
 
     // Filter by date range
     if (dateRange.from || dateRange.to) {
@@ -129,13 +147,6 @@ export const useFilteredTradesContext = () => {
         
         return isWithinInterval(tradeDate, { start: from, end: to });
       });
-    }
-
-    // Filter by selected accounts
-    if (selectedAccounts.length > 0) {
-      filtered = filtered.filter(trade => 
-        selectedAccounts.includes(trade.accountName)
-      );
     }
 
     // Filter by instrument
@@ -246,7 +257,7 @@ export const useFilteredTradesContext = () => {
     }
 
     return filtered;
-  }, [trades, dateRange, selectedAccounts, selectedInstruments, selectedOutcomes, selectedHours, selectedSetups, selectedDays, lastTradesFilter, selectedDirections, selectedReturnRanges, selectedRMultipleRanges, selectedTagsByCategory]);
+  }, [trades, dateRange, selectedAccounts, activeAccountNames, selectedInstruments, selectedOutcomes, selectedHours, selectedSetups, selectedDays, lastTradesFilter, selectedDirections, selectedReturnRanges, selectedRMultipleRanges, selectedTagsByCategory]);
 
   const stats = useMemo(() => {
     const winningTrades = filteredTrades.filter(t => calculateTradeMetrics(t).netPnl > 0);
