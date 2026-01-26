@@ -321,6 +321,15 @@ export function parseCSVToTrades(
         });
       }
       
+      // Calculate Return % at import time based on invested amount
+      // For LONG: invested = entryPrice * volume
+      // For SHORT: invested = entryPrice * volume (same, as it represents margin/exposure)
+      const investedAmount = entryPrice * volume;
+      const calculatedReturnPercent = investedAmount > 0 ? (netPnl / investedAmount) * 100 : 0;
+      
+      // Calculate R-Multiple if we have trade risk (MT5 doesn't provide this, so it stays 0)
+      const calculatedRMultiple = 0; // No trade risk from MT5, so R-Multiple is not applicable
+      
       const trade: TradeFormData = {
         symbol,
         side,
@@ -333,6 +342,9 @@ export function parseCSVToTrades(
         tags: [],
         notes: '',
         manualGrossPnl: grossPnl,
+        // Persist Return % calculated at import time - this prevents recalculation on reload
+        savedReturnPercent: calculatedReturnPercent,
+        savedRMultiple: calculatedRMultiple,
       };
       
       trades.push(trade);
