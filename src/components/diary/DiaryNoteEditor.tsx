@@ -53,7 +53,7 @@ export const DiaryNoteEditor = () => {
       setLocalTitle('');
       setLocalContent('');
     }
-  }, [selectedNote?.id]);
+  }, [selectedNote?.id, selectedNote?.title]);
 
   // Debounced save for title
   useEffect(() => {
