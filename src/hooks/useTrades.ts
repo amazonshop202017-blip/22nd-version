@@ -38,35 +38,30 @@ export const useTrades = () => {
           }
           
           // Migration 3: Backfill savedReturnPercent for trades that don't have it
-          // This uses the calculated returnPercent from metrics as a fallback
-          // IMPORTANT: MT5 trades use accountBalanceSnapshot, non-MT5 use standard calculation
+          // AUTHORITATIVE DEFINITION: Return % = (Net P&L / Account Balance at Trade Time) × 100
+          // This applies to ALL trades (manual and imported) - NO conditional logic
           if (updated.savedReturnPercent === undefined || updated.savedReturnPercent === null) {
-            if (updated.manualGrossPnl !== undefined) {
-              // MT5 trade: calculate Return % using account balance snapshot
-              // Return % = (Net P&L / Account Balance at Trade Time) * 100
-              const entries = updated.entries || [];
-              const totalCharges = entries.reduce((sum: number, e: any) => sum + (e.charges || 0), 0);
-              const netPnl = updated.manualGrossPnl - totalCharges;
-              
-              // Use accountBalanceSnapshot if available, otherwise skip (cannot calculate accurately)
-              if (updated.accountBalanceSnapshot && updated.accountBalanceSnapshot > 0) {
-                updated = {
-                  ...updated,
-                  savedReturnPercent: (netPnl / updated.accountBalanceSnapshot) * 100,
-                };
-              } else {
-                // Legacy MT5 trade without account balance - log warning and skip
-                console.warn(`MT5 trade ${updated.id || 'unknown'} missing accountBalanceSnapshot - cannot calculate Return %`);
-              }
-            } else {
-              // Non-MT5 trade: use standard calculation
-              const metrics = calculateTradeMetrics(updated);
-              if (metrics.positionStatus === 'CLOSED' && metrics.returnPercent !== undefined) {
-                updated = {
-                  ...updated,
-                  savedReturnPercent: metrics.returnPercent,
-                };
-              }
+            // Calculate Net P&L
+            const metrics = calculateTradeMetrics(updated);
+            const netPnl = updated.manualGrossPnl !== undefined 
+              ? updated.manualGrossPnl - metrics.totalCharges 
+              : metrics.netPnl;
+            
+            // Use accountBalanceSnapshot if available
+            if (updated.accountBalanceSnapshot && updated.accountBalanceSnapshot > 0) {
+              updated = {
+                ...updated,
+                savedReturnPercent: (netPnl / updated.accountBalanceSnapshot) * 100,
+              };
+            } else if (metrics.positionStatus === 'CLOSED') {
+              // Legacy trade without account balance - log warning
+              // Cannot calculate Return % accurately without account balance
+              console.warn(`Trade ${updated.id || 'unknown'} missing accountBalanceSnapshot - Return % cannot be calculated accurately`);
+              // Set to 0 to indicate missing data rather than using incorrect formula
+              updated = {
+                ...updated,
+                savedReturnPercent: 0,
+              };
             }
           }
           

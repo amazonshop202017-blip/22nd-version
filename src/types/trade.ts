@@ -203,11 +203,14 @@ export function calculateTradeMetrics(trade: Trade | TradeFormData): TradeCalcul
   // R-Factor
   const rFactor = trade.tradeRisk > 0 ? netPnl / trade.tradeRisk : 0;
   
-  // Return percentage - use the correct invested amount based on direction
-  // LONG: invested = what you bought (totalBuyCost)
-  // SHORT: invested = what you sold (totalSellValue)
-  const investedAmount = side === 'LONG' ? totalBuyCost : totalSellValue;
-  const returnPercent = investedAmount > 0 ? (netPnl / investedAmount) * 100 : 0;
+  // Return percentage - ALWAYS based on account balance at trade time
+  // Return % = (Net P&L / Account Balance at Trade Time) × 100
+  // This is the authoritative definition for ALL trades (manual and imported)
+  // Note: This calculated value is only used as a fallback - savedReturnPercent should be preferred
+  const accountBalance = 'accountBalanceSnapshot' in trade ? (trade as Trade).accountBalanceSnapshot : undefined;
+  const returnPercent = accountBalance && accountBalance > 0 
+    ? (netPnl / accountBalance) * 100 
+    : 0; // Return 0 if no account balance available - savedReturnPercent should be used instead
   
   return {
     grossPnl,

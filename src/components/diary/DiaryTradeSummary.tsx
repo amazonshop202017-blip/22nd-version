@@ -19,15 +19,12 @@ export const DiaryTradeSummary = ({ trade }: DiaryTradeSummaryProps) => {
   const volume = metrics.totalQuantity;
   const commissions = metrics.totalCharges;
   
-  // Use saved return percent if available, otherwise calculate
-  // This ensures accuracy by using the value stored at trade creation
-  let netRoi: string;
-  if (trade.savedReturnPercent !== undefined) {
-    netRoi = trade.savedReturnPercent.toFixed(2);
-  } else {
-    // Fallback to calculated value
-    netRoi = metrics.returnPercent.toFixed(2);
-  }
+  // Use saved return percent - this is the authoritative value
+  // Return % = (Net P&L / Account Balance at Trade Time) × 100
+  // savedReturnPercent is calculated once at trade creation and stored persistently
+  const netRoi: string = trade.savedReturnPercent !== undefined 
+    ? trade.savedReturnPercent.toFixed(2)
+    : '–'; // Show dash for legacy trades without savedReturnPercent
 
   // Count CFDs traded (number of entry trades)
   const cfdsTraded = trade.scaleEntries?.length || 

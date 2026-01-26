@@ -117,7 +117,7 @@ export const DayTradesTable = ({ trades }: DayTradesTableProps) => {
                   <TableCell className={cn(isProfit ? 'text-profit' : 'text-loss')}>
                     {trade.savedReturnPercent !== undefined
                       ? `${trade.savedReturnPercent.toFixed(2)}%`
-                      : `${metrics.returnPercent.toFixed(2)}%`}
+                      : '–'}
                   </TableCell>
                   <TableCell className="text-foreground">
                     {trade.savedRMultiple !== undefined
