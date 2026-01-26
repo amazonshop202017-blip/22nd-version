@@ -21,7 +21,7 @@ export const DiaryNotesList = () => {
     linkNoteToDay,
     folders,
   } = useDiaryContext();
-  const { trades } = useFilteredTradesContext();
+  const { trades } = useFilteredTrades();
   const { formatCurrency } = useGlobalFilters();
 
   const [isSelectDayModalOpen, setIsSelectDayModalOpen] = useState(false);

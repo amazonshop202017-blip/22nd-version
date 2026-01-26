@@ -25,7 +25,7 @@ interface DayData {
 
 const YearlyCalendar = () => {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
-  const { filteredTrades } = useFilteredTradesContext();
+  const { filteredTrades } = useFilteredTrades();
   const { formatCurrency } = useGlobalFilters();
 
   // Group trades by date and calculate daily P&L

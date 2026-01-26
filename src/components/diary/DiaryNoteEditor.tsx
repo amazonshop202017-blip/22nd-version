@@ -27,7 +27,7 @@ export const DiaryNoteEditor = () => {
     selectedFolderId,
     folders,
   } = useDiaryContext();
-  const { trades } = useFilteredTradesContext();
+  const { trades } = useFilteredTrades();
   
   const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
   const [localTitle, setLocalTitle] = useState('');

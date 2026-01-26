@@ -41,7 +41,7 @@ interface DailyPnLData {
 
 const WinsVsLosses = () => {
   const [pnlType, setPnlType] = useState<PnLType>('net');
-  const { filteredTrades } = useFilteredTradesContext();
+  const { filteredTrades } = useFilteredTrades();
   const { formatCurrency, dateRange } = useGlobalFilters();
 
   // Classify trades based on selected P&L type

@@ -12,7 +12,7 @@ interface CompareResultsProps {
 }
 
 export const CompareResults = ({ group1Filters, group2Filters }: CompareResultsProps) => {
-  const { trades } = useFilteredTradesContext();
+  const { trades } = useFilteredTrades();
 
   // Calculate stats for both groups
   const group1Stats = useMemo(() => 

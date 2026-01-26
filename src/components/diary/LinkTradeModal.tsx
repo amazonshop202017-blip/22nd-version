@@ -22,7 +22,7 @@ interface LinkTradeModalProps {
 }
 
 export const LinkTradeModal = ({ open, onOpenChange, onLink }: LinkTradeModalProps) => {
-  const { trades } = useFilteredTradesContext();
+  const { trades } = useFilteredTrades();
   const { formatCurrency } = useGlobalFilters();
   const [searchQuery, setSearchQuery] = useState('');
 

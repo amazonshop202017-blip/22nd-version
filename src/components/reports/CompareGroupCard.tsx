@@ -49,14 +49,14 @@ interface CompareGroupCardProps {
 }
 
 export const CompareGroupCard = ({ groupNumber, filters, onFiltersChange }: CompareGroupCardProps) => {
-  const { trades } = useFilteredTradesContext();
+  const { trades } = useFilteredTrades();
   const [symbolOpen, setSymbolOpen] = useState(false);
   const [tagsPopoverOpen, setTagsPopoverOpen] = useState(false);
 
   // Get unique symbols from trades
-  const availableSymbols = useMemo(() => {
+  const availableSymbols = useMemo((): string[] => {
     const symbols = new Set(trades.map(t => t.symbol));
-    return Array.from(symbols).filter(Boolean).sort();
+    return Array.from(symbols).filter((s): s is string => Boolean(s)).sort();
   }, [trades]);
 
   const handleSymbolToggle = (symbol: string) => {

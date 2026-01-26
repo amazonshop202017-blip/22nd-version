@@ -53,7 +53,7 @@ export const PerformanceByTimeChart = ({
   defaultDisplayType = 'dollar',
   title = 'Performance by Time'
 }: PerformanceByTimeChartProps) => {
-  const { filteredTrades } = useFilteredTradesContext();
+  const { filteredTrades } = useFilteredTrades();
   const { currencyConfig, selectedAccounts, isAllAccountsSelected, classifyTradeOutcome } = useGlobalFilters();
   const { accounts, getAccountBalanceBeforeTrades } = useAccountsContext();
   

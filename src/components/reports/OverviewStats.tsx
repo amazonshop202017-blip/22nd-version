@@ -22,7 +22,7 @@ type PnLType = 'net' | 'gross';
 
 const OverviewStats = () => {
   const [pnlType, setPnlType] = useState<PnLType>('net');
-  const { filteredTrades } = useFilteredTradesContext();
+  const { filteredTrades } = useFilteredTrades();
   const { formatCurrency, dateRange } = useGlobalFilters();
 
   const stats = useMemo(() => {

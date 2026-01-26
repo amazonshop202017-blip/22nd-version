@@ -47,7 +47,7 @@ interface BucketData {
 
 // Hook to calculate bucket data
 export const useTradeDurationBuckets = () => {
-  const { filteredTrades } = useFilteredTradesContext();
+  const { filteredTrades } = useFilteredTrades();
 
   return useMemo(() => {
     const bucketMap = new Map<string, BucketData>();
