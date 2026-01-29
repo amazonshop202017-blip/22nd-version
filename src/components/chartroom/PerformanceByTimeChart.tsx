@@ -1,6 +1,6 @@
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState } from 'react';
 import { useFilteredTrades } from '@/hooks/useFilteredTrades';
-import { useGlobalFilters, DisplayMode } from '@/contexts/GlobalFiltersContext';
+import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { useAccountsContext } from '@/contexts/AccountsContext';
 import { calculateTradeMetrics, Trade } from '@/types/trade';
 import { parseISO, getDay, getMonth, getWeek, getHours, getMinutes } from 'date-fns';
@@ -24,7 +24,7 @@ import {
 } from '@/components/ui/select';
 import { Card, CardContent } from '@/components/ui/card';
 
-type DisplayType = 'dollar' | 'percent' | 'winrate' | 'tradecount' | 'tickpip' | 'privacy';
+type DisplayType = 'dollar' | 'percent' | 'winrate' | 'tradecount';
 type DateSettingType = 'entry' | 'exit';
 type PeriodType = 'weekday' | 'month' | 'week' | 'hour' | '2hour' | '1hour' | '30min' | '15min' | '10min' | '5min';
 
@@ -44,8 +44,6 @@ interface TimeData {
 interface PerformanceByTimeChartProps {
   defaultDisplayType?: DisplayType;
   title?: string;
-  syncWithGlobalDisplay?: boolean;
-  isLeftChart?: boolean;
 }
 
 const WEEKDAY_LABELS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -53,30 +51,15 @@ const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'S
 
 export const PerformanceByTimeChart = ({ 
   defaultDisplayType = 'dollar',
-  title = 'Performance by Time',
-  syncWithGlobalDisplay = false,
-  isLeftChart = false,
+  title = 'Performance by Time'
 }: PerformanceByTimeChartProps) => {
   const { filteredTrades } = useFilteredTrades();
-  const { currencyConfig, selectedAccounts, isAllAccountsSelected, classifyTradeOutcome, displayMode } = useGlobalFilters();
+  const { currencyConfig, selectedAccounts, isAllAccountsSelected, classifyTradeOutcome } = useGlobalFilters();
   const { accounts, getAccountBalanceBeforeTrades } = useAccountsContext();
   
   const [displayType, setDisplayType] = useState<DisplayType>(defaultDisplayType);
   const [dateSetting, setDateSetting] = useState<DateSettingType>('entry');
   const [period, setPeriod] = useState<PeriodType>('weekday');
-
-  // Sync with global display mode if enabled and this is the left chart
-  useEffect(() => {
-    if (syncWithGlobalDisplay && isLeftChart) {
-      const modeMap: Record<DisplayMode, DisplayType> = {
-        'dollar': 'dollar',
-        'percentage': 'percent',
-        'privacy': 'privacy',
-        'tickpip': 'tickpip',
-      };
-      setDisplayType(modeMap[displayMode] || 'dollar');
-    }
-  }, [displayMode, syncWithGlobalDisplay, isLeftChart]);
 
   // Calculate total starting balance for Return (%) denominator
   const totalStartingBalance = useMemo(() => {
@@ -303,8 +286,6 @@ export const PerformanceByTimeChart = ({
                 <SelectItem value="percent">Return (%)</SelectItem>
                 <SelectItem value="winrate">Winrate (%)</SelectItem>
                 <SelectItem value="tradecount">Trade Count</SelectItem>
-                <SelectItem value="tickpip">Tick / Pip</SelectItem>
-                <SelectItem value="privacy">Privacy</SelectItem>
               </SelectContent>
             </Select>
 

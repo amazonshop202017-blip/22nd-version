@@ -463,16 +463,8 @@ const PerformanceByTime = () => {
 
       {/* Side-by-Side Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <PerformanceByTimeChart 
-          defaultDisplayType="dollar" 
-          syncWithGlobalDisplay={true}
-          isLeftChart={true}
-        />
-        <PerformanceByTimeChart 
-          defaultDisplayType="winrate" 
-          syncWithGlobalDisplay={true}
-          isLeftChart={false}
-        />
+        <PerformanceByTimeChart defaultDisplayType="dollar" />
+        <PerformanceByTimeChart defaultDisplayType="winrate" />
       </div>
 
 

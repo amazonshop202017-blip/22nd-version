@@ -1,5 +1,4 @@
-import { useMemo, useState, useEffect, useRef } from 'react';
-import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
+import { useMemo, useState } from 'react';
 import { useFilteredTrades } from '@/hooks/useFilteredTrades';
 import { calculateTradeMetrics, Trade } from '@/types/trade';
 import {
@@ -27,7 +26,7 @@ import {
 } from '@/components/chartroom/TradeDurationBucketCharts';
 
 type TimeUnit = 'days' | 'hours' | 'minutes';
-type DisplayType = 'dollar' | 'percent' | 'tickpip' | 'privacy';
+type DisplayType = 'dollar' | 'percent';
 
 interface HoldingTimeData {
   holdingTime: number;
@@ -41,30 +40,8 @@ interface HoldingTimeData {
 
 const HoldingTime = () => {
   const { filteredTrades } = useFilteredTrades();
-  const { displayMode } = useGlobalFilters();
   const [timeUnit, setTimeUnit] = useState<TimeUnit>('hours');
-
-  // Map global display mode to chart display type for initialization
-  const getInitialDisplayType = (): DisplayType => {
-    switch (displayMode) {
-      case 'dollar': return 'dollar';
-      case 'percentage': return 'percent';
-      case 'privacy': return 'privacy';
-      case 'tickpip': return 'tickpip';
-      default: return 'dollar';
-    }
-  };
-
-  const [displayType, setDisplayType] = useState<DisplayType>(getInitialDisplayType);
-  const hasInitialized = useRef(false);
-
-  // Initialize from global filter only once on mount
-  useEffect(() => {
-    if (!hasInitialized.current) {
-      hasInitialized.current = true;
-      setDisplayType(getInitialDisplayType());
-    }
-  }, []);
+  const [displayType, setDisplayType] = useState<DisplayType>('dollar');
 
   // Helper to convert minutes to selected time unit
   const convertTime = (minutes: number, unit: TimeUnit): number => {
@@ -91,6 +68,16 @@ const HoldingTime = () => {
     });
 
     return closedTrades
+      .filter((trade) => {
+        // For percent mode, skip trades without stored return %
+        if (displayType === 'percent') {
+          const returnPercent = trade.savedReturnPercent;
+          if (returnPercent === undefined || returnPercent === null || !isFinite(returnPercent)) {
+            return false;
+          }
+        }
+        return true;
+      })
       .map((trade) => {
         const metrics = calculateTradeMetrics(trade);
         const holdingTimeInUnit = convertTime(metrics.durationMinutes, timeUnit);
@@ -99,8 +86,7 @@ const HoldingTime = () => {
 
         return {
           holdingTime: Math.round(holdingTimeInUnit * 100) / 100,
-          // For tickpip mode, we show netPnl for now (actual tick/pip conversion will come later)
-          returnValue: metrics.netPnl,
+          returnValue: displayType === 'dollar' ? metrics.netPnl : returnPercent,
           isWinner: metrics.netPnl > 0,
           symbol: trade.symbol,
           side: trade.side,
@@ -108,7 +94,7 @@ const HoldingTime = () => {
           returnPercent,
         };
       });
-  }, [filteredTrades, timeUnit]);
+  }, [filteredTrades, timeUnit, displayType]);
 
   // Split data for coloring
   const winnerData = holdingTimeData.filter(d => d.isWinner);
@@ -220,8 +206,6 @@ const HoldingTime = () => {
                 <SelectContent>
                   <SelectItem value="dollar">Return ($)</SelectItem>
                   <SelectItem value="percent">Return (%)</SelectItem>
-                  <SelectItem value="tickpip">Tick / Pip</SelectItem>
-                  <SelectItem value="privacy">Privacy</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -285,9 +269,13 @@ const HoldingTime = () => {
                     axisLine={{ stroke: 'hsl(var(--border))' }}
                     tickLine={false}
                     tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
-                    tickFormatter={(value) => `${value.toFixed(0)} ticks`}
+                    tickFormatter={(value) => 
+                      displayType === 'dollar' 
+                        ? `$${value.toFixed(0)}` 
+                        : `${value.toFixed(1)}%`
+                    }
                     label={{
-                      value: 'Tick / Pip',
+                      value: displayType === 'dollar' ? 'Return ($)' : 'Return (%)',
                       angle: -90,
                       position: 'insideLeft',
                       offset: 10,

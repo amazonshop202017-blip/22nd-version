@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef } from 'react';
+import { useState, useMemo } from 'react';
 import { useFilteredTrades } from '@/hooks/useFilteredTrades';
 import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { useAccountsContext } from '@/contexts/AccountsContext';
@@ -52,7 +52,7 @@ import {
   CommandSeparator,
 } from '@/components/ui/command';
 
-type DisplayType = 'dollar' | 'percent' | 'winrate' | 'tradecount' | 'tickpip' | 'privacy';
+type DisplayType = 'dollar' | 'percent' | 'winrate' | 'tradecount';
 type SelectionType = 'tradeComments' | 'tags';
 type CommentCategory = 'entryComments' | 'tradeManagement' | 'exitComments';
 
@@ -71,34 +71,13 @@ interface GroupedData {
 
 const PerformanceRatio = () => {
   const { filteredTrades } = useFilteredTrades();
-  const { currencyConfig, selectedAccounts, isAllAccountsSelected, classifyTradeOutcome, displayMode } = useGlobalFilters();
+  const { currencyConfig, selectedAccounts, isAllAccountsSelected, classifyTradeOutcome } = useGlobalFilters();
   const { accounts, getAccountBalanceBeforeTrades } = useAccountsContext();
   const { tags, getActiveTags } = useTagsContext();
   const { categories } = useCategoriesContext();
   const { options } = useCustomStats();
 
-  // Map global display mode to chart display type for initialization
-  const getInitialDisplayType = (): DisplayType => {
-    switch (displayMode) {
-      case 'dollar': return 'dollar';
-      case 'percentage': return 'percent';
-      case 'privacy': return 'privacy';
-      case 'tickpip': return 'tickpip';
-      default: return 'dollar';
-    }
-  };
-
-  const [displayType, setDisplayType] = useState<DisplayType>(getInitialDisplayType);
-  const hasInitialized = useRef(false);
-
-  // Initialize from global filter only once on mount
-  useEffect(() => {
-    if (!hasInitialized.current) {
-      hasInitialized.current = true;
-      setDisplayType(getInitialDisplayType());
-    }
-  }, []);
-
+  const [displayType, setDisplayType] = useState<DisplayType>('dollar');
   const [selectionType, setSelectionType] = useState<SelectionType>('tradeComments');
   const [selectedCommentCategory, setSelectedCommentCategory] = useState<CommentCategory>('entryComments');
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
@@ -463,8 +442,6 @@ const PerformanceRatio = () => {
               <SelectItem value="percent">Return (%)</SelectItem>
               <SelectItem value="winrate">Win Rate (%)</SelectItem>
               <SelectItem value="tradecount">Trade Count</SelectItem>
-              <SelectItem value="tickpip">Tick / Pip</SelectItem>
-              <SelectItem value="privacy">Privacy</SelectItem>
             </SelectContent>
           </Select>
         </div>
