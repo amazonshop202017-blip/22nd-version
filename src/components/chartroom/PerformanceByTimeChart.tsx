@@ -4,6 +4,7 @@ import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { useAccountsContext } from '@/contexts/AccountsContext';
 import { calculateTradeMetrics, Trade } from '@/types/trade';
 import { parseISO, getDay, getMonth, getWeek, getHours, getMinutes } from 'date-fns';
+import { ChartDisplayType, mapGlobalToChartDisplay } from '@/hooks/useChartDisplayMode';
 import {
   BarChart,
   Bar,
@@ -24,7 +25,6 @@ import {
 } from '@/components/ui/select';
 import { Card, CardContent } from '@/components/ui/card';
 
-type DisplayType = 'dollar' | 'percent' | 'winrate' | 'tradecount';
 type DateSettingType = 'entry' | 'exit';
 type PeriodType = 'weekday' | 'month' | 'week' | 'hour' | '2hour' | '1hour' | '30min' | '15min' | '10min' | '5min';
 
@@ -42,8 +42,9 @@ interface TimeData {
 }
 
 interface PerformanceByTimeChartProps {
-  defaultDisplayType?: DisplayType;
+  defaultDisplayType?: ChartDisplayType;
   title?: string;
+  useGlobalDefault?: boolean; // true = use global filter as default, false = use defaultDisplayType
 }
 
 const WEEKDAY_LABELS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -51,13 +52,22 @@ const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'S
 
 export const PerformanceByTimeChart = ({ 
   defaultDisplayType = 'dollar',
-  title = 'Performance by Time'
+  title = 'Performance by Time',
+  useGlobalDefault = true
 }: PerformanceByTimeChartProps) => {
   const { filteredTrades } = useFilteredTrades();
-  const { currencyConfig, selectedAccounts, isAllAccountsSelected, classifyTradeOutcome } = useGlobalFilters();
+  const { currencyConfig, selectedAccounts, isAllAccountsSelected, classifyTradeOutcome, displayMode } = useGlobalFilters();
   const { accounts, getAccountBalanceBeforeTrades } = useAccountsContext();
   
-  const [displayType, setDisplayType] = useState<DisplayType>(defaultDisplayType);
+  // Calculate initial display type from global filter or prop
+  const getInitialDisplayType = (): ChartDisplayType => {
+    if (useGlobalDefault) {
+      return mapGlobalToChartDisplay(displayMode);
+    }
+    return defaultDisplayType;
+  };
+  
+  const [displayType, setDisplayType] = useState<ChartDisplayType>(getInitialDisplayType);
   const [dateSetting, setDateSetting] = useState<DateSettingType>('entry');
   const [period, setPeriod] = useState<PeriodType>('weekday');
 
@@ -251,7 +261,7 @@ export const PerformanceByTimeChart = ({
     return data;
   }, [filteredTrades, displayType, dateSetting, period, totalStartingBalance, classifyTradeOutcome]);
 
-  const formatValue = (value: number, type: DisplayType = displayType): string => {
+  const formatValue = (value: number, type: ChartDisplayType = displayType): string => {
     if (type === 'percent') {
       return `${value >= 0 ? '+' : ''}${value.toFixed(2)}%`;
     }
@@ -260,6 +270,13 @@ export const PerformanceByTimeChart = ({
     }
     if (type === 'tradecount') {
       return `${Math.round(value)}`;
+    }
+    if (type === 'tickpip') {
+      // Placeholder for tick/pip display
+      return `${value >= 0 ? '+' : ''}${value.toFixed(2)} T`;
+    }
+    if (type === 'privacy') {
+      return '•••••';
     }
     const absValue = Math.abs(value);
     if (absValue >= 1000) {
@@ -274,7 +291,7 @@ export const PerformanceByTimeChart = ({
         {/* Header with Dropdowns */}
         <div className="flex items-start justify-between mb-3 flex-wrap gap-3">
           <div className="flex items-center gap-3 flex-wrap">
-            <Select value={displayType} onValueChange={(v) => setDisplayType(v as DisplayType)}>
+            <Select value={displayType} onValueChange={(v) => setDisplayType(v as ChartDisplayType)}>
               <SelectTrigger className="w-[140px] bg-background border-border h-auto py-1.5">
                 <div className="flex flex-col items-start">
                   <span className="text-[10px] text-muted-foreground">Display</span>
@@ -286,6 +303,8 @@ export const PerformanceByTimeChart = ({
                 <SelectItem value="percent">Return (%)</SelectItem>
                 <SelectItem value="winrate">Winrate (%)</SelectItem>
                 <SelectItem value="tradecount">Trade Count</SelectItem>
+                <SelectItem value="tickpip">Tick / Pip</SelectItem>
+                <SelectItem value="privacy">Privacy</SelectItem>
               </SelectContent>
             </Select>
 

@@ -4,6 +4,7 @@ import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { useAccountsContext } from '@/contexts/AccountsContext';
 import { calculateTradeMetrics } from '@/types/trade';
 import { parseISO } from 'date-fns';
+import { ChartDisplayType, mapGlobalToChartDisplay } from '@/hooks/useChartDisplayMode';
 import {
   AreaChart,
   Area,
@@ -29,11 +30,25 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 
+// Drawdown-specific display type (subset of ChartDisplayType)
+type DrawdownDisplayType = 'return' | 'percent' | 'tickpip' | 'privacy';
+
 const Drawdown = () => {
   const { filteredTrades } = useFilteredTrades();
-  const { selectedAccounts, isAllAccountsSelected, currencyConfig } = useGlobalFilters();
+  const { selectedAccounts, isAllAccountsSelected, currencyConfig, displayMode } = useGlobalFilters();
   const { accounts, getAccountBalanceBeforeTrades } = useAccountsContext();
-  const [displayType, setDisplayType] = useState('return');
+  
+  // Map global display mode to drawdown display type
+  const getInitialDisplayType = (): DrawdownDisplayType => {
+    const mapped = mapGlobalToChartDisplay(displayMode);
+    if (mapped === 'dollar') return 'return';
+    if (mapped === 'percent') return 'percent';
+    if (mapped === 'tickpip') return 'tickpip';
+    if (mapped === 'privacy') return 'privacy';
+    return 'return';
+  };
+  
+  const [displayType, setDisplayType] = useState<DrawdownDisplayType>(getInitialDisplayType);
 
   // Calculate total starting balance for Return (%) denominator
   const totalStartingBalance = useMemo(() => {
@@ -233,6 +248,13 @@ const Drawdown = () => {
     if (displayType === 'percent') {
       return formatPercent(value);
     }
+    if (displayType === 'privacy') {
+      return '•••••';
+    }
+    if (displayType === 'tickpip') {
+      // Placeholder for tick/pip display
+      return `${value.toFixed(2)} T`;
+    }
     return formatCurrency(value);
   };
 
@@ -262,16 +284,18 @@ const Drawdown = () => {
         <CardContent className="p-6">
           {/* Display Dropdown */}
           <div className="mb-4">
-            <Select value={displayType} onValueChange={setDisplayType}>
+            <Select value={displayType} onValueChange={(v) => setDisplayType(v as DrawdownDisplayType)}>
               <SelectTrigger className="w-[160px] bg-background border-border">
                 <div className="flex flex-col items-start">
                   <span className="text-xs text-muted-foreground">Display</span>
                   <SelectValue placeholder="Return ($)" />
                 </div>
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-popover border-border z-50">
                 <SelectItem value="return">Return ($)</SelectItem>
                 <SelectItem value="percent">Return (%)</SelectItem>
+                <SelectItem value="tickpip">Tick / Pip</SelectItem>
+                <SelectItem value="privacy">Privacy</SelectItem>
               </SelectContent>
             </Select>
           </div>
