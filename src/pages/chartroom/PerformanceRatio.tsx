@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useFilteredTrades } from '@/hooks/useFilteredTrades';
 import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { useAccountsContext } from '@/contexts/AccountsContext';
@@ -6,6 +6,7 @@ import { useTagsContext } from '@/contexts/TagsContext';
 import { useCategoriesContext } from '@/contexts/CategoriesContext';
 import { useCustomStats } from '@/contexts/CustomStatsContext';
 import { calculateTradeMetrics, Trade } from '@/types/trade';
+import { useChartDisplayMode, ChartDisplayType, getDisplayLabel } from '@/hooks/useChartDisplayMode';
 import {
   BarChart,
   Bar,
@@ -52,7 +53,7 @@ import {
   CommandSeparator,
 } from '@/components/ui/command';
 
-type DisplayType = 'dollar' | 'percent' | 'winrate' | 'tradecount';
+type DisplayType = ChartDisplayType;
 type SelectionType = 'tradeComments' | 'tags';
 type CommentCategory = 'entryComments' | 'tradeManagement' | 'exitComments';
 
@@ -77,7 +78,7 @@ const PerformanceRatio = () => {
   const { categories } = useCategoriesContext();
   const { options } = useCustomStats();
 
-  const [displayType, setDisplayType] = useState<DisplayType>('dollar');
+  const { displayType, setDisplayType } = useChartDisplayMode('dollar', true);
   const [selectionType, setSelectionType] = useState<SelectionType>('tradeComments');
   const [selectedCommentCategory, setSelectedCommentCategory] = useState<CommentCategory>('entryComments');
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
@@ -438,10 +439,12 @@ const PerformanceRatio = () => {
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="bg-popover border-border z-50">
-              <SelectItem value="dollar">Return ($)</SelectItem>
-              <SelectItem value="percent">Return (%)</SelectItem>
-              <SelectItem value="winrate">Win Rate (%)</SelectItem>
-              <SelectItem value="tradecount">Trade Count</SelectItem>
+              <SelectItem value="dollar">{getDisplayLabel('dollar')}</SelectItem>
+              <SelectItem value="percent">{getDisplayLabel('percent')}</SelectItem>
+              <SelectItem value="winrate">{getDisplayLabel('winrate')}</SelectItem>
+              <SelectItem value="tradecount">{getDisplayLabel('tradecount')}</SelectItem>
+              <SelectItem value="tickpip">{getDisplayLabel('tickpip')}</SelectItem>
+              <SelectItem value="privacy">{getDisplayLabel('privacy')}</SelectItem>
             </SelectContent>
           </Select>
         </div>
