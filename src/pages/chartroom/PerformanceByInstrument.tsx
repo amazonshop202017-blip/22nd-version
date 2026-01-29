@@ -246,11 +246,13 @@ const PerformanceByInstrument = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <InstrumentPerformanceChart 
           defaultDisplayType="dollar" 
-          title="Instrument Performance 1" 
+          title="Instrument Performance 1"
+          useGlobalDefault={true}
         />
         <InstrumentPerformanceChart 
           defaultDisplayType="winrate" 
-          title="Instrument Performance 2" 
+          title="Instrument Performance 2"
+          useGlobalDefault={false}
         />
       </div>
 

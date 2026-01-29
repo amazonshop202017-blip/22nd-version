@@ -4,6 +4,7 @@ import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { useAccountsContext } from '@/contexts/AccountsContext';
 import { calculateTradeMetrics, Trade } from '@/types/trade';
 import { useStrategiesContext } from '@/contexts/StrategiesContext';
+import { ChartDisplayType, mapGlobalToChartDisplay } from '@/hooks/useChartDisplayMode';
 import {
   BarChart,
   Bar,
@@ -24,8 +25,6 @@ import {
 } from '@/components/ui/select';
 import { Card, CardContent } from '@/components/ui/card';
 
-type DisplayType = 'dollar' | 'percent' | 'winrate' | 'tradecount';
-
 interface SetupData {
   setup: string;
   totalPnl: number;
@@ -40,19 +39,30 @@ interface SetupData {
 }
 
 interface SetupPerformanceChartProps {
-  defaultDisplayType?: DisplayType;
+  defaultDisplayType?: ChartDisplayType;
   title?: string;
+  useGlobalDefault?: boolean; // true = use global filter as default, false = use defaultDisplayType
 }
 
 export const SetupPerformanceChart = ({ 
   defaultDisplayType = 'dollar',
-  title = 'Performance by Setup'
+  title = 'Performance by Setup',
+  useGlobalDefault = true
 }: SetupPerformanceChartProps) => {
   const { filteredTrades } = useFilteredTrades();
-  const { currencyConfig, selectedAccounts, isAllAccountsSelected, classifyTradeOutcome } = useGlobalFilters();
+  const { currencyConfig, selectedAccounts, isAllAccountsSelected, classifyTradeOutcome, displayMode } = useGlobalFilters();
   const { accounts, getAccountBalanceBeforeTrades } = useAccountsContext();
   const { strategies } = useStrategiesContext();
-  const [displayType, setDisplayType] = useState<DisplayType>(defaultDisplayType);
+  
+  // Calculate initial display type from global filter or prop
+  const getInitialDisplayType = (): ChartDisplayType => {
+    if (useGlobalDefault) {
+      return mapGlobalToChartDisplay(displayMode);
+    }
+    return defaultDisplayType;
+  };
+  
+  const [displayType, setDisplayType] = useState<ChartDisplayType>(getInitialDisplayType);
 
   // Calculate total starting balance for Return (%) denominator
   const totalStartingBalance = useMemo(() => {
@@ -175,10 +185,17 @@ export const SetupPerformanceChart = ({
   }, [filteredTrades, displayType, strategies, totalStartingBalance, classifyTradeOutcome]);
 
   // Format currency
-  const formatValue = (value: number, forceType?: DisplayType): string => {
+  const formatValue = (value: number, forceType?: ChartDisplayType): string => {
     const type = forceType || displayType;
     if (type === 'percent') {
       return `${value >= 0 ? '+' : ''}${value.toFixed(2)}%`;
+    }
+    if (type === 'tickpip') {
+      // Placeholder for tick/pip display
+      return `${value >= 0 ? '+' : ''}${value.toFixed(2)} T`;
+    }
+    if (type === 'privacy') {
+      return '•••••';
     }
     const absValue = Math.abs(value);
     if (absValue >= 1000) {
@@ -194,15 +211,17 @@ export const SetupPerformanceChart = ({
         <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
           <h3 className="text-sm font-medium text-muted-foreground">{title}</h3>
           <div className="flex items-center gap-2">
-            <Select value={displayType} onValueChange={(v) => setDisplayType(v as DisplayType)}>
+            <Select value={displayType} onValueChange={(v) => setDisplayType(v as ChartDisplayType)}>
               <SelectTrigger className="w-[140px] h-8 bg-background border-border text-xs">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-popover border-border z-50">
                 <SelectItem value="dollar">Return ($)</SelectItem>
                 <SelectItem value="percent">Return (%)</SelectItem>
                 <SelectItem value="winrate">Winrate (%)</SelectItem>
                 <SelectItem value="tradecount">Trade Count</SelectItem>
+                <SelectItem value="tickpip">Tick / Pip</SelectItem>
+                <SelectItem value="privacy">Privacy</SelectItem>
               </SelectContent>
             </Select>
           </div>

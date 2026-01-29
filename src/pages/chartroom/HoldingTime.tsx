@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react';
 import { useFilteredTrades } from '@/hooks/useFilteredTrades';
+import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { calculateTradeMetrics, Trade } from '@/types/trade';
+import { mapGlobalToChartDisplay } from '@/hooks/useChartDisplayMode';
 import {
   ScatterChart,
   Scatter,
@@ -26,7 +28,7 @@ import {
 } from '@/components/chartroom/TradeDurationBucketCharts';
 
 type TimeUnit = 'days' | 'hours' | 'minutes';
-type DisplayType = 'dollar' | 'percent';
+type DisplayType = 'dollar' | 'percent' | 'tickpip' | 'privacy';
 
 interface HoldingTimeData {
   holdingTime: number;
@@ -40,8 +42,20 @@ interface HoldingTimeData {
 
 const HoldingTime = () => {
   const { filteredTrades } = useFilteredTrades();
+  const { displayMode } = useGlobalFilters();
   const [timeUnit, setTimeUnit] = useState<TimeUnit>('hours');
-  const [displayType, setDisplayType] = useState<DisplayType>('dollar');
+  
+  // Map global display mode to holding time display type
+  const getInitialDisplayType = (): DisplayType => {
+    const mapped = mapGlobalToChartDisplay(displayMode);
+    if (mapped === 'dollar') return 'dollar';
+    if (mapped === 'percent') return 'percent';
+    if (mapped === 'tickpip') return 'tickpip';
+    if (mapped === 'privacy') return 'privacy';
+    return 'dollar';
+  };
+  
+  const [displayType, setDisplayType] = useState<DisplayType>(getInitialDisplayType);
 
   // Helper to convert minutes to selected time unit
   const convertTime = (minutes: number, unit: TimeUnit): number => {
@@ -203,9 +217,11 @@ const HoldingTime = () => {
                     <SelectValue />
                   </div>
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-popover border-border z-50">
                   <SelectItem value="dollar">Return ($)</SelectItem>
                   <SelectItem value="percent">Return (%)</SelectItem>
+                  <SelectItem value="tickpip">Tick / Pip</SelectItem>
+                  <SelectItem value="privacy">Privacy</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -269,13 +285,17 @@ const HoldingTime = () => {
                     axisLine={{ stroke: 'hsl(var(--border))' }}
                     tickLine={false}
                     tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
-                    tickFormatter={(value) => 
-                      displayType === 'dollar' 
-                        ? `$${value.toFixed(0)}` 
-                        : `${value.toFixed(1)}%`
-                    }
+                    tickFormatter={(value) => {
+                      if (displayType === 'privacy') return '•••••';
+                      if (displayType === 'tickpip') return `${value.toFixed(0)} T`;
+                      if (displayType === 'percent') return `${value.toFixed(1)}%`;
+                      return `$${value.toFixed(0)}`;
+                    }}
                     label={{
-                      value: displayType === 'dollar' ? 'Return ($)' : 'Return (%)',
+                      value: displayType === 'privacy' ? 'Return' 
+                        : displayType === 'tickpip' ? 'Return (Tick/Pip)'
+                        : displayType === 'percent' ? 'Return (%)' 
+                        : 'Return ($)',
                       angle: -90,
                       position: 'insideLeft',
                       offset: 10,
