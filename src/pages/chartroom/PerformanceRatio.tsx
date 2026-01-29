@@ -52,7 +52,7 @@ import {
   CommandSeparator,
 } from '@/components/ui/command';
 
-type DisplayType = 'dollar' | 'percent' | 'winrate' | 'tradecount';
+type DisplayType = 'dollar' | 'percent' | 'winrate' | 'tradecount' | 'tickpip' | 'privacy';
 type SelectionType = 'tradeComments' | 'tags';
 type CommentCategory = 'entryComments' | 'tradeManagement' | 'exitComments';
 
@@ -442,6 +442,8 @@ const PerformanceRatio = () => {
               <SelectItem value="percent">Return (%)</SelectItem>
               <SelectItem value="winrate">Win Rate (%)</SelectItem>
               <SelectItem value="tradecount">Trade Count</SelectItem>
+              <SelectItem value="tickpip">Tick / Pip</SelectItem>
+              <SelectItem value="privacy">Privacy</SelectItem>
             </SelectContent>
           </Select>
         </div>

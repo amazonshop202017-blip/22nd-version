@@ -26,7 +26,7 @@ import {
 } from '@/components/chartroom/TradeDurationBucketCharts';
 
 type TimeUnit = 'days' | 'hours' | 'minutes';
-type DisplayType = 'tickpip';
+type DisplayType = 'dollar' | 'percent' | 'tickpip' | 'privacy';
 
 interface HoldingTimeData {
   holdingTime: number;
@@ -41,7 +41,7 @@ interface HoldingTimeData {
 const HoldingTime = () => {
   const { filteredTrades } = useFilteredTrades();
   const [timeUnit, setTimeUnit] = useState<TimeUnit>('hours');
-  const [displayType, setDisplayType] = useState<DisplayType>('tickpip');
+  const [displayType, setDisplayType] = useState<DisplayType>('dollar');
 
   // Helper to convert minutes to selected time unit
   const convertTime = (minutes: number, unit: TimeUnit): number => {
@@ -195,7 +195,10 @@ const HoldingTime = () => {
                   </div>
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="dollar">Return ($)</SelectItem>
+                  <SelectItem value="percent">Return (%)</SelectItem>
                   <SelectItem value="tickpip">Tick / Pip</SelectItem>
+                  <SelectItem value="privacy">Privacy</SelectItem>
                 </SelectContent>
               </Select>
 
