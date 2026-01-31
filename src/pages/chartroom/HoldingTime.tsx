@@ -325,12 +325,26 @@ const HoldingTime = () => {
                             <p className="text-muted-foreground">
                               Holding Time: {formatTimeValue(data.holdingTime)}
                             </p>
-                            <p className={data.isWinner ? 'text-green-500' : 'text-red-500'}>
-                              Net P/L: ${data.netPnl.toFixed(2)}
-                            </p>
-                            <p className={data.isWinner ? 'text-green-500' : 'text-red-500'}>
-                              Return: {data.returnPercent.toFixed(2)}%
-                            </p>
+                            {displayType === 'dollar' && (
+                              <p className={data.isWinner ? 'text-green-500' : 'text-red-500'}>
+                                Net P/L: ${data.netPnl.toFixed(2)}
+                              </p>
+                            )}
+                            {displayType === 'percent' && (
+                              <p className={data.isWinner ? 'text-green-500' : 'text-red-500'}>
+                                Return: {data.returnPercent.toFixed(2)}%
+                              </p>
+                            )}
+                            {displayType === 'tickpip' && (
+                              <p className={data.isWinner ? 'text-green-500' : 'text-red-500'}>
+                                Tick/Pip: --
+                              </p>
+                            )}
+                            {displayType === 'privacy' && (
+                              <p className={data.isWinner ? 'text-green-500' : 'text-red-500'}>
+                                P/L: •••••
+                              </p>
+                            )}
                           </div>
                         </div>
                       );
