@@ -1,20 +1,21 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { TrendingUp } from 'lucide-react';
 import { useFilteredTrades } from '@/hooks/useFilteredTrades';
 import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
-import { usePrivacyMode } from '@/hooks/usePrivacyMode';
+import { usePrivacyMode, PRIVACY_MASK } from '@/hooks/usePrivacyMode';
+import { useChartDisplayMode, ChartDisplayType, getDisplayLabel } from '@/hooks/useChartDisplayMode';
 import { calculateTradeMetrics, Trade } from '@/types/trade';
 import { parseISO } from 'date-fns';
 import { motion } from 'framer-motion';
 import {
-  BarChart,
+  ComposedChart,
   Bar,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Cell,
+  ReferenceLine,
 } from 'recharts';
 import {
   Table,
@@ -24,21 +25,44 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 
 interface Streak {
   type: 'win' | 'loss';
   count: number;
   totalPnl: number;
+  totalReturnPercent: number;
   trades: Trade[];
   startDate: string;
   endDate: string;
+}
+
+interface ChartDataPoint {
+  streak: number;
+  winAmount: number;
+  lossAmount: number;
+  winAmountPercent: number;
+  lossAmountPercent: number;
+  winFrequency: number;
+  lossFrequency: number;
 }
 
 const ConsecutiveWinnersLosers = () => {
   const { filteredTrades } = useFilteredTrades();
   const { formatCurrency } = useGlobalFilters();
   const { isPrivacyMode, maskCurrency } = usePrivacyMode();
+  const { displayType, setDisplayType } = useChartDisplayMode('dollar', true);
+
+  // Filter to only dollar/percent for this chart
+  const chartDisplayType = displayType === 'percent' ? 'percent' : 'dollar';
 
   // Calculate streaks from trades
   const { streaks, stats, chartData } = useMemo(() => {
@@ -66,6 +90,7 @@ const ConsecutiveWinnersLosers = () => {
     sortedTrades.forEach(({ trade, metrics }) => {
       const isWin = metrics.netPnl > 0;
       const type = isWin ? 'win' : 'loss';
+      const returnPercent = metrics.returnPercent || 0;
 
       if (!currentStreak || currentStreak.type !== type) {
         // Start new streak
@@ -76,6 +101,7 @@ const ConsecutiveWinnersLosers = () => {
           type,
           count: 1,
           totalPnl: metrics.netPnl,
+          totalReturnPercent: returnPercent,
           trades: [trade],
           startDate: metrics.openDate!,
           endDate: metrics.openDate!,
@@ -84,6 +110,7 @@ const ConsecutiveWinnersLosers = () => {
         // Continue streak
         currentStreak.count += 1;
         currentStreak.totalPnl += metrics.netPnl;
+        currentStreak.totalReturnPercent += returnPercent;
         currentStreak.trades.push(trade);
         currentStreak.endDate = metrics.openDate!;
       }
@@ -124,24 +151,64 @@ const ConsecutiveWinnersLosers = () => {
       currentStreak: currentStreakInfo,
     };
 
-    // Chart data - distribution of streak lengths
-    const winDistribution: Record<number, number> = {};
-    const lossDistribution: Record<number, number> = {};
+    // Chart data - aggregate by streak length
+    const winDataByStreak: Record<number, { total: number; totalPercent: number; count: number }> = {};
+    const lossDataByStreak: Record<number, { total: number; totalPercent: number; count: number }> = {};
 
     winStreaks.forEach(s => {
-      winDistribution[s.count] = (winDistribution[s.count] || 0) + 1;
+      if (!winDataByStreak[s.count]) {
+        winDataByStreak[s.count] = { total: 0, totalPercent: 0, count: 0 };
+      }
+      winDataByStreak[s.count].total += s.totalPnl;
+      winDataByStreak[s.count].totalPercent += s.totalReturnPercent;
+      winDataByStreak[s.count].count += 1;
     });
+
     lossStreaks.forEach(s => {
-      lossDistribution[s.count] = (lossDistribution[s.count] || 0) + 1;
+      if (!lossDataByStreak[s.count]) {
+        lossDataByStreak[s.count] = { total: 0, totalPercent: 0, count: 0 };
+      }
+      lossDataByStreak[s.count].total += s.totalPnl;
+      lossDataByStreak[s.count].totalPercent += s.totalReturnPercent;
+      lossDataByStreak[s.count].count += 1;
     });
 
     const maxStreak = Math.max(longestWinStreak, longestLossStreak, 1);
-    const chartData = [];
-    for (let i = 1; i <= maxStreak; i++) {
+    const chartData: ChartDataPoint[] = [];
+    
+    for (let i = 1; i <= Math.min(maxStreak, 10); i++) {
+      const winData = winDataByStreak[i];
+      const lossData = lossDataByStreak[i];
+      
       chartData.push({
         streak: i,
-        wins: winDistribution[i] || 0,
-        losses: lossDistribution[i] || 0,
+        winAmount: winData ? winData.total / winData.count : 0,
+        lossAmount: lossData ? lossData.total / lossData.count : 0,
+        winAmountPercent: winData ? winData.totalPercent / winData.count : 0,
+        lossAmountPercent: lossData ? lossData.totalPercent / lossData.count : 0,
+        winFrequency: winData ? winData.count : 0,
+        lossFrequency: lossData ? lossData.count : 0,
+      });
+    }
+
+    // Add ">10" bucket if needed
+    if (maxStreak > 10) {
+      const winOver10 = winStreaks.filter(s => s.count > 10);
+      const lossOver10 = lossStreaks.filter(s => s.count > 10);
+      
+      const winTotal = winOver10.reduce((sum, s) => sum + s.totalPnl, 0);
+      const winTotalPercent = winOver10.reduce((sum, s) => sum + s.totalReturnPercent, 0);
+      const lossTotal = lossOver10.reduce((sum, s) => sum + s.totalPnl, 0);
+      const lossTotalPercent = lossOver10.reduce((sum, s) => sum + s.totalReturnPercent, 0);
+      
+      chartData.push({
+        streak: 11, // Represents ">10"
+        winAmount: winOver10.length > 0 ? winTotal / winOver10.length : 0,
+        lossAmount: lossOver10.length > 0 ? lossTotal / lossOver10.length : 0,
+        winAmountPercent: winOver10.length > 0 ? winTotalPercent / winOver10.length : 0,
+        lossAmountPercent: lossOver10.length > 0 ? lossTotalPercent / lossOver10.length : 0,
+        winFrequency: winOver10.length,
+        lossFrequency: lossOver10.length,
       });
     }
 
@@ -162,6 +229,67 @@ const ConsecutiveWinnersLosers = () => {
       .sort((a, b) => b.count - a.count)
       .slice(0, 5);
   }, [streaks]);
+
+  // Calculate Y-axis domain
+  const yAxisDomain = useMemo(() => {
+    if (chartData.length === 0) return [-1000, 1000];
+    
+    const isDollar = chartDisplayType === 'dollar';
+    const allPositive = chartData.map(d => isDollar ? d.winAmount : d.winAmountPercent);
+    const allNegative = chartData.map(d => isDollar ? d.lossAmount : d.lossAmountPercent);
+    
+    const maxVal = Math.max(...allPositive, 0);
+    const minVal = Math.min(...allNegative, 0);
+    
+    const padding = Math.max(Math.abs(maxVal), Math.abs(minVal)) * 0.1 || 100;
+    return [minVal - padding, maxVal + padding];
+  }, [chartData, chartDisplayType]);
+
+  // Custom tooltip
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (!active || !payload || payload.length === 0) return null;
+    
+    const data = payload[0].payload as ChartDataPoint;
+    const streakLabel = label === 11 ? '> 10' : label;
+    const isDollar = chartDisplayType === 'dollar';
+    
+    const winValue = isDollar ? data.winAmount : data.winAmountPercent;
+    const lossValue = isDollar ? data.lossAmount : data.lossAmountPercent;
+    
+    const formatValue = (val: number) => {
+      if (isPrivacyMode) return PRIVACY_MASK;
+      if (isDollar) return formatCurrency(val);
+      return `${val.toFixed(2)}%`;
+    };
+
+    return (
+      <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
+        <p className="text-foreground font-semibold mb-2">
+          {streakLabel} trades streak
+        </p>
+        {data.winFrequency > 0 && (
+          <div className="mb-2">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-profit" />
+              <span className="text-sm text-muted-foreground">Consecutive winners</span>
+            </div>
+            <p className="text-profit font-medium ml-4">{formatValue(winValue)}</p>
+            <p className="text-xs text-muted-foreground ml-4">Frequency: {data.winFrequency}</p>
+          </div>
+        )}
+        {data.lossFrequency > 0 && (
+          <div>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-loss" />
+              <span className="text-sm text-muted-foreground">Consecutive losers</span>
+            </div>
+            <p className="text-loss font-medium ml-4">{formatValue(lossValue)}</p>
+            <p className="text-xs text-muted-foreground ml-4">Frequency: {data.lossFrequency}</p>
+          </div>
+        )}
+      </div>
+    );
+  };
 
   if (!stats || filteredTrades.length === 0) {
     return (
@@ -266,41 +394,106 @@ const ConsecutiveWinnersLosers = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5 }}
-        className="glass-card rounded-xl p-6"
       >
-        <h2 className="text-lg font-semibold text-foreground mb-4">Streak Length Distribution</h2>
-        <div className="h-[300px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={chartData} barCategoryGap="20%">
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-              <XAxis
-                dataKey="streak"
-                stroke="hsl(var(--muted-foreground))"
-                fontSize={12}
-                tickLine={false}
-                axisLine={false}
-                label={{ value: 'Streak Length', position: 'insideBottom', offset: -5, fill: 'hsl(var(--muted-foreground))' }}
-              />
-              <YAxis
-                stroke="hsl(var(--muted-foreground))"
-                fontSize={12}
-                tickLine={false}
-                axisLine={false}
-                label={{ value: 'Occurrences', angle: -90, position: 'insideLeft', fill: 'hsl(var(--muted-foreground))' }}
-              />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: 'hsl(var(--card))',
-                  border: '1px solid hsl(var(--border))',
-                  borderRadius: '8px',
-                }}
-                labelFormatter={(value) => `${value} trades in a row`}
-              />
-              <Bar dataKey="wins" name="Win Streaks" fill="hsl(var(--profit))" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="losses" name="Loss Streaks" fill="hsl(var(--loss))" radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+        <Card className="bg-card border-border">
+          <CardContent className="p-6">
+            {/* Header with Display Dropdown */}
+            <div className="flex items-center justify-between mb-4">
+              <Select 
+                value={chartDisplayType} 
+                onValueChange={(val) => setDisplayType(val as ChartDisplayType)}
+              >
+                <SelectTrigger className="w-[160px] bg-background border-border">
+                  <div className="flex flex-col items-start">
+                    <span className="text-xs text-muted-foreground">Average</span>
+                    <SelectValue />
+                  </div>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="dollar">Return ($)</SelectItem>
+                  <SelectItem value="percent">Return (%)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Chart - 2x height (600px) */}
+            <div className="h-[600px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <ComposedChart 
+                  data={chartData} 
+                  margin={{ top: 20, right: 30, left: 20, bottom: 40 }}
+                  barGap={0}
+                  barCategoryGap="20%"
+                >
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+                  <XAxis
+                    dataKey="streak"
+                    stroke="hsl(var(--muted-foreground))"
+                    fontSize={12}
+                    tickLine={false}
+                    axisLine={{ stroke: 'hsl(var(--border))' }}
+                    tickFormatter={(value) => value === 11 ? '> 10' : value}
+                    label={{ 
+                      value: 'Consecutive winners/losers', 
+                      position: 'bottom', 
+                      offset: 20,
+                      fill: 'hsl(var(--muted-foreground))',
+                      fontSize: 12,
+                    }}
+                  />
+                  <YAxis
+                    stroke="hsl(var(--muted-foreground))"
+                    fontSize={12}
+                    tickLine={false}
+                    axisLine={{ stroke: 'hsl(var(--border))' }}
+                    domain={yAxisDomain}
+                    tickFormatter={(value) => {
+                      if (isPrivacyMode) return PRIVACY_MASK;
+                      if (chartDisplayType === 'dollar') {
+                        if (Math.abs(value) >= 1000) {
+                          return `${(value / 1000).toFixed(1)}k`;
+                        }
+                        return value.toFixed(0);
+                      }
+                      return `${value.toFixed(1)}%`;
+                    }}
+                    label={{ 
+                      value: chartDisplayType === 'dollar' ? 'Average Return ($)' : 'Average Return (%)', 
+                      angle: -90, 
+                      position: 'insideLeft',
+                      offset: 0,
+                      fill: 'hsl(var(--muted-foreground))',
+                      fontSize: 12,
+                      style: { textAnchor: 'middle' },
+                    }}
+                  />
+                  
+                  <ReferenceLine y={0} stroke="hsl(var(--border))" strokeWidth={2} />
+
+                  <Tooltip content={<CustomTooltip />} />
+
+                  {/* Win bars (positive - green) */}
+                  <Bar 
+                    dataKey={chartDisplayType === 'dollar' ? 'winAmount' : 'winAmountPercent'}
+                    name="Winners"
+                    fill="hsl(var(--profit))"
+                    radius={[4, 4, 0, 0]}
+                    maxBarSize={60}
+                  />
+                  
+                  {/* Loss bars (negative - red) */}
+                  <Bar 
+                    dataKey={chartDisplayType === 'dollar' ? 'lossAmount' : 'lossAmountPercent'}
+                    name="Losers"
+                    fill="hsl(var(--loss))"
+                    radius={[0, 0, 4, 4]}
+                    maxBarSize={60}
+                  />
+                </ComposedChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
       </motion.div>
 
       {/* Top Streaks Tables */}
