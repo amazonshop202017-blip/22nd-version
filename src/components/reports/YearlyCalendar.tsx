@@ -3,8 +3,8 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useFilteredTrades } from '@/hooks/useFilteredTrades';
 import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { usePrivacyMode, PRIVACY_MASK } from '@/hooks/usePrivacyMode';
-import { calculateTradeMetrics } from '@/types/trade';
-import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, isSameMonth, isToday } from 'date-fns';
+import { calculateTradeMetrics, Trade } from '@/types/trade';
+import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, isSameMonth, isToday, parseISO, startOfDay } from 'date-fns';
 import {
   Tooltip,
   TooltipContent,
@@ -12,6 +12,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
+import { DayDetailsModal } from '@/components/dayview/DayDetailsModal';
 
 const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const MONTHS = [
@@ -29,6 +30,10 @@ const YearlyCalendar = () => {
   const { filteredTrades } = useFilteredTrades();
   const { formatCurrency } = useGlobalFilters();
   const { isPrivacyMode } = usePrivacyMode();
+  
+  // Day details modal state
+  const [selectedDayDate, setSelectedDayDate] = useState<Date | null>(null);
+  const [selectedDayTrades, setSelectedDayTrades] = useState<Trade[]>([]);
 
   // Group trades by date and calculate daily P&L
   const dailyData = useMemo(() => {
@@ -82,13 +87,29 @@ const YearlyCalendar = () => {
     
     if (dayData) {
       if (dayData.netPnl > 0) {
-        return 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40';
+        return 'bg-profit/20 text-profit border border-profit/40';
       } else if (dayData.netPnl < 0) {
-        return 'bg-red-500/20 text-red-400 border border-red-500/40';
+        return 'bg-loss/20 text-loss border border-loss/40';
       }
     }
     
     return 'text-muted-foreground';
+  };
+
+  // Handle day click to open modal
+  const handleDayClick = (day: Date) => {
+    const dayKey = format(day, 'yyyy-MM-dd');
+    const dayTrades = filteredTrades.filter(trade => {
+      const metrics = calculateTradeMetrics(trade);
+      return metrics.openDate && format(new Date(metrics.openDate), 'yyyy-MM-dd') === dayKey;
+    });
+    setSelectedDayDate(day);
+    setSelectedDayTrades(dayTrades);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedDayDate(null);
+    setSelectedDayTrades([]);
   };
 
   return (
@@ -147,10 +168,12 @@ const YearlyCalendar = () => {
                       <Tooltip key={idx} delayDuration={0}>
                         <TooltipTrigger asChild>
                           <div
+                            onClick={() => isCurrentMonth && handleDayClick(date)}
                             className={cn(
-                              "aspect-square flex items-center justify-center text-[9px] rounded-[2px] cursor-default transition-colors",
+                              "aspect-square flex items-center justify-center text-[9px] rounded-[2px] transition-colors",
                               getDayClass(date, monthIndex),
-                              isToday(date) && isCurrentMonth && "ring-1 ring-primary"
+                              isToday(date) && isCurrentMonth && "ring-1 ring-primary",
+                              isCurrentMonth ? "cursor-pointer hover:ring-1 hover:ring-primary/50" : "cursor-default"
                             )}
                           >
                             {isCurrentMonth ? dayNumber : ''}
@@ -169,7 +192,7 @@ const YearlyCalendar = () => {
                                 <>
                                   <div className={cn(
                                     "text-sm font-semibold",
-                                    dayData.netPnl > 0 ? "text-emerald-400" : dayData.netPnl < 0 ? "text-red-400" : "text-muted-foreground"
+                                    dayData.netPnl > 0 ? "text-profit" : dayData.netPnl < 0 ? "text-loss" : "text-muted-foreground"
                                   )}>
                                     Net P&L: {isPrivacyMode ? PRIVACY_MASK : formatCurrency(dayData.netPnl)}
                                   </div>
@@ -195,6 +218,16 @@ const YearlyCalendar = () => {
         {/* Bottom spacing */}
         <div className="h-4" />
       </div>
+
+      {/* Day Details Modal */}
+      {selectedDayDate && (
+        <DayDetailsModal
+          isOpen={!!selectedDayDate}
+          onClose={handleCloseModal}
+          date={selectedDayDate}
+          trades={selectedDayTrades}
+        />
+      )}
     </TooltipProvider>
   );
 };

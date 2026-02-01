@@ -2,8 +2,8 @@ import { useState, useMemo } from 'react';
 import { useFilteredTrades } from '@/hooks/useFilteredTrades';
 import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { usePrivacyMode, PRIVACY_MASK } from '@/hooks/usePrivacyMode';
-import { calculateTradeMetrics } from '@/types/trade';
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, addMonths, subMonths, isSameMonth, getDay, startOfWeek, endOfWeek } from 'date-fns';
+import { calculateTradeMetrics, Trade } from '@/types/trade';
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, addMonths, subMonths, isSameMonth, getDay, parseISO, startOfDay } from 'date-fns';
 import { ChevronLeft, ChevronRight, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -14,6 +14,7 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { motion } from 'framer-motion';
+import { DayDetailsModal } from '@/components/dayview/DayDetailsModal';
 
 interface DayStats {
   pnl: number;
@@ -47,6 +48,10 @@ export const MonthlyPerformanceCalendar = () => {
     winRate: true,
     rMultiple: false,
   });
+  
+  // Day details modal state
+  const [selectedDayDate, setSelectedDayDate] = useState<Date | null>(null);
+  const [selectedDayTrades, setSelectedDayTrades] = useState<Trade[]>([]);
 
   // Week starts on Saturday (6), so order is: Sat, Sun, Mon, Tue, Wed, Thu, Fri
   const weekDays = ['Sat', 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
@@ -181,6 +186,22 @@ export const MonthlyPerformanceCalendar = () => {
     setDisplaySettings(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
+  // Handle day click to open modal
+  const handleDayClick = (day: Date) => {
+    const dayKey = format(day, 'yyyy-MM-dd');
+    const dayTrades = trades.filter(trade => {
+      const metrics = calculateTradeMetrics(trade);
+      return metrics.openDate && format(new Date(metrics.openDate), 'yyyy-MM-dd') === dayKey;
+    });
+    setSelectedDayDate(day);
+    setSelectedDayTrades(dayTrades);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedDayDate(null);
+    setSelectedDayTrades([]);
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -281,10 +302,12 @@ export const MonthlyPerformanceCalendar = () => {
                   return (
                     <div
                       key={dayKey}
+                      onClick={() => isCurrentMonth && handleDayClick(day)}
                       className={`
                         min-h-[80px] p-2 rounded-lg border transition-colors
                         ${isCurrentMonth ? bgClass : 'bg-muted/20 opacity-40'}
                         ${hasData ? 'border' : 'border-transparent'}
+                        ${isCurrentMonth ? 'cursor-pointer hover:ring-1 hover:ring-primary/50' : ''}
                       `}
                     >
                       <div className={`text-xs font-medium mb-1 ${isCurrentMonth ? 'text-primary' : 'text-muted-foreground'}`}>
@@ -346,6 +369,16 @@ export const MonthlyPerformanceCalendar = () => {
           ))}
         </div>
       </div>
+
+      {/* Day Details Modal */}
+      {selectedDayDate && (
+        <DayDetailsModal
+          isOpen={!!selectedDayDate}
+          onClose={handleCloseModal}
+          date={selectedDayDate}
+          trades={selectedDayTrades}
+        />
+      )}
     </motion.div>
   );
 };
