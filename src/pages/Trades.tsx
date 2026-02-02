@@ -475,8 +475,15 @@ const Trades = () => {
                       )}
                       
                       {isColumnVisible('realizedRMultiple') && (
-                        <TableCell className="font-mono px-2 py-1">
-                          {metrics.rFactor !== 0 ? metrics.rFactor.toFixed(2) : (trade.savedRMultiple !== undefined && trade.savedRMultiple !== null ? trade.savedRMultiple.toFixed(2) : '—')}
+                        <TableCell className={cn(
+                          "font-mono px-2 py-1",
+                          trade.savedRMultiple !== undefined && trade.savedRMultiple !== null
+                            ? trade.savedRMultiple >= 0 ? "profit-text" : "loss-text"
+                            : ""
+                        )}>
+                          {trade.savedRMultiple !== undefined && trade.savedRMultiple !== null 
+                            ? trade.savedRMultiple.toFixed(2) 
+                            : '—'}
                         </TableCell>
                       )}
                     </TableRow>
