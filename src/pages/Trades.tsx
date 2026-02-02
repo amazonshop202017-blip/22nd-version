@@ -55,7 +55,7 @@ import {
 } from '@/components/ui/select';
 
 const Trades = () => {
-  const { filteredTrades, deleteTrades, stats } = useFilteredTrades();
+  const { filteredTrades, deleteTrades, bulkAddTrades, stats } = useFilteredTrades();
   const { openModal } = useTradeModal();
   const { formatCurrency } = useGlobalFilters();
   const { isPrivacyMode, maskCurrency } = usePrivacyMode();
@@ -149,6 +149,25 @@ const Trades = () => {
 
     // Perform atomic bulk delete using the snapshot only
     deleteTrades(idsToDelete);
+  };
+
+  const handleDuplicateSelected = () => {
+    if (selectedTrades.size === 0) return;
+    
+    // Get selected trade data
+    const tradesToDuplicate = sortedTrades.filter(t => selectedTrades.has(t.id));
+    
+    // Create trade form data from each trade (exclude id, createdAt, updatedAt)
+    const duplicatedTradesData = tradesToDuplicate.map(trade => {
+      const { id, createdAt, updatedAt, ...tradeData } = trade;
+      return tradeData;
+    });
+    
+    // Bulk add the duplicated trades
+    bulkAddTrades(duplicatedTradesData);
+    
+    // Clear selection after duplication
+    setSelectedTrades(new Set());
   };
 
   const formatDuration = (duration: string) => {
@@ -300,6 +319,7 @@ const Trades = () => {
               size="sm" 
               className="gap-2"
               disabled={selectedTrades.size === 0}
+              onClick={handleDuplicateSelected}
             >
               <Copy className="w-4 h-4" />
               Duplicate
