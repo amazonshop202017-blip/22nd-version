@@ -389,6 +389,36 @@ export const TradeModal = () => {
     return Math.abs(effectiveNetPnl - origNetPnl) > 0.001;
   }, [editingTrade, effectiveNetPnl, selectedAccountId]);
 
+  // For editing: track if R-Multiple-affecting fields changed (entry, exit, stopLoss, direction)
+  const rMultipleFieldsChanged = useMemo(() => {
+    if (!editingTrade) return true; // Always calculate for new trades
+    
+    // Get original values from editing trade
+    const origEntries = editingTrade.entries || [];
+    const origSortedEntries = [...origEntries].sort((a, b) => 
+      new Date(a.datetime).getTime() - new Date(b.datetime).getTime()
+    );
+    const origFirstEntry = origSortedEntries[0];
+    const origLastEntry = origSortedEntries.length > 1 ? origSortedEntries[origSortedEntries.length - 1] : null;
+    
+    const origEntryPrice = origFirstEntry?.price || 0;
+    const origExitPrice = origLastEntry?.price || 0;
+    const origStopLoss = editingTrade.stopLoss || 0;
+    const origDirection = editingTrade.side;
+    
+    const currentEntryPrice = parseFloat(entryPrice) || 0;
+    const currentExitPrice = parseFloat(exitPrice) || 0;
+    const currentStopLoss = parseFloat(stopLoss) || 0;
+    
+    // Check if any R-Multiple input changed
+    return (
+      Math.abs(currentEntryPrice - origEntryPrice) > 0.0001 ||
+      Math.abs(currentExitPrice - origExitPrice) > 0.0001 ||
+      Math.abs(currentStopLoss - origStopLoss) > 0.0001 ||
+      direction !== origDirection
+    );
+  }, [editingTrade, entryPrice, exitPrice, stopLoss, direction]);
+
   // Final return percent to display - for edit, use saved unless P/L changed
   const displayReturnPercent = useMemo(() => {
     if (editingTrade && !pnlFieldsChanged && editingTrade.savedReturnPercent !== undefined) {
@@ -479,7 +509,8 @@ export const TradeModal = () => {
         ? editingTrade.savedReturnPercent 
         : calculatedReturnPercent,
       // Save R-Multiple - use the same value displayed in the footer (rMultipleCalculated)
-      savedRMultiple: editingTrade && !pnlFieldsChanged
+      // Update when R-Multiple affecting fields change (entry, exit, stopLoss, direction)
+      savedRMultiple: editingTrade && !rMultipleFieldsChanged
         ? editingTrade.savedRMultiple
         : (rMultipleCalculated ?? undefined),
       // Account snapshot - save accountId and balance at trade creation time
