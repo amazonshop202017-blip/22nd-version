@@ -57,7 +57,7 @@ const displayGroups: DisplayGroup[] = [
     ],
   },
   {
-    name: 'Win & Directional Performance',
+    name: 'Win Performance',
     options: [
       { value: 'winrate', label: 'Win %' },
       { value: 'long_winrate' as ChartDisplayType, label: 'Long win %' },
