@@ -99,33 +99,62 @@ export const getDisplayLabel = (displayType: ChartDisplayType): string => {
 };
 
 /**
- * Format duration in minutes to human-readable string (m/h/d)
+ * Format duration in minutes to precise human-readable string (e.g., "2H 10M", "1D 3H 20M")
+ * Does NOT round values - preserves exact breakdown into days, hours, minutes.
  */
 export const formatDuration = (minutes: number): string => {
   if (minutes < 1) {
-    return '<1m';
+    return '<1M';
   }
-  if (minutes < 60) {
-    return `${Math.round(minutes)}m`;
+  
+  const totalMinutes = Math.floor(minutes);
+  const days = Math.floor(totalMinutes / 1440);
+  const remainingAfterDays = totalMinutes % 1440;
+  const hours = Math.floor(remainingAfterDays / 60);
+  const mins = remainingAfterDays % 60;
+  
+  const parts: string[] = [];
+  
+  if (days > 0) {
+    parts.push(`${days}D`);
   }
-  if (minutes < 1440) { // Less than 24 hours
-    const hours = minutes / 60;
-    return `${hours.toFixed(1)}h`;
+  if (hours > 0) {
+    parts.push(`${hours}H`);
   }
-  // Days
-  const days = minutes / 1440;
-  return `${days.toFixed(1)}d`;
+  if (mins > 0 || parts.length === 0) {
+    parts.push(`${mins}M`);
+  }
+  
+  return parts.join(' ');
 };
 
 /**
- * Format duration for Y-axis tick (shorter format)
+ * Format duration for Y-axis tick (compact format for axis readability)
+ * Uses same precise format but shorter for axis labels
  */
 export const formatDurationTick = (minutes: number): string => {
-  if (minutes < 60) {
-    return `${Math.round(minutes)}m`;
+  if (minutes < 1) {
+    return '0M';
   }
-  if (minutes < 1440) {
-    return `${Math.round(minutes / 60)}h`;
+  
+  const totalMinutes = Math.floor(minutes);
+  const days = Math.floor(totalMinutes / 1440);
+  const remainingAfterDays = totalMinutes % 1440;
+  const hours = Math.floor(remainingAfterDays / 60);
+  const mins = remainingAfterDays % 60;
+  
+  // For Y-axis, show abbreviated version
+  if (days > 0 && hours > 0) {
+    return `${days}D ${hours}H`;
   }
-  return `${Math.round(minutes / 1440)}d`;
+  if (days > 0) {
+    return `${days}D`;
+  }
+  if (hours > 0 && mins > 0) {
+    return `${hours}H ${mins}M`;
+  }
+  if (hours > 0) {
+    return `${hours}H`;
+  }
+  return `${mins}M`;
 };

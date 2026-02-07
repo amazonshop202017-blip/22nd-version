@@ -36,7 +36,7 @@ const displayGroups: DisplayGroup[] = [
     name: 'Time Analysis',
     options: [
       { value: 'avg_hold_time' as ChartDisplayType, label: 'Average hold time' },
-      { value: 'longest_trade_duration' as ChartDisplayType, label: 'Longest trade duration' },
+      { value: 'longest_duration' as ChartDisplayType, label: 'Longest trade duration' },
     ],
   },
   {
