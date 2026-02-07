@@ -25,8 +25,55 @@ interface ChartDisplayDropdownProps {
   className?: string;
 }
 
-// Display options grouped under "Others" for now
+// Functional options that actually work
+const functionalValues: Set<ChartDisplayType> = new Set([
+  'dollar', 'percent', 'winrate', 'tradecount', 'tickpip'
+]);
+
+// Display options grouped by category
 const displayGroups: DisplayGroup[] = [
+  {
+    name: 'Time Analysis',
+    options: [
+      { value: 'avg_hold_time' as ChartDisplayType, label: 'Average hold time' },
+      { value: 'longest_trade_duration' as ChartDisplayType, label: 'Longest trade duration' },
+    ],
+  },
+  {
+    name: 'Risk & Drawdown',
+    options: [
+      { value: 'avg_realized_r' as ChartDisplayType, label: 'Average realized R-multiple' },
+      { value: 'avg_planned_r' as ChartDisplayType, label: 'Average planned R-multiple' },
+      { value: 'avg_daily_drawdown' as ChartDisplayType, label: 'Average daily net drawdown' },
+    ],
+  },
+  {
+    name: 'Profitability',
+    options: [
+      { value: 'dollar', label: 'Net P&L' },
+      { value: 'profit_factor' as ChartDisplayType, label: 'Profit Factor' },
+      { value: 'avg_win' as ChartDisplayType, label: 'Average win' },
+      { value: 'avg_loss' as ChartDisplayType, label: 'Average loss' },
+    ],
+  },
+  {
+    name: 'Win & Directional Performance',
+    options: [
+      { value: 'winrate', label: 'Win %' },
+      { value: 'long_winrate' as ChartDisplayType, label: 'Long win %' },
+      { value: 'short_winrate' as ChartDisplayType, label: 'Short win %' },
+    ],
+  },
+  {
+    name: 'Trading Activity & Exposure',
+    options: [
+      { value: 'tradecount', label: 'Trade count (total)' },
+      { value: 'tradecount_long' as ChartDisplayType, label: 'Trade count (long)' },
+      { value: 'tradecount_short' as ChartDisplayType, label: 'Trade count (short)' },
+      { value: 'logged_days' as ChartDisplayType, label: 'Logged days' },
+      { value: 'open_trades' as ChartDisplayType, label: 'Open trades' },
+    ],
+  },
   {
     name: 'Others',
     options: [
@@ -44,7 +91,7 @@ export const ChartDisplayDropdown = ({
   onValueChange,
   className,
 }: ChartDisplayDropdownProps) => {
-  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['Others']));
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   const [isOpen, setIsOpen] = useState(false);
 
   const toggleGroup = (groupName: string, e: React.MouseEvent) => {
@@ -62,8 +109,12 @@ export const ChartDisplayDropdown = ({
   };
 
   const handleSelectOption = (optionValue: ChartDisplayType) => {
-    onValueChange(optionValue);
-    setIsOpen(false);
+    // Only trigger change for functional options
+    if (functionalValues.has(optionValue)) {
+      onValueChange(optionValue);
+      setIsOpen(false);
+    }
+    // Non-functional options do nothing
   };
 
   const currentLabel = getDisplayLabel(value);
@@ -85,7 +136,7 @@ export const ChartDisplayDropdown = ({
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
-        className="w-[200px] bg-popover border-border p-1 z-50"
+        className="w-[220px] max-h-[320px] overflow-y-auto bg-popover border-border p-1 z-50"
       >
         {displayGroups.map((group) => {
           const isExpanded = expandedGroups.has(group.name);
@@ -110,20 +161,24 @@ export const ChartDisplayDropdown = ({
                 <div className="pl-2">
                   {group.options.map((option) => {
                     const isSelected = value === option.value;
+                    const isFunctional = functionalValues.has(option.value);
                     return (
                       <button
-                        key={option.value}
+                        key={`${group.name}-${option.value}-${option.label}`}
                         type="button"
                         onClick={() => handleSelectOption(option.value)}
                         className={cn(
-                          'flex items-center w-full px-2 py-1.5 text-sm rounded-sm cursor-pointer',
-                          isSelected
+                          'flex items-center w-full px-2 py-1.5 text-sm rounded-sm',
+                          isFunctional ? 'cursor-pointer' : 'cursor-default opacity-60',
+                          isSelected && isFunctional
                             ? 'bg-primary/10 text-primary'
-                            : 'text-foreground hover:bg-accent hover:text-accent-foreground'
+                            : isFunctional 
+                              ? 'text-foreground hover:bg-accent hover:text-accent-foreground'
+                              : 'text-muted-foreground'
                         )}
                       >
                         <span className="w-5 shrink-0">
-                          {isSelected && <Check className="h-4 w-4" />}
+                          {isSelected && isFunctional && <Check className="h-4 w-4" />}
                         </span>
                         <span>{option.label}</span>
                       </button>
