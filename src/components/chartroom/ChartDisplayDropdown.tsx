@@ -75,6 +75,9 @@ const displayGroups: DisplayGroup[] = [
       { value: 'tradecount_long' as ChartDisplayType, label: 'Trade count (long)' },
       { value: 'tradecount_short' as ChartDisplayType, label: 'Trade count (short)' },
       { value: 'logged_days' as ChartDisplayType, label: 'Logged days' },
+      { value: 'avg_trades_per_day' as ChartDisplayType, label: 'Avg trades per logged day' },
+      { value: 'median_trades_per_day' as ChartDisplayType, label: 'Median trades per day' },
+      { value: '90th_percentile_trades' as ChartDisplayType, label: '90th percentile trades per day' },
     ],
   },
   {
