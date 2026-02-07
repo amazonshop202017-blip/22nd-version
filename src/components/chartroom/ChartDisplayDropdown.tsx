@@ -52,8 +52,12 @@ const displayGroups: DisplayGroup[] = [
     options: [
       { value: 'dollar', label: 'Net P&L' },
       { value: 'profit_factor' as ChartDisplayType, label: 'Profit Factor' },
+      { value: 'trade_expectancy' as ChartDisplayType, label: 'Trade Expectancy' },
+      { value: 'avg_net_trade_pnl' as ChartDisplayType, label: 'Avg net trade P&L' },
       { value: 'avg_win' as ChartDisplayType, label: 'Average win' },
       { value: 'avg_loss' as ChartDisplayType, label: 'Average loss' },
+      { value: 'largest_win' as ChartDisplayType, label: 'Largest winning trade' },
+      { value: 'largest_loss' as ChartDisplayType, label: 'Largest losing trade' },
     ],
   },
   {
@@ -65,13 +69,12 @@ const displayGroups: DisplayGroup[] = [
     ],
   },
   {
-    name: 'Trading Activity & Exposure',
+    name: 'Trading Activity',
     options: [
       { value: 'tradecount', label: 'Trade count (total)' },
       { value: 'tradecount_long' as ChartDisplayType, label: 'Trade count (long)' },
       { value: 'tradecount_short' as ChartDisplayType, label: 'Trade count (short)' },
       { value: 'logged_days' as ChartDisplayType, label: 'Logged days' },
-      { value: 'open_trades' as ChartDisplayType, label: 'Open trades' },
     ],
   },
   {
@@ -146,11 +149,16 @@ export const ChartDisplayDropdown = ({
               <button
                 type="button"
                 onClick={(e) => toggleGroup(group.name, e)}
-                className="flex items-center justify-between w-full px-2 py-1.5 text-sm text-foreground hover:bg-accent hover:text-accent-foreground rounded-sm cursor-pointer"
+                className={cn(
+                  'flex items-center justify-between w-full px-2 py-1.5 text-sm rounded-sm cursor-pointer transition-colors',
+                  isExpanded
+                    ? 'bg-primary/10 text-primary font-medium'
+                    : 'text-foreground hover:bg-accent hover:text-accent-foreground'
+                )}
               >
                 <span>{group.name}</span>
                 {isExpanded ? (
-                  <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                  <ChevronUp className={cn('h-4 w-4', isExpanded ? 'text-primary' : 'text-muted-foreground')} />
                 ) : (
                   <ChevronDown className="h-4 w-4 text-muted-foreground" />
                 )}
