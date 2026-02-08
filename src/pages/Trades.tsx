@@ -161,6 +161,7 @@ const TableWithStickyHorizontalScroll = ({
                 {isColumnVisible('grossPnl') && <TableHead className="px-2">Gross P&L</TableHead>}
                 {isColumnVisible('netPnl') && <TableHead className="px-2">Net P&L</TableHead>}
                 {isColumnVisible('realizedRMultiple') && <TableHead className="px-2">R Multiple</TableHead>}
+                {isColumnVisible('plannedRRR') && <TableHead className="px-2">Planned RR</TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -304,6 +305,18 @@ const TableWithStickyHorizontalScroll = ({
                       )}>
                         {typeof trade.savedRMultiple === 'number'
                           ? trade.savedRMultiple.toFixed(2) 
+                          : '—'}
+                      </TableCell>
+                    )}
+                    {isColumnVisible('plannedRRR') && (
+                      <TableCell className={cn(
+                        "font-mono px-2 py-1",
+                        typeof trade.savedRRR === 'number' && trade.savedRRR > 0
+                          ? "profit-text"
+                          : ""
+                      )}>
+                        {typeof trade.savedRRR === 'number'
+                          ? trade.savedRRR.toFixed(2) 
                           : '—'}
                       </TableCell>
                     )}

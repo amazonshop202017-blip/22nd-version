@@ -513,6 +513,8 @@ export const TradeModal = () => {
       savedRMultiple: editingTrade && !rMultipleFieldsChanged
         ? editingTrade.savedRMultiple
         : (rMultipleCalculated ?? undefined),
+      // Save Planned RRR - based on Entry, Stop Loss, Take Profit
+      savedRRR: rrrCalculated ?? undefined,
       // Account snapshot - save accountId and balance at trade creation time
       accountId: editingTrade && !pnlFieldsChanged
         ? editingTrade.accountId

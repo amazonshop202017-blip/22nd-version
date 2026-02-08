@@ -64,6 +64,8 @@ export interface Trade {
   savedReturnPercent?: number;
   // Saved R-Multiple - calculated at trade creation based on trade risk
   savedRMultiple?: number;
+  // Saved Planned RRR (Risk:Reward Ratio) - based on Entry, Stop Loss, Take Profit
+  savedRRR?: number;
   // Account snapshot at trade creation time
   accountId?: string;
   accountBalanceSnapshot?: number;

@@ -61,6 +61,7 @@ export const ALL_COLUMNS: ColumnConfig[] = [
   { id: 'grossPnl', label: 'Gross P&L', group: 'performance', visible: true },
   { id: 'netPnl', label: 'Net P&L', group: 'performance', visible: true },
   { id: 'realizedRMultiple', label: 'Realized R Multiple', group: 'performance', visible: true },
+  { id: 'plannedRRR', label: 'Planned RR / R-Multiple', group: 'performance', visible: false },
 ];
 
 const STORAGE_KEY = 'trades-column-visibility';
