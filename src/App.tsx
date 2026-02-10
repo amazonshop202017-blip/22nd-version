@@ -44,8 +44,8 @@ const App = () => (
       <CategoriesProvider>
         <TagsProvider>
           <StrategiesProvider>
-            <AccountsProvider>
-              <TradesProvider>
+            <TradesProvider>
+              <AccountsProvider>
                 <GlobalFiltersProvider>
                   <CustomStatsProvider>
                     <SymbolTickSizeProvider>
@@ -84,8 +84,8 @@ const App = () => (
                   </SymbolTickSizeProvider>
                 </CustomStatsProvider>
                 </GlobalFiltersProvider>
-            </TradesProvider>
               </AccountsProvider>
+            </TradesProvider>
           </StrategiesProvider>
         </TagsProvider>
       </CategoriesProvider>
