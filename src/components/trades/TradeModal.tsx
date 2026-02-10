@@ -21,7 +21,7 @@ import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useCustomStats } from '@/contexts/CustomStatsContext';
 import { useTagsContext } from '@/contexts/TagsContext';
-import { TradeFormData, TradeEntry, ScaleEntry, calculateTradeMetrics, InstrumentType, INSTRUMENT_TYPES } from '@/types/trade';
+import { TradeFormData, TradeEntry, ScaleEntry, calculateTradeMetrics } from '@/types/trade';
 import { cn } from '@/lib/utils';
 
 const defaultEntry = (): TradeEntry => ({
@@ -83,7 +83,6 @@ export const TradeModal = () => {
   
   // Additional fields
   const [symbol, setSymbol] = useState('');
-  const [instrument, setInstrument] = useState<InstrumentType | ''>('');
   const [accountName, setAccountName] = useState('');
   const [notes, setNotes] = useState('');
   const [tradeRisk, setTradeRisk] = useState(0);
@@ -188,7 +187,6 @@ export const TradeModal = () => {
   useEffect(() => {
     if (editingTrade) {
       setSymbol(editingTrade.symbol);
-      setInstrument(editingTrade.instrument || '');
       setAccountName(editingTrade.accountName);
       // Set account ID from accountName
       const matchedAccount = accounts.find(a => a.name === editingTrade.accountName);
@@ -282,7 +280,6 @@ export const TradeModal = () => {
   const resetForm = () => {
     setActiveTab('regular');
     setSymbol('');
-    setInstrument('');
     setAccountName('');
     setSelectedAccountId('');
     setAccountError(false);
@@ -466,7 +463,6 @@ export const TradeModal = () => {
 
     const tradeData: TradeFormData = {
       symbol: symbol.trim(),
-      instrument: instrument || undefined,
       side: direction,
       entries,
       tradeRisk,
@@ -720,32 +716,16 @@ export const TradeModal = () => {
                   </div>
                 </div>
 
-                {/* Symbol & Instrument - Same Row */}
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1.5">
-                    <Label className="text-xs text-muted-foreground">Symbol *</Label>
-                    <Input
-                      type="text"
-                      placeholder="e.g., EURUSD, CL, AAPL..."
-                      value={symbol}
-                      onChange={(e) => setSymbol(e.target.value)}
-                      className="h-10 bg-input border-border"
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label className="text-xs text-muted-foreground">Instrument</Label>
-                    <Select value={instrument || "none"} onValueChange={(val) => setInstrument(val === "none" ? "" : val as InstrumentType)}>
-                      <SelectTrigger className="h-10 bg-input border-border">
-                        <SelectValue placeholder="Select..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">None</SelectItem>
-                        {INSTRUMENT_TYPES.map((type) => (
-                          <SelectItem key={type} value={type}>{type}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                {/* Symbol - Free text input */}
+                <div className="space-y-1.5">
+                  <Label className="text-xs text-muted-foreground">Symbol *</Label>
+                  <Input
+                    type="text"
+                    placeholder="e.g., EURUSD, CL, WTI, AAPL..."
+                    value={symbol}
+                    onChange={(e) => setSymbol(e.target.value)}
+                    className="h-10 bg-input border-border"
+                  />
                 </div>
 
                 {/* Setup & Checklist - Same Row 50/50 */}

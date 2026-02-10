@@ -14,15 +14,9 @@ export interface ScaleEntry {
   quantity: number;
 }
 
-// Asset class types for the instrument field
-export type InstrumentType = 'Equity' | 'Futures' | 'Options' | 'Crypto' | 'Forex';
-
-export const INSTRUMENT_TYPES: InstrumentType[] = ['Equity', 'Futures', 'Options', 'Crypto', 'Forex'];
-
 export interface Trade {
   id: string;
   symbol: string;
-  instrument?: InstrumentType;
   side: 'LONG' | 'SHORT';
   entries: TradeEntry[];
   tradeRisk: number;

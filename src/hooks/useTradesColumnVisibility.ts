@@ -18,7 +18,7 @@ export const COLUMN_GROUPS: ColumnGroup[] = [
   {
     id: 'identification',
     label: 'Trade Identification',
-    columns: ['symbol', 'instrument', 'side', 'volume', 'ticksPips', 'accountName'],
+    columns: ['symbol', 'side', 'volume', 'ticksPips', 'accountName'],
   },
   {
     id: 'timing',
@@ -40,7 +40,6 @@ export const COLUMN_GROUPS: ColumnGroup[] = [
 export const ALL_COLUMNS: ColumnConfig[] = [
   // Trade Identification
   { id: 'symbol', label: 'Symbol', group: 'identification', visible: true },
-  { id: 'instrument', label: 'Instrument', group: 'identification', visible: false },
   { id: 'side', label: 'Side', group: 'identification', visible: true },
   { id: 'volume', label: 'Volume', group: 'identification', visible: true },
   { id: 'ticksPips', label: 'Ticks / Pips', group: 'identification', visible: false },
