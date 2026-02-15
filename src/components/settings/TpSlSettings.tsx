@@ -259,52 +259,75 @@ export const TpSlSettings = () => {
               />
             </div>
 
-            {/* Profit Target / Stop Loss side by side */}
-            <div className="grid grid-cols-2 gap-4">
-              {/* Profit Target */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-profit">Profit Target</label>
-                <Select value={formPtUnit} onValueChange={(v) => setFormPtUnit(v as 'tick' | 'dollar')}>
-                  <SelectTrigger className="bg-input border-border h-9">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="tick">Tick / Pip</SelectItem>
-                    <SelectItem value="dollar">{currencyConfig.symbol}</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Input
-                  type="number"
-                  min="0"
-                  step="any"
-                  placeholder="Value"
-                  value={formPtValue}
-                  onChange={e => setFormPtValue(e.target.value)}
-                  className="bg-input border-border"
-                />
+            {/* Type / Take Profit / Stop Loss row */}
+            <div className="grid grid-cols-[auto_1fr_1fr] gap-4 items-end">
+              {/* Type toggle */}
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium">Type</label>
+                <div className="flex h-10 rounded-md border border-border overflow-hidden">
+                  <button
+                    type="button"
+                    onClick={() => { setFormPtUnit('tick'); setFormSlUnit('tick'); }}
+                    className={cn(
+                      "px-3 text-sm font-medium transition-colors",
+                      formPtUnit === 'tick'
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-input text-muted-foreground hover:text-foreground"
+                    )}
+                  >
+                    %
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setFormPtUnit('dollar'); setFormSlUnit('dollar'); }}
+                    className={cn(
+                      "px-3 text-sm font-medium transition-colors border-l border-border",
+                      formPtUnit === 'dollar'
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-input text-muted-foreground hover:text-foreground"
+                    )}
+                  >
+                    {currencyConfig.symbol}
+                  </button>
+                </div>
+              </div>
+
+              {/* Take Profit */}
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-profit">Take Profit</label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                    {formPtUnit === 'tick' ? '%' : currencyConfig.symbol}
+                  </span>
+                  <Input
+                    type="number"
+                    min="0"
+                    step="any"
+                    placeholder="0.00"
+                    value={formPtValue}
+                    onChange={e => setFormPtValue(e.target.value)}
+                    className="bg-input border-border pl-8"
+                  />
+                </div>
               </div>
 
               {/* Stop Loss */}
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 <label className="text-sm font-medium text-loss">Stop Loss</label>
-                <Select value={formSlUnit} onValueChange={(v) => setFormSlUnit(v as 'tick' | 'dollar')}>
-                  <SelectTrigger className="bg-input border-border h-9">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="tick">Tick / Pip</SelectItem>
-                    <SelectItem value="dollar">{currencyConfig.symbol}</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Input
-                  type="number"
-                  min="0"
-                  step="any"
-                  placeholder="Value"
-                  value={formSlValue}
-                  onChange={e => setFormSlValue(e.target.value)}
-                  className="bg-input border-border"
-                />
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                    {formSlUnit === 'tick' ? '%' : currencyConfig.symbol}
+                  </span>
+                  <Input
+                    type="number"
+                    min="0"
+                    step="any"
+                    placeholder="0.00"
+                    value={formSlValue}
+                    onChange={e => setFormSlValue(e.target.value)}
+                    className="bg-input border-border pl-8"
+                  />
+                </div>
               </div>
             </div>
           </div>
