@@ -1,13 +1,14 @@
-import { useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Cell } from 'recharts';
 import { format, parseISO } from 'date-fns';
 import { motion } from 'framer-motion';
 import { useFilteredTrades } from '@/hooks/useFilteredTrades';
 import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { usePrivacyMode, PRIVACY_MASK } from '@/hooks/usePrivacyMode';
-import { calculateTradeMetrics } from '@/types/trade';
+import { calculateTradeMetrics, Trade } from '@/types/trade';
 import { Info } from 'lucide-react';
 import { Tooltip as UITooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { DayDetailsModal } from '@/components/dayview/DayDetailsModal';
 
 interface DailyData {
   date: string;
@@ -21,10 +22,12 @@ export const NetDailyPnLChart = () => {
   const { currencyConfig } = useGlobalFilters();
   const { isPrivacyMode } = usePrivacyMode();
 
+  const [selectedDayDate, setSelectedDayDate] = useState<Date | null>(null);
+  const [selectedDayTrades, setSelectedDayTrades] = useState<Trade[]>([]);
+
   const chartData = useMemo(() => {
     if (trades.length === 0) return [];
 
-    // Calculate P&L for each trade and group by date
     const dailyDataMap = new Map<string, { pnl: number; count: number }>();
 
     trades.forEach(trade => {
@@ -39,7 +42,6 @@ export const NetDailyPnLChart = () => {
       }
     });
 
-    // Sort dates
     const sortedDates = Array.from(dailyDataMap.keys()).sort();
 
     const data: DailyData[] = sortedDates.map(date => {
@@ -59,6 +61,24 @@ export const NetDailyPnLChart = () => {
     if (isPrivacyMode) return PRIVACY_MASK;
     const prefix = value >= 0 ? '$' : '-$';
     return `${prefix}${Math.abs(value).toFixed(0)}`;
+  };
+
+  const handleChartClick = (data: any) => {
+    if (data?.activePayload?.[0]?.payload) {
+      const clicked = data.activePayload[0].payload as DailyData;
+      const clickedDate = parseISO(clicked.date);
+      const dayTrades = trades.filter(trade => {
+        const metrics = calculateTradeMetrics(trade);
+        return metrics.closeDate && format(parseISO(metrics.closeDate), 'yyyy-MM-dd') === clicked.date;
+      });
+      setSelectedDayDate(clickedDate);
+      setSelectedDayTrades(dayTrades);
+    }
+  };
+
+  const handleCloseModal = () => {
+    setSelectedDayDate(null);
+    setSelectedDayTrades([]);
   };
 
   if (chartData.length === 0) {
@@ -106,11 +126,12 @@ export const NetDailyPnLChart = () => {
         </UITooltip>
       </div>
       
-      <div className="flex-1">
+      <div className="flex-1 cursor-pointer">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={chartData}
             margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+            onClick={handleChartClick}
           >
             <CartesianGrid 
               strokeDasharray="3 3" 
@@ -144,7 +165,7 @@ export const NetDailyPnLChart = () => {
                         {isPrivacyMode ? PRIVACY_MASK : `${data.dailyPnl >= 0 ? '+' : ''}${formatCurrency(data.dailyPnl)}`}
                       </p>
                       <p className="text-xs text-muted-foreground mt-1">
-                        {data.tradeCount} trade{data.tradeCount !== 1 ? 's' : ''}
+                        {data.tradeCount} trade{data.tradeCount !== 1 ? 's' : ''} · Click for details
                       </p>
                     </div>
                   );
@@ -173,6 +194,15 @@ export const NetDailyPnLChart = () => {
           </BarChart>
         </ResponsiveContainer>
       </div>
+
+      {selectedDayDate && (
+        <DayDetailsModal
+          isOpen={!!selectedDayDate}
+          onClose={handleCloseModal}
+          date={selectedDayDate}
+          trades={selectedDayTrades}
+        />
+      )}
     </motion.div>
   );
 };

@@ -1,13 +1,14 @@
-import { useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { format, parseISO } from 'date-fns';
 import { motion } from 'framer-motion';
 import { useFilteredTrades } from '@/hooks/useFilteredTrades';
 import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { usePrivacyMode, PRIVACY_MASK } from '@/hooks/usePrivacyMode';
-import { calculateTradeMetrics } from '@/types/trade';
+import { calculateTradeMetrics, Trade } from '@/types/trade';
 import { Info } from 'lucide-react';
 import { Tooltip as UITooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { DayDetailsModal } from '@/components/dayview/DayDetailsModal';
 
 interface DailyData {
   date: string;
@@ -21,10 +22,12 @@ export const DailyCumulativePnLChart = () => {
   const { formatCurrency: globalFormatCurrency, currencyConfig } = useGlobalFilters();
   const { isPrivacyMode } = usePrivacyMode();
 
+  const [selectedDayDate, setSelectedDayDate] = useState<Date | null>(null);
+  const [selectedDayTrades, setSelectedDayTrades] = useState<Trade[]>([]);
+
   const chartData = useMemo(() => {
     if (trades.length === 0) return [];
 
-    // Calculate P&L for each trade and group by date
     const dailyPnLMap = new Map<string, number>();
 
     trades.forEach(trade => {
@@ -36,7 +39,6 @@ export const DailyCumulativePnLChart = () => {
       }
     });
 
-    // Sort dates and calculate cumulative P&L
     const sortedDates = Array.from(dailyPnLMap.keys()).sort();
     let cumulative = 0;
 
@@ -60,18 +62,32 @@ export const DailyCumulativePnLChart = () => {
     return `${prefix}${Math.abs(value).toFixed(0)}`;
   };
 
-  // Calculate gradient split point for coloring above/below zero
   const { gradientOffset } = useMemo(() => {
     if (chartData.length === 0) return { gradientOffset: 0.5 };
-    
     const maxValue = Math.max(...chartData.map(d => d.cumulativePnl));
     const minValue = Math.min(...chartData.map(d => d.cumulativePnl));
-    
     if (maxValue <= 0) return { gradientOffset: 0 };
     if (minValue >= 0) return { gradientOffset: 1 };
-    
     return { gradientOffset: maxValue / (maxValue - minValue) };
   }, [chartData]);
+
+  const handleChartClick = (data: any) => {
+    if (data?.activePayload?.[0]?.payload) {
+      const clicked = data.activePayload[0].payload as DailyData;
+      const clickedDate = parseISO(clicked.date);
+      const dayTrades = trades.filter(trade => {
+        const metrics = calculateTradeMetrics(trade);
+        return metrics.closeDate && format(parseISO(metrics.closeDate), 'yyyy-MM-dd') === clicked.date;
+      });
+      setSelectedDayDate(clickedDate);
+      setSelectedDayTrades(dayTrades);
+    }
+  };
+
+  const handleCloseModal = () => {
+    setSelectedDayDate(null);
+    setSelectedDayTrades([]);
+  };
 
   if (chartData.length === 0) {
     return (
@@ -118,11 +134,12 @@ export const DailyCumulativePnLChart = () => {
         </UITooltip>
       </div>
       
-      <div className="flex-1">
+      <div className="flex-1 cursor-pointer">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart
             data={chartData}
             margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+            onClick={handleChartClick}
           >
             <defs>
               <linearGradient id="splitColor" x1="0" y1="0" x2="0" y2="1">
@@ -168,6 +185,7 @@ export const DailyCumulativePnLChart = () => {
                       <p className={`text-sm font-semibold font-mono ${isPrivacyMode ? 'text-foreground' : value >= 0 ? 'profit-text' : 'loss-text'}`}>
                         {isPrivacyMode ? PRIVACY_MASK : `${value >= 0 ? '+' : ''}${formatCurrency(value)}`}
                       </p>
+                      <p className="text-[10px] text-muted-foreground mt-1">Click for details</p>
                     </div>
                   );
                 }
@@ -190,6 +208,15 @@ export const DailyCumulativePnLChart = () => {
           </AreaChart>
         </ResponsiveContainer>
       </div>
+
+      {selectedDayDate && (
+        <DayDetailsModal
+          isOpen={!!selectedDayDate}
+          onClose={handleCloseModal}
+          date={selectedDayDate}
+          trades={selectedDayTrades}
+        />
+      )}
     </motion.div>
   );
 };
