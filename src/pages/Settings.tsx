@@ -64,7 +64,7 @@ const Settings = () => {
   };
 
   // Settings tab state - now with 4 tabs
-  const [activeSettingsTab, setActiveSettingsTab] = useState<'main' | 'custom-tags' | 'trade-comments' | 'symbol-tick'>('main');
+  const [activeSettingsTab, setActiveSettingsTab] = useState<'main' | 'accounts' | 'custom-tags' | 'trade-comments' | 'symbol-tick'>('main');
   
   // Custom Tags sub-tab state
   const [activeTagsSubTab, setActiveTagsSubTab] = useState<'categories' | 'tags'>('categories');
@@ -127,8 +127,6 @@ const Settings = () => {
 
   return (
     <div className="space-y-8 animate-fade-in">
-      {/* Account Import Modal */}
-      <AccountImportModal open={showImportModal} onOpenChange={setShowImportModal} />
       
       <div>
         <h1 className="text-3xl font-bold text-foreground mb-2">Settings</h1>
@@ -148,6 +146,18 @@ const Settings = () => {
         >
           <SettingsIcon className="w-4 h-4" />
           Main
+        </button>
+        <button
+          onClick={() => setActiveSettingsTab('accounts')}
+          className={cn(
+            "flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors",
+            activeSettingsTab === 'accounts'
+              ? "bg-background text-foreground shadow-sm"
+              : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+          )}
+        >
+          <Wallet className="w-4 h-4" />
+          Accounts
         </button>
         <button
           onClick={() => setActiveSettingsTab('custom-tags')}
@@ -329,6 +339,15 @@ const Settings = () => {
             </div>
           </div>
 
+        </>
+      )}
+
+      {/* Accounts Tab Content */}
+      {activeSettingsTab === 'accounts' && (
+        <>
+          {/* Account Import Modal */}
+          <AccountImportModal open={showImportModal} onOpenChange={setShowImportModal} />
+          
           {/* Accounts Section */}
           <div className="glass-card rounded-2xl p-6">
             <div className="flex items-center gap-3 mb-6">
@@ -444,7 +463,6 @@ const Settings = () => {
                                 </div>
                               </div>
                             </div>
-                            {/* Always visible action buttons */}
                             <div className="flex items-center gap-2">
                               <Button
                                 size="sm"
@@ -510,7 +528,6 @@ const Settings = () => {
                       <div className="space-y-2 mt-2">
                         <AnimatePresence>
                           {archivedAccountsWithStats.map((account) => {
-                            // Count trades for this account
                             const tradeCount = trades.filter(t => t.accountName === account.name).length;
                             
                             return (
@@ -542,7 +559,6 @@ const Settings = () => {
                                     </div>
                                   </div>
                                 </div>
-                                {/* Archived account actions */}
                                 <div className="flex items-center gap-2">
                                   <Button
                                     size="sm"
@@ -559,11 +575,8 @@ const Settings = () => {
                                     variant="ghost"
                                     onClick={() => {
                                       if (window.confirm(`Are you sure you want to permanently delete "${account.name}"? This will also delete ALL trades and data associated with this account. This action cannot be undone.`)) {
-                                        // Delete trades by account ID first (for trades that have accountId)
                                         deleteTradesByAccountId(account.id);
-                                        // Also delete by account name as fallback (for legacy trades without accountId)
                                         deleteTradesByAccountName(account.name);
-                                        // Then delete the account and its transactions
                                         deleteAccountPermanently(account.id);
                                       }
                                     }}
