@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { useTradedSymbols } from '@/hooks/useTradedSymbols';
 import { useSymbolTickSize } from '@/contexts/SymbolTickSizeContext';
 import { toast } from 'sonner';
-import { Save, Ruler } from 'lucide-react';
+import { Save, Ruler, MoreVertical, PlayCircle, Eraser } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -13,22 +13,24 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { ApplyToModal } from '@/components/settings/ApplyToModal';
 
 export const SymbolTickSizeManagement = () => {
   const tradedSymbols = useTradedSymbols();
   const { tickSizes, setAllTickSizes, contractSizes, setAllContractSizes } = useSymbolTickSize();
   
-  // Local state for editing
   const [localTickSizes, setLocalTickSizes] = useState<Record<string, string>>({});
   const [localContractSizes, setLocalContractSizes] = useState<Record<string, string>>({});
+  const [showApplyTo, setShowApplyTo] = useState(false);
 
-  // Initialize local state with saved values
   useEffect(() => {
     const initialTick: Record<string, string> = {};
     const initialContract: Record<string, string> = {};
     tradedSymbols.forEach(symbol => {
       initialTick[symbol] = tickSizes[symbol]?.toString() || '';
-      // Default contract size to 1 if not set
       initialContract[symbol] = contractSizes[symbol]?.toString() || '1';
     });
     setLocalTickSizes(initialTick);
@@ -41,6 +43,12 @@ export const SymbolTickSizeManagement = () => {
 
   const handleContractChange = (symbol: string, value: string) => {
     setLocalContractSizes(prev => ({ ...prev, [symbol]: value }));
+  };
+
+  const handleResetSymbol = (symbol: string) => {
+    setLocalTickSizes(prev => ({ ...prev, [symbol]: '' }));
+    setLocalContractSizes(prev => ({ ...prev, [symbol]: '1' }));
+    toast.success(`Reset settings for ${symbol}`);
   };
 
   const handleSave = () => {
@@ -97,6 +105,7 @@ export const SymbolTickSizeManagement = () => {
               <TableHead className="font-semibold">Symbol</TableHead>
               <TableHead className="font-semibold">Tick / Pip Size</TableHead>
               <TableHead className="font-semibold">Contract Size</TableHead>
+              <TableHead className="w-10"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -125,6 +134,25 @@ export const SymbolTickSizeManagement = () => {
                     className="w-40 bg-background"
                   />
                 </TableCell>
+                <TableCell>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                        <MoreVertical className="w-4 h-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="bg-popover border-border">
+                      <DropdownMenuItem onClick={() => setShowApplyTo(true)} className="cursor-pointer">
+                        <PlayCircle className="w-4 h-4 mr-2" />
+                        Apply To
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleResetSymbol(symbol)} className="cursor-pointer text-loss">
+                        <Eraser className="w-4 h-4 mr-2" />
+                        Reset
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -146,6 +174,8 @@ export const SymbolTickSizeManagement = () => {
           Save
         </Button>
       </div>
+
+      <ApplyToModal open={showApplyTo} onOpenChange={setShowApplyTo} />
     </div>
   );
 };

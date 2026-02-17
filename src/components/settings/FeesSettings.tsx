@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Plus, MoreVertical, ExternalLink, DollarSign, Edit2, Trash2 } from 'lucide-react';
+import { Plus, MoreVertical, ExternalLink, DollarSign, Edit2, Trash2, PlayCircle } from 'lucide-react';
+import { ApplyToModal } from '@/components/settings/ApplyToModal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -62,6 +63,7 @@ export const FeesSettings = () => {
   const [rules, setRules] = useState<FeeRule[]>(loadRules);
   const [showModal, setShowModal] = useState(false);
   const [editingRuleId, setEditingRuleId] = useState<string | null>(null);
+  const [showApplyTo, setShowApplyTo] = useState(false);
 
   // Form state
   const [formAccountId, setFormAccountId] = useState('');
@@ -242,6 +244,10 @@ export const FeesSettings = () => {
                             <Edit2 className="w-4 h-4 mr-2" />
                             Edit
                           </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => setShowApplyTo(true)} className="cursor-pointer">
+                            <PlayCircle className="w-4 h-4 mr-2" />
+                            Apply To
+                          </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => handleDelete(rule.id)} className="cursor-pointer text-loss">
                             <Trash2 className="w-4 h-4 mr-2" />
                             Delete
@@ -349,6 +355,8 @@ export const FeesSettings = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <ApplyToModal open={showApplyTo} onOpenChange={setShowApplyTo} />
     </div>
   );
 };
