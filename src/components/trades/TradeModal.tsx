@@ -371,8 +371,12 @@ export const TradeModal = () => {
     const rules = loadFeeRules();
     const rule = findMatchingFeeRule(rules, selectedAccount.name, symbol.trim());
     if (!rule) return 0;
-    return calculateFeeFromRule(rule, entries, direction);
-  }, [selectedAccountId, symbol, entries, direction, accounts]);
+    // When editing, use the original trade's full entries array (preserves all executions)
+    // The modal's `entries` state is a simplified rebuild (max 2) that loses scale-in/out detail
+    const effectiveEntries = editingTrade ? editingTrade.entries : entries;
+    const effectiveSide = editingTrade ? editingTrade.side : direction;
+    return calculateFeeFromRule(rule, effectiveEntries, effectiveSide);
+  }, [selectedAccountId, symbol, entries, direction, accounts, editingTrade]);
 
   // For editing, use the original trade's metrics for auto-calculated gross PnL
   // so multi-entry trades retain correct values instead of using rebuilt simplified entries
