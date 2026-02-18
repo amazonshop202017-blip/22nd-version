@@ -57,6 +57,7 @@ interface TradesContextType {
   addTrade: (data: TradeFormData) => Trade;
   bulkAddTrades: (tradesData: TradeFormData[]) => Trade[];
   updateTrade: (id: string, data: TradeFormData) => void;
+  bulkUpdateTrades: (updates: Map<string, Partial<TradeFormData>>) => void;
   deleteTrade: (id: string) => void;
   deleteTrades: (ids: string[]) => void;
   deleteTradesByAccountId: (accountId: string) => void;
@@ -110,7 +111,7 @@ const dayIndexToFilter: Record<number, DayFilter> = {
 // Hook to get filtered trades and stats (must be used inside GlobalFiltersProvider)
 // NOTE: activeAccountNames is passed as a parameter to avoid circular dependency with AccountsContext
 export const useFilteredTradesContext = (activeAccountNames?: string[]) => {
-  const { trades, addTrade, bulkAddTrades, updateTrade, deleteTrade, deleteTrades, deleteTradesByAccountId, deleteTradesByAccountName, getTradeById } = useTradesContext();
+  const { trades, addTrade, bulkAddTrades, updateTrade, bulkUpdateTrades, deleteTrade, deleteTrades, deleteTradesByAccountId, deleteTradesByAccountName, getTradeById } = useTradesContext();
   const { 
     dateRange, 
     selectedAccounts,
@@ -409,6 +410,7 @@ export const useFilteredTradesContext = (activeAccountNames?: string[]) => {
     addTrade,
     bulkAddTrades,
     updateTrade,
+    bulkUpdateTrades,
     deleteTrade,
     deleteTrades,
     deleteTradesByAccountId,

@@ -76,7 +76,7 @@ export const FeesSettings = () => {
   const [formFeeValue, setFormFeeValue] = useState('');
 
   const { accounts } = useAccountsContext();
-  const { trades, updateTrade } = useTradesContext();
+  const { trades, bulkUpdateTrades } = useTradesContext();
   const { selectedAccounts, isAllAccountsSelected, currencyConfig } = useGlobalFilters();
   const tradedSymbols = useTradedSymbols();
   const { setTickSize } = useSymbolTickSize();
@@ -90,21 +90,23 @@ export const FeesSettings = () => {
       t => t.accountName === rule.accountName && t.symbol === rule.symbol
     );
 
-    let applied = 0;
+    const updates = new Map<string, Partial<import('@/types/trade').TradeFormData>>();
+
     for (const trade of matchingTrades) {
       const shouldApply = overwrite || (emptyOnly && trade.manualFees === undefined);
       if (!shouldApply) continue;
 
       const fee = calculateFeeFromRule(rule, trade.entries, trade.side);
-      // Only call updateTrade if value actually changes
       if (trade.manualFees !== fee) {
-        const { id, createdAt, updatedAt, ...tradeData } = trade;
-        updateTrade(id, { ...tradeData, manualFees: fee });
+        updates.set(trade.id, { manualFees: fee });
       }
-      applied++;
     }
 
-    toast.success(`Fee rule applied to ${applied} trade${applied !== 1 ? 's' : ''}`);
+    if (updates.size > 0) {
+      bulkUpdateTrades(updates);
+    }
+
+    toast.success(`Fee rule applied to ${updates.size} trade${updates.size !== 1 ? 's' : ''}`);
   };
 
   const activeAccounts = accounts.filter(a => !a.isArchived);

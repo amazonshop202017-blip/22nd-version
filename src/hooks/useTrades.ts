@@ -135,6 +135,19 @@ export const useTrades = () => {
     saveTrades(updated);
   }, [trades, saveTrades]);
 
+  // Bulk update multiple trades atomically (avoids stale closure issues with looped updateTrade)
+  const bulkUpdateTrades = useCallback((updates: Map<string, Partial<TradeFormData>>) => {
+    const now = new Date().toISOString();
+    const updated = trades.map(trade => {
+      const patch = updates.get(trade.id);
+      if (patch) {
+        return { ...trade, ...patch, updatedAt: now };
+      }
+      return trade;
+    });
+    saveTrades(updated);
+  }, [trades, saveTrades]);
+
   const deleteTrade = useCallback((id: string) => {
     saveTrades(trades.filter(trade => trade.id !== id));
   }, [trades, saveTrades]);
@@ -211,6 +224,7 @@ export const useTrades = () => {
     addTrade,
     bulkAddTrades,
     updateTrade,
+    bulkUpdateTrades,
     deleteTrade,
     deleteTrades,
     deleteTradesByAccountId,
