@@ -25,6 +25,7 @@ import { useTagsContext } from '@/contexts/TagsContext';
 import { useSymbolTickSize } from '@/contexts/SymbolTickSizeContext';
 import { TradeFormData, TradeEntry, ScaleEntry, calculateTradeMetrics, Trade } from '@/types/trade';
 import { getContractSizeForSymbol } from '@/lib/contractSizeRegistry';
+import { loadFeeRules, findMatchingFeeRule, calculateFeeFromRule } from '@/lib/feeCalculation';
 import { cn } from '@/lib/utils';
 
 const defaultEntry = (): TradeEntry => ({
@@ -363,9 +364,20 @@ export const TradeModal = () => {
     return calculateTradeMetrics(formData);
   }, [symbol, direction, entries, tradeRisk, tradeTarget, accountName, strategyId, selectedTags, notes, positionMAE, positionMFE, potentialMAE, potentialMFE, missedTrade, editingTrade]);
 
+  // Auto-calculate fee from fee rules when manualFees is not set
+  const calculatedFee = useMemo(() => {
+    const selectedAccount = accounts.find(a => a.id === selectedAccountId);
+    if (!selectedAccount || !symbol.trim()) return 0;
+    const rules = loadFeeRules();
+    const rule = findMatchingFeeRule(rules, selectedAccount.name, symbol.trim());
+    if (!rule) return 0;
+    return calculateFeeFromRule(rule, entries, direction);
+  }, [selectedAccountId, symbol, entries, direction, accounts]);
+
   // Calculate actual gross and net P/L
   const effectiveGrossPnl = manualGrossPnl !== '' ? parseFloat(manualGrossPnl) || 0 : metrics.grossPnl;
-  const effectiveNetPnl = effectiveGrossPnl - (parseFloat(fees) || 0);
+  const effectiveFees = fees !== '' ? (parseFloat(fees) || 0) : calculatedFee;
+  const effectiveNetPnl = effectiveGrossPnl - effectiveFees;
 
   // Calculate account balance snapshot (BEFORE any trade P/L)
   // This is: startingBalance + deposits - withdrawals
@@ -495,8 +507,8 @@ export const TradeModal = () => {
       potentialMFE,
       missedTrade,
       manualGrossPnl: manualGrossPnl !== '' ? parseFloat(manualGrossPnl) : undefined,
-      // Persist manual fees override (even if 0)
-      manualFees: fees !== '' ? parseFloat(fees) : undefined,
+      // Persist manual fees override (even if 0); if empty, persist calculated fee
+      manualFees: fees !== '' ? parseFloat(fees) : (calculatedFee > 0 ? calculatedFee : undefined),
       // Persist scale entries and exits
       scaleEntries: scaleEntries.length > 0 ? scaleEntries : undefined,
       scaleExits: scaleExits.length > 0 ? scaleExits : undefined,
@@ -1023,7 +1035,7 @@ export const TradeModal = () => {
                       <Input
                         type="text"
                         inputMode="decimal"
-                        placeholder="0.00"
+                        placeholder={calculatedFee > 0 ? calculatedFee.toFixed(2) : '0.00'}
                         value={fees}
                         onChange={(e) => {
                           const val = e.target.value;
