@@ -374,8 +374,19 @@ export const TradeModal = () => {
     return calculateFeeFromRule(rule, entries, direction);
   }, [selectedAccountId, symbol, entries, direction, accounts]);
 
+  // For editing, use the original trade's metrics for auto-calculated gross PnL
+  // so multi-entry trades retain correct values instead of using rebuilt simplified entries
+  const editingTradeGrossPnl = useMemo(() => {
+    if (!editingTrade) return metrics.grossPnl;
+    const origMetrics = calculateTradeMetrics(editingTrade);
+    return editingTrade.manualGrossPnl !== undefined ? editingTrade.manualGrossPnl : origMetrics.grossPnl;
+  }, [editingTrade, metrics.grossPnl]);
+
+  // The placeholder value for the Gross PnL field
+  const grossPnlPlaceholder = editingTrade ? editingTradeGrossPnl : metrics.grossPnl;
+
   // Calculate actual gross and net P/L
-  const effectiveGrossPnl = manualGrossPnl !== '' ? parseFloat(manualGrossPnl) || 0 : metrics.grossPnl;
+  const effectiveGrossPnl = manualGrossPnl !== '' ? parseFloat(manualGrossPnl) || 0 : grossPnlPlaceholder;
   const effectiveFees = fees !== '' ? (parseFloat(fees) || 0) : calculatedFee;
   const effectiveNetPnl = effectiveGrossPnl - effectiveFees;
 
@@ -1007,7 +1018,7 @@ export const TradeModal = () => {
                     <Input
                       type="text"
                       inputMode="decimal"
-                      placeholder={metrics.grossPnl.toFixed(2)}
+                      placeholder={grossPnlPlaceholder.toFixed(2)}
                       value={manualGrossPnl}
                       onChange={(e) => {
                         const val = e.target.value;
