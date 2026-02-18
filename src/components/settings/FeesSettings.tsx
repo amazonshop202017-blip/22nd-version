@@ -16,10 +16,13 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useAccountsContext } from '@/contexts/AccountsContext';
+import { useTradesContext } from '@/contexts/TradesContext';
 import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { useTradedSymbols } from '@/hooks/useTradedSymbols';
 import { useSymbolTickSize } from '@/contexts/SymbolTickSizeContext';
 import { TypeableCombobox } from '@/components/trades/TypeableCombobox';
+import { calculateFeeFromRule } from '@/lib/feeCalculation';
+import { toast } from 'sonner';
 
 export interface FeeRule {
   id: string;
@@ -64,7 +67,7 @@ export const FeesSettings = () => {
   const [showModal, setShowModal] = useState(false);
   const [editingRuleId, setEditingRuleId] = useState<string | null>(null);
   const [showApplyTo, setShowApplyTo] = useState(false);
-
+  const [applyingRule, setApplyingRule] = useState<FeeRule | null>(null);
   // Form state
   const [formAccountId, setFormAccountId] = useState('');
   const [formSymbol, setFormSymbol] = useState('');
@@ -73,9 +76,36 @@ export const FeesSettings = () => {
   const [formFeeValue, setFormFeeValue] = useState('');
 
   const { accounts } = useAccountsContext();
+  const { trades, updateTrade } = useTradesContext();
   const { selectedAccounts, isAllAccountsSelected, currencyConfig } = useGlobalFilters();
   const tradedSymbols = useTradedSymbols();
   const { setTickSize } = useSymbolTickSize();
+
+  const handleApplyTo = (emptyOnly: boolean, overwrite: boolean) => {
+    if (!applyingRule) return;
+    if (!emptyOnly && !overwrite) return;
+
+    const rule = applyingRule;
+    const matchingTrades = trades.filter(
+      t => t.accountName === rule.accountName && t.symbol === rule.symbol
+    );
+
+    let applied = 0;
+    for (const trade of matchingTrades) {
+      const shouldApply = overwrite || (emptyOnly && trade.manualFees === undefined);
+      if (!shouldApply) continue;
+
+      const fee = calculateFeeFromRule(rule, trade.entries, trade.side);
+      // Only call updateTrade if value actually changes
+      if (trade.manualFees !== fee) {
+        const { id, createdAt, updatedAt, ...tradeData } = trade;
+        updateTrade(id, { ...tradeData, manualFees: fee });
+      }
+      applied++;
+    }
+
+    toast.success(`Fee rule applied to ${applied} trade${applied !== 1 ? 's' : ''}`);
+  };
 
   const activeAccounts = accounts.filter(a => !a.isArchived);
 
@@ -244,7 +274,7 @@ export const FeesSettings = () => {
                             <Edit2 className="w-4 h-4 mr-2" />
                             Edit
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => setShowApplyTo(true)} className="cursor-pointer">
+                          <DropdownMenuItem onClick={() => { setApplyingRule(rule); setShowApplyTo(true); }} className="cursor-pointer">
                             <PlayCircle className="w-4 h-4 mr-2" />
                             Apply To
                           </DropdownMenuItem>
@@ -356,7 +386,7 @@ export const FeesSettings = () => {
         </DialogContent>
       </Dialog>
 
-      <ApplyToModal open={showApplyTo} onOpenChange={setShowApplyTo} />
+      <ApplyToModal open={showApplyTo} onOpenChange={setShowApplyTo} onApply={handleApplyTo} />
     </div>
   );
 };
