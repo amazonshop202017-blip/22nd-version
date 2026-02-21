@@ -161,6 +161,8 @@ const TableWithStickyHorizontalScroll = ({
                 {isColumnVisible('netPnl') && <TableHead className="px-2">Net P&L</TableHead>}
                 {isColumnVisible('realizedRMultiple') && <TableHead className="px-2">R Multiple</TableHead>}
                 {isColumnVisible('plannedRRR') && <TableHead className="px-2">Planned RR</TableHead>}
+                {isColumnVisible('farthestProfitTicks') && <TableHead className="px-2 text-right">Farthest Profit (Ticks)</TableHead>}
+                {isColumnVisible('farthestLossTicks') && <TableHead className="px-2 text-right">Farthest Loss (Ticks)</TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -313,6 +315,16 @@ const TableWithStickyHorizontalScroll = ({
                         {typeof trade.savedRRR === 'number'
                           ? trade.savedRRR.toFixed(2) 
                           : '—'}
+                      </TableCell>
+                    )}
+                    {isColumnVisible('farthestProfitTicks') && (
+                      <TableCell className="font-mono text-right px-2 py-1">
+                        {typeof trade.mfeTickPip === 'number' ? trade.mfeTickPip : ''}
+                      </TableCell>
+                    )}
+                    {isColumnVisible('farthestLossTicks') && (
+                      <TableCell className="font-mono text-right px-2 py-1">
+                        {typeof trade.maeTickPip === 'number' ? trade.maeTickPip : ''}
                       </TableCell>
                     )}
                   </TableRow>
