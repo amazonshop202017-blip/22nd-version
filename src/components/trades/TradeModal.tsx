@@ -1087,37 +1087,45 @@ export const TradeModal = () => {
               <div className="space-y-3">
                 <h4 className="text-sm font-medium text-foreground">Advanced Price Data</h4>
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1.5">
+                  <div className={`space-y-1.5 ${openQuantity > 0 ? 'opacity-60' : ''}`}>
                     <Label className="text-xs text-muted-foreground">Farthest Price in Profit</Label>
                     <Input
                       type="text"
                       inputMode="decimal"
                       placeholder="0.00"
                       value={farthestPriceInProfit}
+                      disabled={openQuantity > 0}
                       onChange={(e) => {
                         const val = e.target.value;
                         if (val === '' || /^\d*\.?\d*$/.test(val)) {
                           setFarthestPriceInProfit(val);
                         }
                       }}
-                      className="h-10 bg-input border-border"
+                      className="h-10 bg-input border-border disabled:cursor-not-allowed"
                     />
+                    {openQuantity > 0 && (
+                      <p className="text-[10px] text-muted-foreground italic">Available after trade is fully closed</p>
+                    )}
                   </div>
-                  <div className="space-y-1.5">
+                  <div className={`space-y-1.5 ${openQuantity > 0 ? 'opacity-60' : ''}`}>
                     <Label className="text-xs text-muted-foreground">Farthest Price in Loss</Label>
                     <Input
                       type="text"
                       inputMode="decimal"
                       placeholder="0.00"
                       value={farthestPriceInLoss}
+                      disabled={openQuantity > 0}
                       onChange={(e) => {
                         const val = e.target.value;
                         if (val === '' || /^\d*\.?\d*$/.test(val)) {
                           setFarthestPriceInLoss(val);
                         }
                       }}
-                      className="h-10 bg-input border-border"
+                      className="h-10 bg-input border-border disabled:cursor-not-allowed"
                     />
+                    {openQuantity > 0 && (
+                      <p className="text-[10px] text-muted-foreground italic">Available after trade is fully closed</p>
+                    )}
                   </div>
                 </div>
               </div>
