@@ -96,7 +96,30 @@ export const TradeModal = () => {
   const [scaleModalOpen, setScaleModalOpen] = useState(false);
   const [scaleEntries, setScaleEntries] = useState<ScaleEntry[]>([]);
   const [scaleExits, setScaleExits] = useState<ScaleEntry[]>([]);
-  const [openQuantity, setOpenQuantity] = useState(0);
+  // Dynamically computed open quantity - reacts to form changes without needing save
+  const openQuantity = useMemo(() => {
+    if (scaleEntries.length > 0) {
+      const totalEntryQty = scaleEntries.reduce((sum, e) => sum + e.quantity, 0);
+      const totalExitQty = scaleExits.reduce((sum, e) => sum + e.quantity, 0);
+      return Math.max(0, totalEntryQty - totalExitQty);
+    }
+    // Fallback: compute from entries array
+    if (entries.length > 0) {
+      let netPosition = 0;
+      for (const entry of entries) {
+        if (entry.type === 'BUY') {
+          netPosition += entry.quantity;
+        } else {
+          netPosition -= entry.quantity;
+        }
+      }
+      return Math.abs(netPosition);
+    }
+    // New trade with no entries yet — consider open
+    const qty = parseFloat(quantity) || 0;
+    const hasExit = exitPrice !== '' && parseFloat(exitPrice) > 0;
+    return hasExit ? 0 : qty;
+  }, [scaleEntries, scaleExits, entries, quantity, exitPrice]);
 
   // Assign Tags modal state
   const [assignTagsModalOpen, setAssignTagsModalOpen] = useState(false);
@@ -192,21 +215,6 @@ export const TradeModal = () => {
       }
       if (editingTrade.scaleExits && editingTrade.scaleExits.length > 0) {
         setScaleExits(editingTrade.scaleExits);
-        // Calculate open quantity from scale data
-        const totalEntryQty = editingTrade.scaleEntries?.reduce((sum, e) => sum + e.quantity, 0) || 0;
-        const totalExitQty = editingTrade.scaleExits.reduce((sum, e) => sum + e.quantity, 0);
-        setOpenQuantity(totalEntryQty - totalExitQty);
-      } else if (editingTrade.entries.length > 0) {
-        // Fallback: compute open quantity from entries array (same as calculateTradeMetrics)
-        let netPosition = 0;
-        for (const entry of editingTrade.entries) {
-          if (entry.type === 'BUY') {
-            netPosition += entry.quantity;
-          } else {
-            netPosition -= entry.quantity;
-          }
-        }
-        setOpenQuantity(Math.abs(netPosition));
       }
       
       // Parse entries to simplified format
@@ -290,7 +298,7 @@ export const TradeModal = () => {
     // Reset scale data
     setScaleEntries([]);
     setScaleExits([]);
-    setOpenQuantity(0);
+    // openQuantity is now derived via useMemo, no need to reset
     // Reset Advanced Data
     setEntryComment('');
     setTradeManagement('');
@@ -584,7 +592,7 @@ export const TradeModal = () => {
     // Persist scale entries and exits
     setScaleEntries(newScaleEntries);
     setScaleExits(newScaleExits);
-    setOpenQuantity(openQty);
+    // openQuantity is now derived via useMemo from scaleEntries/scaleExits
     
     // Update entry and exit prices with averaged values
     if (avgEntry > 0) {
