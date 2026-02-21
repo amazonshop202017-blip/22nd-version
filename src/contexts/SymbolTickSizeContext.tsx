@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import { setContractSizeRegistry, setTickSizeRegistry } from '@/lib/contractSizeRegistry';
+// Multi-account rule support with backward-compatible migration
 
 export interface TickPipRule {
   id: string;
