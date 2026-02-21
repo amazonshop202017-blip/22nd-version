@@ -552,13 +552,13 @@ export const TradeModal = () => {
       contractSize: editingTrade
         ? editingTrade.contractSize
         : (getContractSizeForSymbol(symbol.trim()) || 1),
-      // MFE/MAE in ticks — preserve existing values for edits, calculate for new trades
+      // MFE/MAE in ticks — start with existing values for edits, null for new trades
       mfeTickPip: editingTrade ? editingTrade.mfeTickPip ?? null : null,
       maeTickPip: editingTrade ? editingTrade.maeTickPip ?? null : null,
     };
 
-    // For NEW trades only: auto-calculate MFE/MAE in tick/pip units (independently)
-    if (!editingTrade) {
+    // Auto-calculate MFE/MAE in tick/pip units (independently) for BOTH new and edited trades
+    {
       const trimmedSymbol = symbol.trim();
       const tickSize = tickSizes[trimmedSymbol];
       const ep = parseFloat(entryPrice);
@@ -572,6 +572,8 @@ export const TradeModal = () => {
           ? (fpProfit - ep) / tickSize
           : (ep - fpProfit) / tickSize;
         tradeData.mfeTickPip = Math.max(0, Math.floor(profitTicks));
+      } else {
+        tradeData.mfeTickPip = null;
       }
 
       // MAE — independent
@@ -580,6 +582,8 @@ export const TradeModal = () => {
           ? (ep - fpLoss) / tickSize
           : (fpLoss - ep) / tickSize;
         tradeData.maeTickPip = Math.max(0, Math.floor(lossTicks));
+      } else {
+        tradeData.maeTickPip = null;
       }
 
       console.log('[MFE/MAE Debug] Saving mfeTickPip:', tradeData.mfeTickPip, 'maeTickPip:', tradeData.maeTickPip);
