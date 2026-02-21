@@ -45,18 +45,9 @@ export const TradeModal = () => {
   const { currencyConfig, selectedAccounts: globalSelectedAccounts, isAllAccountsSelected } = useGlobalFilters();
   const { tickSizes, contractSizes, setContractSize } = useSymbolTickSize();
   const { 
-    options: customStatsOptions,
-    addTimeframe,
-    addConfluence,
-    addPattern,
-    addPreparation,
     addEntryComment,
     addTradeManagement,
     addExitComment,
-    addMental,
-    addIndicator,
-    addMarketGeneral,
-    addBias,
     getActiveEntryComments,
     getActiveTradeManagements,
     getActiveExitComments,
@@ -100,11 +91,6 @@ export const TradeModal = () => {
   
   // Hidden fields for compatibility
   const [entries, setEntries] = useState<TradeEntry[]>([defaultEntry()]);
-  const [positionMAE, setPositionMAE] = useState(0);
-  const [positionMFE, setPositionMFE] = useState(0);
-  const [potentialMAE, setPotentialMAE] = useState(0);
-  const [potentialMFE, setPotentialMFE] = useState(0);
-  const [missedTrade, setMissedTrade] = useState(false);
 
   // Scale In/Out modal state and data
   const [scaleModalOpen, setScaleModalOpen] = useState(false);
@@ -124,15 +110,7 @@ export const TradeModal = () => {
   const [priceReachedFirst, setPriceReachedFirst] = useState<'takeProfit' | 'stopLoss' | ''>('');
   const [breakEven, setBreakEven] = useState<boolean | null>(null);
   
-  // Custom Stats fields
-  const [timeframe, setTimeframe] = useState('');
-  const [confluence, setConfluence] = useState('');
-  const [pattern, setPattern] = useState('');
-  const [preparation, setPreparation] = useState('');
-  const [mental, setMental] = useState('');
-  const [indicator, setIndicator] = useState('');
-  const [marketGeneral, setMarketGeneral] = useState('');
-  const [bias, setBias] = useState('');
+
 
   // Get current strategy's checklist items
   const currentStrategyChecklist = useMemo(() => {
@@ -207,11 +185,6 @@ export const TradeModal = () => {
       setTradeTarget(editingTrade.tradeTarget || 0);
       setStopLoss(editingTrade.stopLoss !== undefined ? editingTrade.stopLoss.toString() : '');
       setTakeProfit(editingTrade.takeProfit !== undefined ? editingTrade.takeProfit.toString() : '');
-      setPositionMAE(editingTrade.positionMAE || 0);
-      setPositionMFE(editingTrade.positionMFE || 0);
-      setPotentialMAE(editingTrade.potentialMAE || 0);
-      setPotentialMFE(editingTrade.potentialMFE || 0);
-      setMissedTrade(editingTrade.missedTrade || false);
 
       // Load scale entries/exits if available
       if (editingTrade.scaleEntries && editingTrade.scaleEntries.length > 0) {
@@ -267,15 +240,6 @@ export const TradeModal = () => {
       setPriceReachedFirst(editingTrade.priceReachedFirst || '');
       setBreakEven(editingTrade.breakEven ?? null);
       
-      // Load Custom Stats
-      setTimeframe(editingTrade.timeframe || '');
-      setConfluence(editingTrade.confluence || '');
-      setPattern(editingTrade.pattern || '');
-      setPreparation(editingTrade.preparation || '');
-      setMental(editingTrade.mental || '');
-      setIndicator(editingTrade.indicator || '');
-      setMarketGeneral(editingTrade.marketGeneral || '');
-      setBias(editingTrade.bias || '');
     } else {
       resetForm();
       // Auto-select account when exactly one account is selected in global filter (Add Trade only)
@@ -312,11 +276,6 @@ export const TradeModal = () => {
     setTradeRisk(0);
     setTradeTarget(0);
     setEntries([defaultEntry()]);
-    setPositionMAE(0);
-    setPositionMFE(0);
-    setPotentialMAE(0);
-    setPotentialMFE(0);
-    setMissedTrade(false);
     // Reset scale data
     setScaleEntries([]);
     setScaleExits([]);
@@ -329,15 +288,6 @@ export const TradeModal = () => {
     setFarthestPriceInLoss('');
     setPriceReachedFirst('');
     setBreakEven(null);
-    // Reset Custom Stats
-    setTimeframe('');
-    setConfluence('');
-    setPattern('');
-    setPreparation('');
-    setMental('');
-    setIndicator('');
-    setMarketGeneral('');
-    setBias('');
   };
 
   const metrics = useMemo(() => {
@@ -351,18 +301,13 @@ export const TradeModal = () => {
       strategyId: strategyId || undefined,
       tags: selectedTags,
       notes,
-      positionMAE,
-      positionMFE,
-      potentialMAE,
-      potentialMFE,
-      missedTrade,
       // Use stored contractSize for edits, registry value for new trades
       contractSize: editingTrade
         ? editingTrade.contractSize
         : (getContractSizeForSymbol(symbol.trim()) || 1),
     };
     return calculateTradeMetrics(formData);
-  }, [symbol, direction, entries, tradeRisk, tradeTarget, accountName, strategyId, selectedTags, notes, positionMAE, positionMFE, potentialMAE, potentialMFE, missedTrade, editingTrade]);
+  }, [symbol, direction, entries, tradeRisk, tradeTarget, accountName, strategyId, selectedTags, notes, editingTrade]);
 
   // Auto-calculate fee from fee rules when manualFees is not set
   const calculatedFee = useMemo(() => {
@@ -549,11 +494,6 @@ export const TradeModal = () => {
       notes: notes.trim(),
       stopLoss: stopLoss !== '' ? parseFloat(stopLoss) : undefined,
       takeProfit: takeProfit !== '' ? parseFloat(takeProfit) : undefined,
-      positionMAE,
-      positionMFE,
-      potentialMAE,
-      potentialMFE,
-      missedTrade,
       manualGrossPnl: manualGrossPnl !== '' ? parseFloat(manualGrossPnl) : undefined,
       // Persist manual fees override (even if 0); if empty, persist calculated fee
       manualFees: fees !== '' ? parseFloat(fees) : (calculatedFee > 0 ? calculatedFee : undefined),
@@ -568,15 +508,6 @@ export const TradeModal = () => {
       farthestPriceInLoss: farthestPriceInLoss !== '' ? parseFloat(farthestPriceInLoss) : undefined,
       priceReachedFirst: priceReachedFirst || undefined,
       breakEven: breakEven ?? undefined,
-      // Custom Stats
-      timeframe: timeframe || undefined,
-      confluence: confluence || undefined,
-      pattern: pattern || undefined,
-      preparation: preparation || undefined,
-      mental: mental || undefined,
-      indicator: indicator || undefined,
-      marketGeneral: marketGeneral || undefined,
-      bias: bias || undefined,
       // Save Return (%) - for new trades, always calculate; for edits, update if P/L or account changed
       savedReturnPercent: editingTrade && !pnlFieldsChanged 
         ? editingTrade.savedReturnPercent 

@@ -161,9 +161,8 @@ const Strategies = () => {
         ) : (
           <div className="overflow-x-auto">
             {/* Table Header */}
-            <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_auto] gap-4 px-6 py-3 bg-muted/30 border-b border-border text-xs font-medium text-muted-foreground uppercase tracking-wider">
+            <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_auto] gap-4 px-6 py-3 bg-muted/30 border-b border-border text-xs font-medium text-muted-foreground uppercase tracking-wider">
               <div>Title</div>
-              <div className="text-right">Missed Trades</div>
               <div className="text-right">Average Loser</div>
               <div className="text-right">Average Winner</div>
               <div className="text-right">Total Net P&L</div>
@@ -182,7 +181,7 @@ const Strategies = () => {
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, x: -20 }}
-                  className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_auto] gap-4 px-6 py-4 border-b border-border hover:bg-muted/20 transition-colors group"
+                  className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_auto] gap-4 px-6 py-4 border-b border-border hover:bg-muted/20 transition-colors group"
                 >
                   {editingId === strategy.id ? (
                     <div className="col-span-11 space-y-3">
@@ -223,10 +222,6 @@ const Strategies = () => {
                         </span>
                       </div>
 
-                      {/* Missed Trades */}
-                      <div className="text-right text-sm text-muted-foreground flex items-center justify-end">
-                        {strategy.stats.missedTrades}
-                      </div>
 
                       {/* Average Loser */}
                       <div className="text-right text-sm flex items-center justify-end">

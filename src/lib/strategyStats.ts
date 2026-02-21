@@ -8,7 +8,6 @@ export interface StrategyStats {
   avgWinner: number;
   avgLoser: number;
   expectancy: number;
-  missedTrades: number;
   sharedStrategies: string;
 }
 
@@ -25,7 +24,6 @@ export function calculateStrategyStats(strategyId: string, trades: Trade[]): Str
       avgWinner: 0,
       avgLoser: 0,
       expectancy: 0,
-      missedTrades: 0,
       sharedStrategies: '-',
     };
   }
@@ -74,7 +72,7 @@ export function calculateStrategyStats(strategyId: string, trades: Trade[]): Str
     avgWinner,
     avgLoser,
     expectancy,
-    missedTrades: 0, // Placeholder - could be implemented with additional tracking
+    
     sharedStrategies: '-', // Placeholder - for future multi-strategy feature
   };
 }

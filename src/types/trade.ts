@@ -33,12 +33,6 @@ export interface Trade {
   // Stop Loss and Take Profit
   stopLoss?: number;
   takeProfit?: number;
-  // Manual position metrics
-  positionMAE?: number;
-  positionMFE?: number;
-  potentialMAE?: number;
-  potentialMFE?: number;
-  missedTrade?: boolean;
   // Manual Gross P/L override
   manualGrossPnl?: number;
   // Manual Fees override (like manualGrossPnl - undefined means "use computed")
@@ -54,15 +48,6 @@ export interface Trade {
   farthestPriceInLoss?: number;
   priceReachedFirst?: 'takeProfit' | 'stopLoss';
   breakEven?: boolean;
-  // Custom Stats
-  timeframe?: string;
-  confluence?: string;
-  pattern?: string;
-  preparation?: string;
-  mental?: string;
-  indicator?: string;
-  marketGeneral?: string;
-  bias?: string;
   // Saved Return (%) - calculated at trade creation based on account balance
   savedReturnPercent?: number;
   // Saved R-Multiple - calculated at trade creation based on trade risk
