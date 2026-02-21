@@ -148,21 +148,17 @@ export const SymbolTickSizeProvider = ({ children }: { children: ReactNode }) =>
 
   // Account+Symbol lookup with fallback
   const getTickSizeForAccountSymbol = (accountName: string, symbol: string): number | undefined => {
-    // Try account+symbol match first
     const accountRule = tickPipRules.find(
       r => r.accountName === accountName && r.symbol === symbol
     );
-    if (accountRule) return accountRule.tickSize;
-    // Fallback to symbol-only legacy
-    return tickSizes[symbol];
+    return accountRule ? accountRule.tickSize : undefined;
   };
 
   const getContractSizeForAccountSymbol = (accountName: string, symbol: string): number => {
     const accountRule = tickPipRules.find(
       r => r.accountName === accountName && r.symbol === symbol
     );
-    if (accountRule) return accountRule.contractSize;
-    return contractSizes[symbol] ?? 1;
+    return accountRule ? accountRule.contractSize : 1;
   };
 
   return (

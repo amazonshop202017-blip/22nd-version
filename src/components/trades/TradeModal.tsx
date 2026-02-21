@@ -560,7 +560,7 @@ export const TradeModal = () => {
     // Auto-calculate MFE/MAE in tick/pip units (independently) for BOTH new and edited trades
     {
       const trimmedSymbol = symbol.trim();
-      const tickSize = getTickSizeForAccountSymbol(accountName, trimmedSymbol) ?? tickSizes[trimmedSymbol];
+      const tickSize = getTickSizeForAccountSymbol(accountName, trimmedSymbol);
       const ep = parseFloat(entryPrice);
       const fpProfit = farthestPriceInProfit !== '' ? parseFloat(farthestPriceInProfit) : NaN;
       const fpLoss = farthestPriceInLoss !== '' ? parseFloat(farthestPriceInLoss) : NaN;
