@@ -44,7 +44,7 @@ export const TradeModal = () => {
   const { strategies, getStrategyById } = useStrategiesContext();
   const { accounts, getAccountWithStats, getAccountBalanceBeforeTrades } = useAccountsContext();
   const { currencyConfig, selectedAccounts: globalSelectedAccounts, isAllAccountsSelected } = useGlobalFilters();
-  const { tickSizes, contractSizes, setContractSize } = useSymbolTickSize();
+  const { tickSizes, contractSizes, setContractSize, getTickSizeForAccountSymbol, getContractSizeForAccountSymbol } = useSymbolTickSize();
   const { 
     addEntryComment,
     addTradeManagement,
@@ -324,7 +324,7 @@ export const TradeModal = () => {
       // Use stored contractSize for edits, registry value for new trades
       contractSize: editingTrade
         ? editingTrade.contractSize
-        : (getContractSizeForSymbol(symbol.trim()) || 1),
+        : (getContractSizeForAccountSymbol(accountName, symbol.trim())),
       mfeTickPip: null,
       maeTickPip: null,
     };
@@ -551,7 +551,7 @@ export const TradeModal = () => {
       // Contract size: snapshot from registry for new trades, preserve stored value for edits
       contractSize: editingTrade
         ? editingTrade.contractSize
-        : (getContractSizeForSymbol(symbol.trim()) || 1),
+        : (getContractSizeForAccountSymbol(accountName, symbol.trim())),
       // MFE/MAE in ticks — start with existing values for edits, null for new trades
       mfeTickPip: editingTrade ? editingTrade.mfeTickPip ?? null : null,
       maeTickPip: editingTrade ? editingTrade.maeTickPip ?? null : null,
@@ -560,7 +560,7 @@ export const TradeModal = () => {
     // Auto-calculate MFE/MAE in tick/pip units (independently) for BOTH new and edited trades
     {
       const trimmedSymbol = symbol.trim();
-      const tickSize = tickSizes[trimmedSymbol];
+      const tickSize = getTickSizeForAccountSymbol(accountName, trimmedSymbol) ?? tickSizes[trimmedSymbol];
       const ep = parseFloat(entryPrice);
       const fpProfit = farthestPriceInProfit !== '' ? parseFloat(farthestPriceInProfit) : NaN;
       const fpLoss = farthestPriceInLoss !== '' ? parseFloat(farthestPriceInLoss) : NaN;
