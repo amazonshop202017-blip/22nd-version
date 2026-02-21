@@ -90,19 +90,9 @@ export const SymbolTickSizeProvider = ({ children }: { children: ReactNode }) =>
     setContractSizeRegistry(contractSizes);
   }, [contractSizes]);
 
-  // Keep rules synced to flat dicts for backward compatibility
-  // Rules override flat dicts per symbol (last rule for a symbol wins as global fallback)
-  useEffect(() => {
-    // Build merged flat dicts: start with legacy, overlay rules
-    const mergedTick = { ...tickSizes };
-    const mergedContract = { ...contractSizes };
-    tickPipRules.forEach(rule => {
-      mergedTick[rule.symbol] = rule.tickSize;
-      mergedContract[rule.symbol] = rule.contractSize;
-    });
-    setTickSizeRegistry(mergedTick);
-    setContractSizeRegistry(mergedContract);
-  }, [tickPipRules, tickSizes, contractSizes]);
+  // Keep legacy flat dicts synced to registries (rules are NOT merged here;
+  // rules are strictly account+symbol and resolved via getTickSizeForAccountSymbol)
+  // This ensures the registry only contains legacy/global defaults.
 
   const setTickSize = (symbol: string, size: number) => {
     setTickSizes(prev => ({ ...prev, [symbol]: size }));
