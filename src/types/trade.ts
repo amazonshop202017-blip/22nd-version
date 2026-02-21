@@ -48,6 +48,9 @@ export interface Trade {
   farthestPriceInLoss?: number;
   priceReachedFirst?: 'takeProfit' | 'stopLoss';
   breakEven?: boolean;
+  // Maximum Favorable/Adverse Excursion in ticks/pips (storage only, no auto-calculation)
+  mfeTickPip?: number;
+  maeTickPip?: number;
   // Saved Return (%) - calculated at trade creation based on account balance
   savedReturnPercent?: number;
   // Saved R-Multiple - calculated at trade creation based on trade risk
