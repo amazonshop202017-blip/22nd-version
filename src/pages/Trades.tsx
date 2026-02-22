@@ -303,16 +303,7 @@ const TableWithStickyHorizontalScroll = ({
                         if (risk > 0) rMultiple = realizedPnl / risk;
                       }
                       return (
-                      <TableCell className={cn(
-                        "font-mono px-2 py-1",
-                        rMultiple !== null
-                          ? rMultiple > 0 
-                            ? "text-profit" 
-                            : rMultiple < 0 
-                              ? "text-loss" 
-                              : ""
-                          : ""
-                      )}>
+                      <TableCell className="font-mono px-2 py-1 text-foreground">
                         {rMultiple !== null
                           ? rMultiple.toFixed(2) 
                           : '—'}
@@ -321,12 +312,7 @@ const TableWithStickyHorizontalScroll = ({
                     })()}
                     
                     {isColumnVisible('plannedRRR') && (
-                      <TableCell className={cn(
-                        "font-mono px-2 py-1",
-                        typeof trade.savedRRR === 'number' && trade.savedRRR > 0
-                          ? "text-profit"
-                          : ""
-                      )}>
+                      <TableCell className="font-mono px-2 py-1 text-foreground">
                         {typeof trade.savedRRR === 'number'
                           ? trade.savedRRR.toFixed(2) 
                           : '—'}
