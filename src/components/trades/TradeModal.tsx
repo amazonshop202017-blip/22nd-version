@@ -26,6 +26,7 @@ import { useSymbolTickSize } from '@/contexts/SymbolTickSizeContext';
 import { TradeFormData, TradeEntry, ScaleEntry, calculateTradeMetrics, Trade } from '@/types/trade';
 import { getContractSizeForSymbol } from '@/lib/contractSizeRegistry';
 import { loadFeeRules, findMatchingFeeRule, calculateFeeFromRule } from '@/lib/feeCalculation';
+import { loadTpSlRules, findMatchingTpSlRule } from '@/lib/tpslCalculation';
 import { cn } from '@/lib/utils';
 import { TradeModalErrorBoundary } from './TradeModalErrorBoundary';
 
@@ -378,6 +379,40 @@ export const TradeModal = () => {
     return calculateFeeFromRule(rule, entries, direction);
   }, [selectedAccountId, symbol, entries, direction, accounts, editingTrade, scaleEntries, scaleExits, entryDate, exitDate]);
 
+  // Auto-calculate TP/SL placeholders from TP/SL rules + tick size (mirrors fee placeholder pattern)
+  const calculatedTpSl = useMemo(() => {
+    // Only for new trades or when TP/SL fields are empty
+    const selectedAccount = accounts.find(a => a.id === selectedAccountId);
+    if (!selectedAccount || !symbol.trim()) return { tp: undefined as number | undefined, sl: undefined as number | undefined };
+    const ep = parseFloat(entryPrice);
+    if (!ep || ep <= 0) return { tp: undefined, sl: undefined };
+
+    const trimmedSymbol = symbol.trim();
+    const tickSize = getTickSizeForAccountSymbol(selectedAccount.name, trimmedSymbol);
+    if (!tickSize || tickSize <= 0) return { tp: undefined, sl: undefined };
+
+    const rules = loadTpSlRules();
+    const rule = findMatchingTpSlRule(rules, selectedAccount.name, trimmedSymbol);
+    if (!rule) return { tp: undefined, sl: undefined };
+
+    // Only support tick-based rules for price placeholder calculation
+    let tp: number | undefined;
+    let sl: number | undefined;
+
+    if (rule.profitTargetUnit === 'tick' && rule.profitTargetValue > 0) {
+      tp = direction === 'LONG'
+        ? ep + (rule.profitTargetValue * tickSize)
+        : ep - (rule.profitTargetValue * tickSize);
+    }
+    if (rule.stopLossUnit === 'tick' && rule.stopLossValue > 0) {
+      sl = direction === 'LONG'
+        ? ep - (rule.stopLossValue * tickSize)
+        : ep + (rule.stopLossValue * tickSize);
+    }
+
+    return { tp, sl };
+  }, [selectedAccountId, symbol, entryPrice, direction, accounts, getTickSizeForAccountSymbol]);
+
   // For editing, use the original trade's metrics for auto-calculated gross PnL
   // so multi-entry trades retain correct values instead of using rebuilt simplified entries
   const editingTradeGrossPnl = useMemo(() => {
@@ -514,8 +549,8 @@ export const TradeModal = () => {
       selectedChecklistItems,
       tags: selectedTags,
       notes: notes.trim(),
-      stopLoss: stopLoss !== '' ? parseFloat(stopLoss) : undefined,
-      takeProfit: takeProfit !== '' ? parseFloat(takeProfit) : undefined,
+      stopLoss: stopLoss !== '' ? parseFloat(stopLoss) : (calculatedTpSl.sl !== undefined ? calculatedTpSl.sl : undefined),
+      takeProfit: takeProfit !== '' ? parseFloat(takeProfit) : (calculatedTpSl.tp !== undefined ? calculatedTpSl.tp : undefined),
       manualGrossPnl: manualGrossPnl !== '' ? parseFloat(manualGrossPnl) : undefined,
       // Persist manual fees override (even if 0); if empty, persist calculated fee
       manualFees: fees !== '' ? parseFloat(fees) : (calculatedFee > 0 ? calculatedFee : undefined),
@@ -652,8 +687,8 @@ export const TradeModal = () => {
   // Calculated summary metrics - Fixed calculations
   const rrrCalculated = useMemo(() => {
     const entry = parseFloat(entryPrice) || 0;
-    const sl = parseFloat(stopLoss) || 0;
-    const tp = parseFloat(takeProfit) || 0;
+    const sl = stopLoss !== '' ? (parseFloat(stopLoss) || 0) : (calculatedTpSl.sl ?? 0);
+    const tp = takeProfit !== '' ? (parseFloat(takeProfit) || 0) : (calculatedTpSl.tp ?? 0);
     
     if (entry <= 0 || sl <= 0 || tp <= 0) return null;
     
@@ -672,11 +707,11 @@ export const TradeModal = () => {
     if (risk <= 0) return null;
     
     return reward / risk;
-  }, [entryPrice, stopLoss, takeProfit, direction]);
+  }, [entryPrice, stopLoss, takeProfit, direction, calculatedTpSl]);
 
   const rMultipleCalculated = useMemo(() => {
     const entry = parseFloat(entryPrice) || 0;
-    const sl = parseFloat(stopLoss) || 0;
+    const sl = stopLoss !== '' ? (parseFloat(stopLoss) || 0) : (calculatedTpSl.sl ?? 0);
     const exit = parseFloat(exitPrice) || 0;
     
     // Require exit price for R-Multiple
@@ -697,7 +732,7 @@ export const TradeModal = () => {
     if (risk <= 0) return null;
     
     return realizedPnl / risk;
-  }, [entryPrice, stopLoss, exitPrice, direction]);
+  }, [entryPrice, stopLoss, exitPrice, direction, calculatedTpSl]);
 
   const returnPercent = displayReturnPercent.toFixed(2) + '%';
 
@@ -963,7 +998,7 @@ export const TradeModal = () => {
                     <Input
                       type="text"
                       inputMode="decimal"
-                      placeholder="0.00"
+                      placeholder={calculatedTpSl.sl !== undefined ? calculatedTpSl.sl.toString() : '0.00'}
                       value={stopLoss}
                       onChange={(e) => {
                         const val = e.target.value;
@@ -980,7 +1015,7 @@ export const TradeModal = () => {
                     <Input
                       type="text"
                       inputMode="decimal"
-                      placeholder="0.00"
+                      placeholder={calculatedTpSl.tp !== undefined ? calculatedTpSl.tp.toString() : '0.00'}
                       value={takeProfit}
                       onChange={(e) => {
                         const val = e.target.value;
