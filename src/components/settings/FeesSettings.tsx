@@ -110,8 +110,9 @@ export const FeesSettings = () => {
     const updates = new Map<string, Partial<import('@/types/trade').TradeFormData>>();
 
     for (const trade of matchingTrades) {
-      const shouldApply = overwrite || (emptyOnly && trade.manualFees === undefined);
-      if (!shouldApply) continue;
+      const feeEmpty = trade.manualFees === undefined;
+      if (emptyOnly && !feeEmpty) continue;
+      if (overwrite && feeEmpty) continue;
 
       const fee = calculateFeeFromRule(rule, trade.entries, trade.side);
       const updatedTrade = { ...trade, manualFees: fee };
