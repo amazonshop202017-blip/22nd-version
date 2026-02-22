@@ -425,7 +425,7 @@ export const FeesSettings = () => {
         </DialogContent>
       </Dialog>
 
-      <ApplyToModal open={showApplyTo} onOpenChange={setShowApplyTo} onApply={handleApplyTo} />
+      <ApplyToModal open={showApplyTo} onOpenChange={setShowApplyTo} onApply={handleApplyTo} context="fees" />
     </div>
   );
 };

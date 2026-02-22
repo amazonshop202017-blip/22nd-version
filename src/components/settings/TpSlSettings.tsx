@@ -484,7 +484,7 @@ export const TpSlSettings = () => {
         </DialogContent>
       </Dialog>
 
-      <ApplyToModal open={showApplyTo} onOpenChange={setShowApplyTo} onApply={handleApplyTo} />
+      <ApplyToModal open={showApplyTo} onOpenChange={setShowApplyTo} onApply={handleApplyTo} context="tpsl" />
     </div>
   );
 };

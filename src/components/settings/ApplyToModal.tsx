@@ -9,11 +9,36 @@ interface ApplyToModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onApply?: (emptyOnly: boolean, overwrite: boolean) => void;
+  /** Controls the descriptions shown for each option */
+  context?: 'tpsl' | 'fees';
 }
 
-export const ApplyToModal = ({ open, onOpenChange, onApply }: ApplyToModalProps) => {
+const descriptions = {
+  tpsl: {
+    emptyTitle: 'Apply to trades with no TP/SL set',
+    emptySub: 'Only targets trades where both Take Profit and Stop Loss are empty.',
+    overwriteTitle: 'Apply to trades with existing TP/SL values',
+    overwriteSub: 'Only targets trades that already have a Take Profit or Stop Loss value and overwrites them.',
+  },
+  fees: {
+    emptyTitle: 'Apply to trades with no fees set',
+    emptySub: 'Only targets trades where fees have not been manually entered.',
+    overwriteTitle: 'Apply to trades with existing fee values',
+    overwriteSub: 'Only targets trades that already have a fee value and overwrites it.',
+  },
+  default: {
+    emptyTitle: 'Apply to trades with empty fields only',
+    emptySub: 'Only trades where the related field is null/empty.',
+    overwriteTitle: 'Apply to trades and overwrite current values',
+    overwriteSub: 'Replace existing values with this rule\'s values.',
+  },
+};
+
+export const ApplyToModal = ({ open, onOpenChange, onApply, context }: ApplyToModalProps) => {
   const [emptyOnly, setEmptyOnly] = useState(false);
   const [overwrite, setOverwrite] = useState(false);
+
+  const desc = descriptions[context ?? 'default'];
 
   const handleApply = () => {
     if (onApply) {
@@ -42,8 +67,8 @@ export const ApplyToModal = ({ open, onOpenChange, onApply }: ApplyToModalProps)
               className="mt-0.5"
             />
             <div>
-              <p className="text-sm font-medium">Apply to existing trades with empty fields only</p>
-              <p className="text-xs text-muted-foreground">Only trades where the related field is null/empty.</p>
+              <p className="text-sm font-medium">{desc.emptyTitle}</p>
+              <p className="text-xs text-muted-foreground">{desc.emptySub}</p>
             </div>
           </label>
 
@@ -54,8 +79,8 @@ export const ApplyToModal = ({ open, onOpenChange, onApply }: ApplyToModalProps)
               className="mt-0.5"
             />
             <div>
-              <p className="text-sm font-medium">Apply to existing trades and overwrite current values</p>
-              <p className="text-xs text-muted-foreground">Replace existing values with this rule's values</p>
+              <p className="text-sm font-medium">{desc.overwriteTitle}</p>
+              <p className="text-xs text-muted-foreground">{desc.overwriteSub}</p>
             </div>
           </label>
         </div>
