@@ -4,12 +4,18 @@ import { useFilteredTrades } from '@/hooks/useFilteredTrades';
 import { prepareExitTrades, computeHeatmap, HeatmapCell } from '@/lib/exitAnalyzerCalc';
 import { Crosshair, Info } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Heatmap } from '@mui/x-charts-pro/Heatmap';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
 import {
   ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip,
   ResponsiveContainer, ReferenceLine, Cell as RechartsCell
 } from 'recharts';
 
-// ─── Inputs Section ───
+// Dark MUI theme to match app
+const muiDarkTheme = createTheme({
+  palette: { mode: 'dark', background: { default: 'transparent', paper: 'transparent' } },
+});
+
 const InputField = ({ label, value, onChange, min }: {
   label: string; value: number; onChange: (v: number) => void; min?: number;
 }) => (
@@ -24,22 +30,6 @@ const InputField = ({ label, value, onChange, min }: {
     />
   </div>
 );
-
-// ─── Color helper ───
-function cellColor(expectancy: number): string {
-  if (expectancy > 0.5) return 'hsl(142 76% 35%)';
-  if (expectancy > 0.2) return 'hsl(142 76% 25%)';
-  if (expectancy > 0) return 'hsl(142 76% 18%)';
-  if (expectancy === 0) return 'hsl(222 47% 14%)';
-  if (expectancy > -0.2) return 'hsl(0 84% 18%)';
-  if (expectancy > -0.5) return 'hsl(0 84% 25%)';
-  return 'hsl(0 84% 35%)';
-}
-
-function cellTextColor(expectancy: number): string {
-  if (Math.abs(expectancy) > 0.2) return 'hsl(210 40% 98%)';
-  return 'hsl(215 20% 55%)';
-}
 
 const ExitAnalyzer = () => {
   const { filteredTrades } = useFilteredTrades();
@@ -63,7 +53,7 @@ const ExitAnalyzer = () => {
     [filteredTrades, treatMissingAsZero]
   );
 
-  // Check for zoom
+  // Zoom logic
   const zoomedRange = useMemo(() => {
     if (selectedCells.size === 0) return null;
     const selected = Array.from(selectedCells).map(k => {
@@ -83,7 +73,6 @@ const ExitAnalyzer = () => {
     };
   }, [selectedCells, slStep, tpStep]);
 
-  // Compute heatmap
   const heatmapRange = zoomedRange || { minSL, maxSL, minTP, maxTP, slStep, tpStep };
   const isValidRange = heatmapRange.minSL > 0 && heatmapRange.maxSL >= heatmapRange.minSL &&
     heatmapRange.minTP > 0 && heatmapRange.maxTP >= heatmapRange.minTP &&
@@ -98,8 +87,8 @@ const ExitAnalyzer = () => {
     );
   }, [exitTrades, heatmapRange, isValidRange]);
 
-  // Build grid structure
-  const { tpValues, slValues, cellMap } = useMemo(() => {
+  // Build MUI heatmap data
+  const { tpValues, slValues, cellMap, muiData } = useMemo(() => {
     const tpSet = new Set<number>();
     const slSet = new Set<number>();
     const map = new Map<string, HeatmapCell>();
@@ -108,11 +97,21 @@ const ExitAnalyzer = () => {
       slSet.add(c.sl);
       map.set(`${c.sl}:${c.tp}`, c);
     }
-    return {
-      tpValues: Array.from(tpSet).sort((a, b) => a - b),
-      slValues: Array.from(slSet).sort((a, b) => a - b),
-      cellMap: map,
-    };
+    const tpArr = Array.from(tpSet).sort((a, b) => a - b);
+    const slArr = Array.from(slSet).sort((a, b) => a - b);
+
+    // MUI Heatmap data: [xIndex, yIndex, value]
+    const data: [number, number, number][] = [];
+    for (let xi = 0; xi < tpArr.length; xi++) {
+      for (let yi = 0; yi < slArr.length; yi++) {
+        const cell = map.get(`${slArr[yi]}:${tpArr[xi]}`);
+        if (cell) {
+          data.push([xi, yi, cell.expectancy]);
+        }
+      }
+    }
+
+    return { tpValues: tpArr, slValues: slArr, cellMap: map, muiData: data };
   }, [heatmapCells]);
 
   const toggleCell = useCallback((key: string) => {
@@ -129,15 +128,27 @@ const ExitAnalyzer = () => {
     setActiveModel(null);
   }, []);
 
-  // Selected cells for comparison table
   const comparisonRows = useMemo(() => {
     return Array.from(selectedCells).map(key => cellMap.get(key)!).filter(Boolean);
   }, [selectedCells, cellMap]);
 
-  // Scatter data
   const scatterData = useMemo(() => {
     return exitTrades.map((t, i) => ({ x: t.mae, y: t.mfe, id: i }));
   }, [exitTrades]);
+
+  // Handle MUI heatmap cell click
+  const handleHeatmapClick = useCallback((_event: any, data: any) => {
+    if (data?.dataIndex != null) {
+      const tuple = muiData[data.dataIndex];
+      if (tuple) {
+        const tp = tpValues[tuple[0]];
+        const sl = slValues[tuple[1]];
+        if (tp != null && sl != null) {
+          toggleCell(`${sl}:${tp}`);
+        }
+      }
+    }
+  }, [muiData, tpValues, slValues, toggleCell]);
 
   return (
     <div className="space-y-6">
@@ -151,7 +162,7 @@ const ExitAnalyzer = () => {
         </div>
       </motion.div>
 
-      {/* Inputs Section */}
+      {/* Inputs */}
       <motion.div
         initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}
         className="glass-card rounded-2xl p-5"
@@ -194,9 +205,7 @@ const ExitAnalyzer = () => {
               Clear selection ({selectedCells.size})
             </button>
           )}
-          {zoomedRange && (
-            <span className="text-primary">🔍 Zoomed view</span>
-          )}
+          {zoomedRange && <span className="text-primary">🔍 Zoomed view</span>}
         </div>
       </motion.div>
 
@@ -215,80 +224,38 @@ const ExitAnalyzer = () => {
         </div>
       )}
 
-      {/* Heatmap */}
-      {heatmapCells.length > 0 && (
+      {/* MUI Heatmap */}
+      {muiData.length > 0 && (
         <motion.div
           initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-          className="glass-card rounded-2xl p-5 overflow-x-auto"
+          className="glass-card rounded-2xl p-5"
         >
           <h2 className="text-lg font-semibold mb-4">SL / TP Performance Heatmap</h2>
-          <div className="inline-block">
-            {/* Header row */}
-            <div className="flex">
-              <div className="w-16 h-10 flex items-center justify-center text-xs text-muted-foreground font-medium">
-                SL\TP
-              </div>
-              {tpValues.map(tp => (
-                <div key={tp} className="w-20 h-10 flex items-center justify-center text-xs font-mono text-muted-foreground">
-                  {tp}
-                </div>
-              ))}
-            </div>
-            {/* Data rows */}
-            {slValues.map(sl => (
-              <div key={sl} className="flex">
-                <div className="w-16 h-20 flex items-center justify-center text-xs font-mono text-muted-foreground">
-                  {sl}
-                </div>
-                {tpValues.map(tp => {
-                  const key = `${sl}:${tp}`;
-                  const cell = cellMap.get(key);
-                  if (!cell) return <div key={key} className="w-20 h-20" />;
-                  const isSelected = selectedCells.has(key);
-                  return (
-                    <Tooltip key={key}>
-                      <TooltipTrigger asChild>
-                        <button
-                          onClick={() => toggleCell(key)}
-                          className="w-20 h-20 m-0.5 rounded-lg flex flex-col items-center justify-center gap-0.5 transition-all duration-150 hover:scale-105 cursor-pointer"
-                          style={{
-                            backgroundColor: cellColor(cell.expectancy),
-                            color: cellTextColor(cell.expectancy),
-                            outline: isSelected ? '2px solid hsl(199 89% 48%)' : 'none',
-                            outlineOffset: isSelected ? '-2px' : '0',
-                          }}
-                        >
-                          <span className="text-sm font-bold font-mono">
-                            {cell.expectancy >= 0 ? '+' : ''}{cell.expectancy.toFixed(2)}R
-                          </span>
-                          <span className="text-[10px] opacity-80">
-                            {cell.winRate.toFixed(0)}% win
-                          </span>
-                        </button>
-                      </TooltipTrigger>
-                      <TooltipContent side="top" className="font-mono text-xs space-y-0.5">
-                        <p>SL: {cell.sl} | TP: {cell.tp}</p>
-                        <p>Expectancy: {cell.expectancy.toFixed(3)}R</p>
-                        <p>Win Rate: {cell.winRate.toFixed(1)}%</p>
-                        <p>Avg R: {cell.avgR.toFixed(3)}</p>
-                        <p>Trades: {cell.tradesCount}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  );
-                })}
-              </div>
-            ))}
-          </div>
-          {/* Legend */}
-          <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
-            <span>Negative</span>
-            <div className="flex gap-0.5">
-              {['hsl(0 84% 35%)', 'hsl(0 84% 25%)', 'hsl(0 84% 18%)', 'hsl(222 47% 14%)', 'hsl(142 76% 18%)', 'hsl(142 76% 25%)', 'hsl(142 76% 35%)'].map((c, i) => (
-                <div key={i} className="w-6 h-3 rounded-sm" style={{ backgroundColor: c }} />
-              ))}
-            </div>
-            <span>Positive</span>
-          </div>
+          <ThemeProvider theme={muiDarkTheme}>
+            <Heatmap
+              xAxis={[{ data: tpValues.map(v => `TP ${v}`), label: 'Take Profit (ticks)' }]}
+              yAxis={[{ data: slValues.map(v => `SL ${v}`), label: 'Stop Loss (ticks)' }]}
+              series={[{
+                data: muiData,
+                highlightScope: { highlight: 'item', fade: 'global' },
+                label: 'Expectancy (R)',
+              }]}
+              zAxis={[{
+                min: Math.min(...muiData.map(d => d[2]), -1),
+                max: Math.max(...muiData.map(d => d[2]), 1),
+                colorMap: {
+                  type: 'continuous',
+                  min: Math.min(...muiData.map(d => d[2]), -1),
+                  max: Math.max(...muiData.map(d => d[2]), 1),
+                  color: ['hsl(0, 84%, 40%)', 'hsl(142, 76%, 40%)'] as [string, string],
+                },
+              }]}
+              height={Math.max(350, slValues.length * 60 + 80)}
+              margin={{ left: 80, bottom: 60, top: 20, right: 20 }}
+              onItemClick={handleHeatmapClick}
+              hideLegend={false}
+            />
+          </ThemeProvider>
         </motion.div>
       )}
 
@@ -367,22 +334,15 @@ const ExitAnalyzer = () => {
                   color: 'hsl(210 40% 98%)',
                   fontSize: 12,
                 }}
-                formatter={(value: number, name: string) => [value, name]}
               />
               {activeModel && (
                 <>
                   <ReferenceLine
-                    x={activeModel.sl}
-                    stroke="hsl(0 84% 60%)"
-                    strokeDasharray="6 3"
-                    strokeWidth={2}
+                    x={activeModel.sl} stroke="hsl(0 84% 60%)" strokeDasharray="6 3" strokeWidth={2}
                     label={{ value: `SL ${activeModel.sl}`, fill: 'hsl(0 84% 60%)', fontSize: 11, position: 'top' }}
                   />
                   <ReferenceLine
-                    y={activeModel.tp}
-                    stroke="hsl(142 76% 45%)"
-                    strokeDasharray="6 3"
-                    strokeWidth={2}
+                    y={activeModel.tp} stroke="hsl(142 76% 45%)" strokeDasharray="6 3" strokeWidth={2}
                     label={{ value: `TP ${activeModel.tp}`, fill: 'hsl(142 76% 45%)', fontSize: 11, position: 'right' }}
                   />
                 </>
