@@ -74,7 +74,7 @@ const App = () => (
                               <Route path="/chart-room/tags-analytics" element={<TagsAnalytics />} />
                               <Route path="/chart-room/risk-distribution" element={<RiskDistribution />} />
                               <Route path="/chart-room/trade-management" element={<TradeManagement />} />
-                              <Route path="/chart-room/exit-analyzer" element={<ExitAnalyzer />} />
+                              <Route path="/exit-analyzer" element={<ExitAnalyzer />} />
                               <Route path="/settings" element={<Settings />} />
                               <Route path="*" element={<NotFound />} />
                             </Routes>

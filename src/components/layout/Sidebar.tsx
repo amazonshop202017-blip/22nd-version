@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { LayoutDashboard, LineChart, ListOrdered, FileText, Settings, Target, Plus, ChevronLeft, ChevronRight, BarChart3, ChevronDown } from 'lucide-react';
+import { LayoutDashboard, LineChart, ListOrdered, FileText, Settings, Target, Plus, ChevronLeft, ChevronRight, BarChart3, ChevronDown, Crosshair } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTradeModal } from '@/contexts/TradeModalContext';
@@ -24,6 +24,7 @@ const tradingViewItems = [
 const analysisItems = [
   { icon: Target, label: 'Setups', path: '/strategies' },
   { icon: FileText, label: 'Reports', path: '/reports' },
+  { icon: Crosshair, label: 'Exit Analyzer', path: '/exit-analyzer' },
 ];
 
 const chartRoomItems = [
@@ -37,7 +38,6 @@ const chartRoomItems = [
   { label: 'Tags/Comments Analysis', path: '/chart-room/tags-analytics' },
   { label: 'Risk Distribution', path: '/chart-room/risk-distribution' },
   { label: 'Trade Management', path: '/chart-room/trade-management' },
-  { label: 'Exit Analyzer', path: '/chart-room/exit-analyzer' },
 ];
 
 export const Sidebar = () => {
