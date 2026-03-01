@@ -29,16 +29,23 @@ export function prepareExitTrades(
     const mfe = trade.mfeTickPip;
     const mae = trade.maeTickPip;
 
+    // Both missing → always skip
+    if (mfe == null && mae == null) continue;
+
     let mfeVal: number;
     let maeVal: number;
 
-    if (treatMissingAsZero) {
+    if (mfe != null && mae != null) {
+      // Both present → always include
+      mfeVal = mfe;
+      maeVal = mae;
+    } else if (treatMissingAsZero) {
+      // One present, one missing, checkbox ticked → treat missing as 0
       mfeVal = mfe ?? 0;
       maeVal = mae ?? 0;
     } else {
-      if (mfe == null || mae == null) continue;
-      mfeVal = mfe;
-      maeVal = mae;
+      // One missing, checkbox not ticked → skip
+      continue;
     }
 
     const metrics = calculateTradeMetrics(trade);
