@@ -390,7 +390,7 @@ const ExitAnalyzer = () => {
                   return (
                     <tr
                       key={`${row.sl}:${row.tp}`}
-                      onClick={() => setActiveModel({ sl: row.sl, tp: row.tp })}
+                      onClick={() => { setActiveModel({ sl: row.sl, tp: row.tp }); setScatterSL(row.sl); setScatterTP(row.tp); }}
                       className={`cursor-pointer transition-colors border-b border-border/50 hover:bg-secondary/50 ${isActive ? 'bg-primary/10' : ''}`}
                     >
                       <td className="py-2.5 px-3 font-mono">{row.sl}</td>
