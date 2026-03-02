@@ -321,17 +321,19 @@ const ExitAnalyzer = () => {
                 textStyle: { color: 'hsl(215, 20%, 55%)' },
               },
               series: [{
-                name: 'Expectancy',
+                name: coloringMode === 'expectancy' ? 'Expectancy' : 'Win Rate',
                 type: 'heatmap',
                 data: heatmapCells.map(c => {
                   const xi = tpValues.indexOf(c.tp);
                   const yi = slValues.indexOf(c.sl);
-                  return [xi, yi, c.expectancy];
+                  const colorVal = coloringMode === 'expectancy' ? c.expectancy : c.winRate;
+                  return [xi, yi, colorVal];
                 }),
                 label: {
                   show: true,
                   formatter: (params: any) => {
                     const val = params.value[2] as number;
+                    if (coloringMode === 'winrate') return `${val.toFixed(1)}%`;
                     return `${val >= 0 ? '+' : ''}${val.toFixed(2)}R`;
                   },
                   color: 'hsl(210, 40%, 98%)',
