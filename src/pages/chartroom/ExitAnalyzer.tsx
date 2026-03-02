@@ -2,7 +2,7 @@ import { useState, useMemo, useCallback, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useFilteredTrades } from '@/hooks/useFilteredTrades';
 import { prepareExitTrades, computeHeatmap, HeatmapCell } from '@/lib/exitAnalyzerCalc';
-import { Crosshair, Info } from 'lucide-react';
+import { Crosshair, Info, X } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip,
@@ -403,6 +403,7 @@ const ExitAnalyzer = () => {
                   <th className="text-right py-2 px-3 text-muted-foreground font-medium">Win Rate</th>
                   <th className="text-right py-2 px-3 text-muted-foreground font-medium">Avg R</th>
                   <th className="text-right py-2 px-3 text-muted-foreground font-medium">Trades</th>
+                  <th className="w-8"></th>
                 </tr>
               </thead>
               <tbody>
@@ -422,6 +423,14 @@ const ExitAnalyzer = () => {
                       <td className="py-2.5 px-3 text-right font-mono">{row.winRate.toFixed(1)}%</td>
                       <td className="py-2.5 px-3 text-right font-mono">{row.avgR.toFixed(3)}</td>
                       <td className="py-2.5 px-3 text-right font-mono">{row.tradesCount}</td>
+                      <td className="py-2.5 px-1">
+                        <button
+                          onClick={(e) => { e.stopPropagation(); toggleCell(`${row.sl}:${row.tp}`); }}
+                          className="p-1 rounded hover:bg-destructive/20 text-muted-foreground hover:text-destructive transition-colors"
+                        >
+                          <X className="h-3.5 w-3.5" />
+                        </button>
+                      </td>
                     </tr>
                   );
                 })}
