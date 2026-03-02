@@ -232,12 +232,13 @@ const ExitAnalyzer = () => {
       {heatmapCells.length > 0 && (
         <motion.div
           initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-          className="glass-card rounded-2xl p-5"
+          className="glass-card rounded-2xl p-5 overflow-auto"
+          style={{ maxHeight: 700 }}
         >
-          <h2 className="text-lg font-semibold mb-4">SL / TP Performance Heatmap</h2>
+          <h2 className="text-lg font-semibold mb-4 sticky top-0 left-0 z-10">SL / TP Performance Heatmap</h2>
           <ReactEChartsCore
             echarts={echarts}
-            style={{ height: Math.max(400, slValues.length * 50 + 100) }}
+            style={{ width: Math.max(600, tpValues.length * 60 + 120), height: Math.max(400, slValues.length * 50 + 120) }}
             option={{
               tooltip: {
                 position: 'top',
