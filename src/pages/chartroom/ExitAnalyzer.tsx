@@ -361,6 +361,7 @@ const ExitAnalyzer = () => {
             }}
             notMerge={true}
           />
+          </div>
         </motion.div>
       )}
 
