@@ -188,9 +188,6 @@ const ExitAnalyzer = () => {
               Clear selection ({selectedCells.size})
             </button>
           )}
-          {zoomedRange && (
-            <span className="text-primary">🔍 Zoomed view</span>
-          )}
         </div>
       </motion.div>
 
