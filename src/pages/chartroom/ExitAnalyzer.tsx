@@ -61,6 +61,7 @@ const ExitAnalyzer = () => {
   const [slStep, setSlStep] = useState(5);
   const [tpStep, setTpStep] = useState(5);
   const [treatMissingAsZero, setTreatMissingAsZero] = useState(true);
+  const [coloringMode, setColoringMode] = useState<'expectancy' | 'winrate'>('expectancy');
 
   // Selection
   const [selectedCells, setSelectedCells] = useState<Set<string>>(new Set());
@@ -235,7 +236,26 @@ const ExitAnalyzer = () => {
           className="glass-card rounded-2xl p-5 overflow-auto"
           style={{ maxHeight: 700 }}
         >
-          <h2 className="text-lg font-semibold mb-4 sticky top-0 left-0 z-10">SL / TP Performance Heatmap</h2>
+          <div className="flex items-center justify-between mb-4 sticky top-0 left-0 z-10">
+            <h2 className="text-lg font-semibold">SL / TP Performance Heatmap</h2>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground">Coloring:</span>
+              <div className="flex rounded-md border border-border overflow-hidden">
+                <button
+                  onClick={() => setColoringMode('expectancy')}
+                  className={`px-3 py-1 text-xs font-medium transition-colors ${coloringMode === 'expectancy' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground hover:text-foreground'}`}
+                >
+                  Expectancy
+                </button>
+                <button
+                  onClick={() => setColoringMode('winrate')}
+                  className={`px-3 py-1 text-xs font-medium transition-colors ${coloringMode === 'winrate' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground hover:text-foreground'}`}
+                >
+                  Win Rate
+                </button>
+              </div>
+            </div>
+          </div>
           <ReactEChartsCore
             echarts={echarts}
             style={{ width: Math.max(600, tpValues.length * 60 + 120), height: Math.max(400, slValues.length * 50 + 120) }}
@@ -285,8 +305,12 @@ const ExitAnalyzer = () => {
                 axisTick: { lineStyle: { color: 'hsl(222, 47%, 18%)' } },
               },
               visualMap: {
-                min: Math.min(...heatmapCells.map(c => c.expectancy)),
-                max: Math.max(...heatmapCells.map(c => c.expectancy)),
+                min: coloringMode === 'expectancy'
+                  ? Math.min(...heatmapCells.map(c => c.expectancy))
+                  : Math.min(...heatmapCells.map(c => c.winRate)),
+                max: coloringMode === 'expectancy'
+                  ? Math.max(...heatmapCells.map(c => c.expectancy))
+                  : Math.max(...heatmapCells.map(c => c.winRate)),
                 calculable: true,
                 orient: 'horizontal',
                 left: 'center',
@@ -297,17 +321,19 @@ const ExitAnalyzer = () => {
                 textStyle: { color: 'hsl(215, 20%, 55%)' },
               },
               series: [{
-                name: 'Expectancy',
+                name: coloringMode === 'expectancy' ? 'Expectancy' : 'Win Rate',
                 type: 'heatmap',
                 data: heatmapCells.map(c => {
                   const xi = tpValues.indexOf(c.tp);
                   const yi = slValues.indexOf(c.sl);
-                  return [xi, yi, c.expectancy];
+                  const colorVal = coloringMode === 'expectancy' ? c.expectancy : c.winRate;
+                  return [xi, yi, colorVal];
                 }),
                 label: {
                   show: true,
                   formatter: (params: any) => {
                     const val = params.value[2] as number;
+                    if (coloringMode === 'winrate') return `${val.toFixed(1)}%`;
                     return `${val >= 0 ? '+' : ''}${val.toFixed(2)}R`;
                   },
                   color: 'hsl(210, 40%, 98%)',
