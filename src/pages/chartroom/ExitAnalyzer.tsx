@@ -305,6 +305,29 @@ const ExitAnalyzer = () => {
               </tbody>
             </table>
           </div>
+          {/* Color bar legend */}
+          <div className="flex items-center justify-center gap-3 px-5 pb-4 pt-2">
+            <span className="text-xs text-muted-foreground font-mono">
+              {(() => {
+                const allVals = heatmapCells.map(c => coloringMode === 'expectancy' ? c.expectancy : c.winRate);
+                const minV = Math.min(...allVals);
+                return coloringMode === 'expectancy' ? `${minV >= 0 ? '+' : ''}${minV.toFixed(2)}R` : `${minV.toFixed(1)}%`;
+              })()}
+            </span>
+            <div
+              className="h-3 rounded-full flex-1 max-w-xs"
+              style={{
+                background: 'linear-gradient(to right, #8B3A1A, #C96A2B, #D4944A, #6BAF6E, #2FAF7A, #1A7A4E)',
+              }}
+            />
+            <span className="text-xs text-muted-foreground font-mono">
+              {(() => {
+                const allVals = heatmapCells.map(c => coloringMode === 'expectancy' ? c.expectancy : c.winRate);
+                const maxV = Math.max(...allVals);
+                return coloringMode === 'expectancy' ? `${maxV >= 0 ? '+' : ''}${maxV.toFixed(2)}R` : `${maxV.toFixed(1)}%`;
+              })()}
+            </span>
+          </div>
         </motion.div>
       )}
 
