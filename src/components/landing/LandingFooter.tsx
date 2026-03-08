@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { LineChart } from 'lucide-react';
+import logo from '@/assets/logo.svg';
 
 export const LandingFooter = () => {
   return (
