@@ -135,13 +135,7 @@ const ExitAnalyzer = () => {
   return (
     <div className="space-y-6">
       <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
-        <div className="flex items-center gap-3">
-          <Crosshair className="h-8 w-8 text-primary" />
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Exit Analyzer</h1>
-            <p className="text-muted-foreground mt-1">Discover optimal SL/TP exits using historical MFE/MAE behavior</p>
-          </div>
-        </div>
+        <PageHeader title="Exit Analyzer" tooltip="Discover optimal SL/TP levels based on your historical MFE/MAE data." />
       </motion.div>
 
       {/* Sub-Navigation Menu */}
