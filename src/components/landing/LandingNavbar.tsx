@@ -5,7 +5,9 @@ import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const navLinks = [
+  { label: 'Home', path: '/' },
   { label: 'Features', path: '/features' },
+  { label: 'Supported Platforms', path: '/supported-platforms' },
   { label: 'Pricing', path: '/pricing' },
 ];
 
