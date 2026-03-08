@@ -257,24 +257,6 @@ const painCards = [
   },
 ];
 
-// ─── Testimonials ───
-const testimonials = [
-  {
-    quote: "I discovered I lose on 71% of my trades in the first 30 minutes of market open. I stopped trading that window entirely. One insight from TradeValley paid for years of subscription.",
-    name: 'Arjun M.',
-    role: 'Options Trader · Zerodha',
-  },
-  {
-    quote: "My Exit Score was 34 out of 100. I didn't want to believe it until the heatmap proved it trade by trade. Three months later it's 61 — and my monthly P&L reflects that number exactly.",
-    name: 'Sneha R.',
-    role: 'Futures Trader · Upstox',
-  },
-  {
-    quote: "I've quit every other journal within a week. TradeValley showed me exactly 4 things to fix — nothing more. That restraint is why I still use it every single day.",
-    name: 'Vikram T.',
-    role: 'Equity Trader · Angel One',
-  },
-];
 
 // ─── Broker logos (text-based, muted) ───
 const brokers = ['Zerodha', 'Upstox', 'Angel One', 'MT5', 'Tradovate'];
@@ -572,48 +554,6 @@ const Landing4 = () => {
                 </p>
                 <p className="mt-3 text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>{stat.label}</p>
                 {stat.sub && <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.3)' }}>{stat.sub}</p>}
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ════════════════════════════════════════
-          SECTION 8 — TESTIMONIALS
-      ════════════════════════════════════════ */}
-      <section className="py-20 lg:py-28 px-6 lg:px-8" style={{ background: '#F8F7F5' }}>
-        <div className="max-w-5xl mx-auto">
-          <motion.div
-            initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.3 }}
-            variants={fadeUp} custom={0}
-            className="text-center mb-14"
-          >
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight" style={{ fontFamily: "'Playfair Display', serif", color: '#0F0F0F' }}>
-              What changes when you finally see your patterns.
-            </h2>
-          </motion.div>
-
-          <div className="grid md:grid-cols-3 gap-6">
-            {testimonials.map((t, i) => (
-              <motion.div
-                key={t.name}
-                initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.2 }}
-                variants={fadeUp} custom={i}
-                className="bg-white p-7 flex flex-col"
-                style={{
-                  border: '1px solid #EBEBEB',
-                  borderTop: '3px solid #059669',
-                  borderRadius: '2px',
-                  minHeight: '280px',
-                }}
-              >
-                <p className="text-sm leading-relaxed flex-1 italic" style={{ color: '#0F0F0F', fontFamily: "'Playfair Display', serif" }}>
-                  "{t.quote}"
-                </p>
-                <div className="mt-auto pt-5" style={{ borderTop: '1px solid #EBEBEB' }}>
-                  <p className="text-sm font-bold" style={{ color: '#0F0F0F' }}>{t.name}</p>
-                  <p className="text-xs mt-0.5" style={{ color: '#8A8A8A' }}>{t.role}</p>
-                </div>
               </motion.div>
             ))}
           </div>
