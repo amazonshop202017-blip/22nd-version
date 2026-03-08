@@ -177,9 +177,9 @@ const HeatmapVisual = ({ large = false, variant = 'neutral' }: { large?: boolean
         </p>
         <div className="h-14 relative">
           <svg viewBox="0 0 200 40" className="w-full h-full">
-            <path d="M0,35 Q30,30 50,28 T100,20 T150,14 T200,8" fill="none" stroke="#0F0F0F" strokeWidth="1.5" strokeLinecap="round" opacity="0.3" />
+            <path d="M0,35 Q30,30 50,28 T100,20 T150,14 T200,8" fill="none" stroke={trendStroke} strokeWidth="1.5" strokeLinecap="round" opacity={trendOpacity} />
             {[10, 30, 55, 75, 95, 120, 140, 160, 185].map((x, i) => (
-              <circle key={i} cx={x} cy={35 - i * 3 + Math.sin(i) * 4} r="2.5" fill="#0F0F0F" opacity="0.4" />
+              <circle key={i} cx={x} cy={35 - i * 3 + Math.sin(i) * 4} r="2.5" fill={dotFill} opacity={dotOpacity} />
             ))}
           </svg>
         </div>
