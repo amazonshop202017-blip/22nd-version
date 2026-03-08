@@ -2,12 +2,18 @@ import { useState, useMemo, useCallback, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useFilteredTrades } from '@/hooks/useFilteredTrades';
 import { prepareExitTrades, computeHeatmap, HeatmapCell } from '@/lib/exitAnalyzerCalc';
-import { Crosshair, Info, X } from 'lucide-react';
+import { Crosshair, Info, X, Zap, PenLine } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { cn } from '@/lib/utils';
 import {
   ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip,
   ResponsiveContainer, ReferenceLine, Cell as RechartsCell
 } from 'recharts';
+
+const subTabs = [
+  { id: 'auto', label: 'Auto', icon: Zap },
+  { id: 'manual', label: 'Manual', icon: PenLine },
+];
 
 // ─── Inputs Section ───
 const InputField = ({ label, value, onChange, min }: {
@@ -51,6 +57,7 @@ const ExitAnalyzer = () => {
   const [maxTP, setMaxTP] = useState(30);
   const [slStep, setSlStep] = useState(5);
   const [tpStep, setTpStep] = useState(5);
+  const [activeTab, setActiveTab] = useState('auto');
   const [treatMissingAsZero, setTreatMissingAsZero] = useState(true);
   const [coloringMode, setColoringMode] = useState<'expectancy' | 'winrate'>('expectancy');
 
@@ -137,6 +144,34 @@ const ExitAnalyzer = () => {
         </div>
       </motion.div>
 
+      {/* Sub-Navigation Menu */}
+      <div className="flex items-center gap-1 border-b border-border pb-2">
+        {subTabs.map((tab) => (
+          <div key={tab.id} className="relative">
+            <button
+              onClick={() => setActiveTab(tab.id)}
+              className={cn(
+                "flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
+                activeTab === tab.id
+                  ? "text-primary"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+              )}
+            >
+              <tab.icon className="w-4 h-4" />
+              <span>{tab.label}</span>
+            </button>
+            {activeTab === tab.id && (
+              <motion.div
+                layoutId="exitAnalyzerTab"
+                className="absolute bottom-[-9px] left-0 right-0 h-0.5 bg-primary"
+              />
+            )}
+          </div>
+        ))}
+      </div>
+
+      {activeTab === 'auto' ? (
+      <>
       {/* Inputs Section */}
       <motion.div
         initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}
@@ -463,6 +498,24 @@ const ExitAnalyzer = () => {
               </Scatter>
             </ScatterChart>
           </ResponsiveContainer>
+        </motion.div>
+      )}
+      </>
+      ) : (
+        <motion.div
+          key="manual"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="glass-card rounded-2xl p-12 flex flex-col items-center justify-center min-h-[400px]"
+        >
+          <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center mb-6">
+            <PenLine className="w-10 h-10 text-primary" />
+          </div>
+          <h3 className="text-2xl font-semibold mb-3">Manual Exit Analysis</h3>
+          <p className="text-muted-foreground text-center max-w-md">
+            Manually define and test specific SL/TP exit strategies against your trade history. Coming soon.
+          </p>
         </motion.div>
       )}
     </div>
