@@ -61,20 +61,20 @@ export const Sidebar = () => {
       {/* Logo Section */}
       <div className="p-4 border-b border-sidebar-border">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center flex-shrink-0">
-            <LineChart className="w-5 h-5 text-primary-foreground" />
-          </div>
           <AnimatePresence>
-            {!isCollapsed && (
+            {!isCollapsed ? (
               <motion.div
                 initial={{ opacity: 0, width: 0 }}
                 animate={{ opacity: 1, width: 'auto' }}
                 exit={{ opacity: 0, width: 0 }}
                 className="overflow-hidden"
               >
-                <h1 className="text-lg font-bold text-foreground whitespace-nowrap">TradeJournal</h1>
-                <p className="text-xs text-muted-foreground whitespace-nowrap">Track. Analyze. Improve.</p>
+                <img src={logo} alt="TradeValley" className="h-8 brightness-0 invert" />
               </motion.div>
+            ) : (
+              <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center flex-shrink-0">
+                <img src={logo} alt="TV" className="h-5 brightness-0 invert object-contain" style={{ objectPosition: 'left' }} />
+              </div>
             )}
           </AnimatePresence>
         </div>

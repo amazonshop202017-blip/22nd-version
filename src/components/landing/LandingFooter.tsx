@@ -44,7 +44,7 @@ export const LandingFooter = () => {
         </div>
 
         <div className="border-t border-slate-800 mt-12 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-slate-500">© {new Date().getFullYear()} TradeJournal. All rights reserved.</p>
+          <p className="text-xs text-slate-500">© {new Date().getFullYear()} TradeValley. All rights reserved.</p>
           <p className="text-xs text-slate-500">Built for traders, by traders.</p>
         </div>
       </div>
