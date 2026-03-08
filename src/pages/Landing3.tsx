@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowRight, Play, TrendingDown, Timer, HelpCircle, XCircle, Sparkles } from 'lucide-react';
+import { ArrowRight, Play, Sparkles } from 'lucide-react';
 import { LandingFooter } from '@/components/landing/LandingFooter';
 import logo from '@/assets/logo.svg';
 import { useState, useEffect } from 'react';
@@ -50,7 +50,7 @@ const Landing3Navbar = () => {
   );
 };
 
-// ─── Heatmap Visual (simplified representation) ───
+// ─── Heatmap Visual (larger, product-window feel) ───
 const HeatmapVisual = () => {
   const heatmapData = [
     [32, 41, 55, 48, 37, 29],
@@ -71,53 +71,56 @@ const HeatmapVisual = () => {
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-2xl shadow-slate-200/60 border border-slate-100 p-6 max-w-md mx-auto">
-      <div className="flex items-center justify-between mb-4">
+    <div
+      className="bg-white rounded-2xl p-8 w-full max-w-lg mx-auto"
+      style={{ boxShadow: '0 8px 40px rgba(0,0,0,0.08)', border: '1px solid #EBEBEB' }}
+    >
+      <div className="flex items-center justify-between mb-6">
         <div>
           <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Exit Analyzer</p>
-          <p className="text-sm font-bold text-slate-800 mt-0.5">SL / TP Heatmap</p>
+          <p className="text-base font-bold text-slate-800 mt-0.5">SL / TP Heatmap</p>
         </div>
         <div className="flex items-center gap-1.5 text-xs text-slate-400">
-          <span className="w-2 h-2 rounded-full bg-emerald-500" /> High
-          <span className="w-2 h-2 rounded-full bg-orange-400 ml-2" /> Low
+          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" /> High
+          <span className="w-2.5 h-2.5 rounded-full bg-orange-400 ml-2" /> Low
         </div>
       </div>
 
       {/* TP Labels */}
-      <div className="flex gap-1 mb-1 pl-10">
+      <div className="flex gap-1.5 mb-1.5 pl-12">
         {['0.5', '1.0', '1.5', '2.0', '2.5', '3.0'].map(tp => (
-          <div key={tp} className="flex-1 text-center text-[10px] font-mono text-slate-400">{tp}</div>
+          <div key={tp} className="flex-1 text-center text-[11px] font-mono text-slate-400">{tp}</div>
         ))}
       </div>
 
       {/* Grid */}
-      <div className="space-y-1">
+      <div className="space-y-1.5">
         {heatmapData.map((row, ri) => (
-          <div key={ri} className="flex items-center gap-1">
-            <div className="w-8 text-right text-[10px] font-mono text-slate-400 pr-1">{['0.3', '0.5', '0.8', '1.0', '1.5', '2.0'][ri]}</div>
+          <div key={ri} className="flex items-center gap-1.5">
+            <div className="w-10 text-right text-[11px] font-mono text-slate-400 pr-1">{['0.3', '0.5', '0.8', '1.0', '1.5', '2.0'][ri]}</div>
             {row.map((val, ci) => (
               <motion.div
                 key={ci}
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.8 + (ri * 6 + ci) * 0.02, duration: 0.3 }}
-                className={`flex-1 aspect-square rounded-md ${getColor(val)} flex items-center justify-center`}
+                className={`flex-1 aspect-square rounded-lg ${getColor(val)} flex items-center justify-center`}
               >
-                <span className="text-[9px] font-mono font-semibold text-white/90">{val}</span>
+                <span className="text-[11px] font-mono font-semibold text-white/90">{val}</span>
               </motion.div>
             ))}
           </div>
         ))}
       </div>
 
-      {/* Scatter plot hint */}
-      <div className="mt-4 pt-4 border-t border-slate-100">
-        <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-2">Exit Score Trend</p>
-        <div className="h-12 relative">
-          <svg viewBox="0 0 200 40" className="w-full h-full">
-            <path d="M0,35 Q30,30 50,28 T100,20 T150,14 T200,8" fill="none" stroke="#059669" strokeWidth="2" strokeLinecap="round" />
+      {/* Scatter plot */}
+      <div className="mt-6 pt-5 border-t border-slate-100">
+        <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-3">Exit Score Trend</p>
+        <div className="h-20 relative">
+          <svg viewBox="0 0 200 50" className="w-full h-full">
+            <path d="M0,45 Q30,38 50,35 T100,25 T150,17 T200,10" fill="none" stroke="#059669" strokeWidth="2" strokeLinecap="round" />
             {[10, 30, 55, 75, 95, 120, 140, 160, 185].map((x, i) => (
-              <circle key={i} cx={x} cy={35 - i * 3 + Math.sin(i) * 4} r="2.5" fill="#059669" opacity="0.6" />
+              <circle key={i} cx={x} cy={45 - i * 3.5 + Math.sin(i) * 4} r="3" fill="#059669" opacity="0.6" />
             ))}
           </svg>
         </div>
@@ -126,25 +129,21 @@ const HeatmapVisual = () => {
   );
 };
 
-// ─── Pain Cards ───
+// ─── Pain Cards (no icons) ───
 const painCards = [
   {
-    icon: TrendingDown,
     title: 'Exiting winners too early',
     body: "It's not impatience. It's the absence of data showing you what your best exits actually look like. Once you see it — you can't unsee it.",
   },
   {
-    icon: Timer,
     title: 'Holding losers longer than planned',
     body: "Nobody does this intentionally. It happens when there's no clear record of how many times hope has cost more than a clean cut would have.",
   },
   {
-    icon: HelpCircle,
     title: "Not knowing why some days work and others don't",
     body: "The difference between your best and worst trading days isn't luck. It's a pattern. It's in your data. You just haven't been shown it yet.",
   },
   {
-    icon: XCircle,
     title: 'Trying journals before — and quitting',
     body: "Not because you lack discipline. Because the tools gave you 50 metrics and zero clarity on what to actually do differently tomorrow.",
   },
@@ -176,9 +175,9 @@ const Landing3 = () => {
       <Landing3Navbar />
 
       {/* ════════════════════════════════════════════
-          SECTION 2 — HERO
+          HERO — spacing reduced ~30%
       ════════════════════════════════════════════ */}
-      <section className="pt-28 pb-20 lg:pt-36 lg:pb-28 px-6 lg:px-8">
+      <section className="pt-24 pb-14 lg:pt-28 lg:pb-20 px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             {/* Left — Copy */}
@@ -190,11 +189,12 @@ const Landing3 = () => {
                 For Traders Who Are Done Guessing
               </motion.p>
 
+              {/* FIX 1 — Line 3 is 20-25% larger */}
               <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={1}>
-                <h1 className="text-3xl sm:text-4xl lg:text-[3.2rem] font-bold tracking-tight flex flex-col whitespace-nowrap" style={{ fontFamily: "'Playfair Display', serif" }}>
-                  <span className="text-slate-400 leading-[1.2]">"Most traders have data."</span>
-                  <span className="text-slate-400 leading-[1.2]">"Almost none have answers."</span>
-                  <span className="text-slate-900 leading-[1.2] mt-3">TradeValley gives you both.</span>
+                <h1 className="font-bold tracking-tight flex flex-col whitespace-nowrap" style={{ fontFamily: "'Playfair Display', serif" }}>
+                  <span className="text-3xl sm:text-4xl lg:text-[3.2rem] text-slate-400 leading-[1.2]">"Most traders have data."</span>
+                  <span className="text-3xl sm:text-4xl lg:text-[3.2rem] text-slate-400 leading-[1.2]">"Almost none have answers."</span>
+                  <span className="text-4xl sm:text-5xl lg:text-[4rem] text-slate-900 leading-[1.15] mt-3 font-bold">TradeValley gives you both.</span>
                 </h1>
               </motion.div>
 
@@ -205,10 +205,10 @@ const Landing3 = () => {
                 TradeValley turns your complete trade history into clear, brutally honest insights — so you stop repeating the same mistakes and start building a real edge.
               </motion.p>
 
-              {/* Buttons */}
+              {/* FIX 5 — Primary button + secondary text link below */}
               <motion.div
                 initial="hidden" animate="visible" variants={fadeUp} custom={4}
-                className="mt-8 flex flex-wrap items-center gap-4"
+                className="mt-8 flex flex-col items-start gap-3"
               >
                 <Link
                   to="/entering"
@@ -216,32 +216,32 @@ const Landing3 = () => {
                 >
                   Discover Your Edge Free <ArrowRight className="w-4 h-4" />
                 </Link>
-                <button className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-slate-900 px-5 py-3 rounded-lg border border-slate-200 hover:border-slate-300 transition-colors">
-                  <Play className="w-4 h-4" /> Watch 2-min Demo
+                <button className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-400 hover:text-slate-600 transition-colors">
+                  <Play className="w-3.5 h-3.5" /> Watch 2-min Demo
                 </button>
               </motion.div>
 
-              {/* Micro Stats */}
+              {/* FIX 6 — More breathing room, taller dividers */}
               <motion.div
                 initial="hidden" animate="visible" variants={fadeUp} custom={5}
-                className="mt-8 flex flex-wrap items-center gap-0 text-xs text-slate-400"
+                className="mt-14 flex flex-wrap items-stretch gap-0 text-xs text-slate-400"
               >
-                <div className="flex flex-col pr-5 border-r border-slate-200">
+                <div className="flex flex-col pr-6 border-r-2 border-slate-200">
                   <span className="font-bold text-slate-700 text-sm">₹499/month</span>
-                  <span>Half the cost of every alternative</span>
+                  <span className="mt-0.5">Half the cost of every alternative</span>
                 </div>
-                <div className="flex flex-col px-5 border-r border-slate-200">
+                <div className="flex flex-col px-6 border-r-2 border-slate-200">
                   <span className="font-bold text-slate-700 text-sm">14-day free trial</span>
-                  <span>No card needed</span>
+                  <span className="mt-0.5">No card needed</span>
                 </div>
-                <div className="flex flex-col pl-5">
+                <div className="flex flex-col pl-6">
                   <span className="font-bold text-slate-700 text-sm">8+ brokers supported</span>
-                  <span>File import ready · Auto-sync coming</span>
+                  <span className="mt-0.5">File import ready · Auto-sync coming</span>
                 </div>
               </motion.div>
             </div>
 
-            {/* Right — Heatmap Visual */}
+            {/* FIX 2 — Larger heatmap visual */}
             <motion.div
               initial={{ opacity: 0, x: 40 }}
               animate={{ opacity: 1, x: 0 }}
@@ -255,9 +255,9 @@ const Landing3 = () => {
       </section>
 
       {/* ════════════════════════════════════════════
-          SECTION 3 — PAIN
+          PAIN — spacing reduced ~30%
       ════════════════════════════════════════════ */}
-      <section className="py-20 lg:py-28 px-6 lg:px-8 bg-slate-50/70">
+      <section className="py-14 lg:py-20 px-6 lg:px-8 bg-slate-50/70">
         <div className="max-w-5xl mx-auto">
           <motion.div
             initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.3 }}
@@ -272,6 +272,7 @@ const Landing3 = () => {
             </p>
           </motion.div>
 
+          {/* FIX 3 — No icons, just title + body */}
           <div className="grid sm:grid-cols-2 gap-5">
             {painCards.map((card, i) => (
               <motion.div
@@ -280,12 +281,7 @@ const Landing3 = () => {
                 variants={fadeUp} custom={i}
                 className="bg-white rounded-xl border border-slate-100 p-6 hover:shadow-lg hover:shadow-slate-100/80 transition-shadow duration-300"
               >
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center">
-                    <card.icon className="w-4.5 h-4.5 text-slate-500" />
-                  </div>
-                  <h3 className="font-semibold text-slate-800 text-sm">{card.title}</h3>
-                </div>
+                <h3 className="font-semibold text-slate-800 text-sm mb-3">{card.title}</h3>
                 <p className="text-sm text-slate-500 leading-relaxed">{card.body}</p>
               </motion.div>
             ))}
@@ -303,9 +299,9 @@ const Landing3 = () => {
       </section>
 
       {/* ════════════════════════════════════════════
-          SECTION 4 — EXIT ANALYZER
+          EXIT ANALYZER — spacing reduced ~30%
       ════════════════════════════════════════════ */}
-      <section id="how-it-works" className="py-20 lg:py-28 px-6 lg:px-8 bg-white">
+      <section id="how-it-works" className="py-14 lg:py-20 px-6 lg:px-8 bg-white">
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
             {/* Left — Copy */}
@@ -374,9 +370,9 @@ const Landing3 = () => {
       </section>
 
       {/* ════════════════════════════════════════════
-          SECTION 5 — SOCIAL PROOF
+          TESTIMONIALS — spacing reduced ~30%, FIX 7
       ════════════════════════════════════════════ */}
-      <section className="py-20 lg:py-28 px-6 lg:px-8 bg-slate-50/70">
+      <section className="py-14 lg:py-20 px-6 lg:px-8 bg-slate-50/70">
         <div className="max-w-5xl mx-auto">
           <motion.div
             initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.3 }}
@@ -394,10 +390,11 @@ const Landing3 = () => {
                 key={t.name}
                 initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.2 }}
                 variants={fadeUp} custom={i}
-                className="bg-white rounded-xl border border-slate-100 p-6 flex flex-col hover:shadow-lg hover:shadow-slate-100/80 transition-shadow duration-300"
+                className="bg-white rounded-xl border border-slate-100 border-t-[3px] border-t-emerald-600 p-6 flex flex-col hover:shadow-lg hover:shadow-slate-100/80 transition-shadow duration-300"
+                style={{ minHeight: '280px' }}
               >
                 <p className="text-sm text-slate-600 leading-relaxed flex-1 italic">"{t.quote}"</p>
-                <div className="mt-5 pt-4 border-t border-slate-100">
+                <div className="mt-auto pt-4 border-t border-slate-100">
                   <p className="text-sm font-semibold text-slate-800">{t.name}</p>
                   <p className="text-xs text-slate-400 mt-0.5">{t.role}</p>
                 </div>
@@ -408,9 +405,9 @@ const Landing3 = () => {
       </section>
 
       {/* ════════════════════════════════════════════
-          SECTION 6 — FINAL CTA
+          FINAL CTA — spacing reduced ~30%, FIX 8 button
       ════════════════════════════════════════════ */}
-      <section className="py-20 lg:py-28 px-6 lg:px-8 bg-emerald-900">
+      <section className="py-14 lg:py-20 px-6 lg:px-8 bg-emerald-900">
         <div className="max-w-3xl mx-auto text-center">
           <motion.h2
             initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.3 }}
@@ -436,9 +433,9 @@ const Landing3 = () => {
           >
             <Link
               to="/entering"
-              className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-900 bg-white hover:bg-emerald-50 px-7 py-3.5 rounded-lg transition-colors"
+              className="inline-flex items-center gap-2.5 text-base font-semibold text-emerald-900 bg-white hover:bg-emerald-50 px-10 py-4.5 rounded-lg transition-colors"
             >
-              Start Free for 14 Days <ArrowRight className="w-4 h-4" />
+              Start Free for 14 Days <ArrowRight className="w-5 h-5" />
             </Link>
           </motion.div>
 
