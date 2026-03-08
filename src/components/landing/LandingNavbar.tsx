@@ -1,11 +1,22 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LineChart, Menu, X } from 'lucide-react';
+import { LineChart, Menu, X, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from '@/components/ui/dropdown-menu';
+
+const homeLinks = [
+  { label: 'Home 1', path: '/' },
+  { label: 'Home 2', path: '/home-2' },
+  { label: 'Home 3', path: '/home-3' },
+];
 
 const navLinks = [
-  { label: 'Home', path: '/' },
   { label: 'Features', path: '/features' },
   { label: 'Supported Platforms', path: '/supported-platforms' },
   { label: 'Pricing', path: '/pricing' },
@@ -13,7 +24,10 @@ const navLinks = [
 
 export const LandingNavbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [mobileHomeOpen, setMobileHomeOpen] = useState(false);
   const location = useLocation();
+
+  const isHomePage = ['/', '/home-2', '/home-3'].includes(location.pathname);
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200/60">
@@ -29,6 +43,31 @@ export const LandingNavbar = () => {
 
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center gap-8">
+            {/* Home Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger className={cn(
+                "text-sm font-medium transition-colors flex items-center gap-1 outline-none",
+                isHomePage ? "text-slate-900" : "text-slate-500 hover:text-slate-900"
+              )}>
+                Home <ChevronDown className="w-3.5 h-3.5" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="min-w-[140px]">
+                {homeLinks.map((link) => (
+                  <DropdownMenuItem key={link.path} asChild>
+                    <Link
+                      to={link.path}
+                      className={cn(
+                        "w-full cursor-pointer",
+                        location.pathname === link.path && "font-semibold"
+                      )}
+                    >
+                      {link.label}
+                    </Link>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
             {navLinks.map((link) => (
               <Link
                 key={link.path}
@@ -81,6 +120,40 @@ export const LandingNavbar = () => {
             className="md:hidden bg-white border-t border-slate-100 overflow-hidden"
           >
             <div className="px-6 py-4 space-y-3">
+              {/* Mobile Home Accordion */}
+              <button
+                onClick={() => setMobileHomeOpen(!mobileHomeOpen)}
+                className="flex items-center justify-between w-full text-sm font-medium text-slate-600 hover:text-slate-900 py-2"
+              >
+                Home <ChevronDown className={cn("w-4 h-4 transition-transform", mobileHomeOpen && "rotate-180")} />
+              </button>
+              <AnimatePresence>
+                {mobileHomeOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="pl-4 space-y-1 overflow-hidden"
+                  >
+                    {homeLinks.map((link) => (
+                      <Link
+                        key={link.path}
+                        to={link.path}
+                        onClick={() => setMobileOpen(false)}
+                        className={cn(
+                          "block text-sm py-1.5",
+                          location.pathname === link.path
+                            ? "text-slate-900 font-semibold"
+                            : "text-slate-500"
+                        )}
+                      >
+                        {link.label}
+                      </Link>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
               {navLinks.map((link) => (
                 <Link
                   key={link.path}
