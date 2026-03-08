@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowRight, Play, Clock, CreditCard, Wifi, Grid3X3, TrendingDown, Timer, HelpCircle, XCircle, Sparkles } from 'lucide-react';
+import { ArrowRight, Play, TrendingDown, Timer, HelpCircle, XCircle, Sparkles } from 'lucide-react';
 import { LandingFooter } from '@/components/landing/LandingFooter';
+import logo from '@/assets/logo.svg';
 import { useState, useEffect } from 'react';
 
 // ─── Animations ───
@@ -27,11 +28,8 @@ const Landing2Navbar = () => {
     <nav className={`fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl transition-all duration-300 ${scrolled ? 'border-b border-slate-200/60' : ''}`}>
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          <Link to="/home-2" className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-emerald-700 flex items-center justify-center">
-              <span className="text-white font-bold text-sm tracking-tight">TV</span>
-            </div>
-            <span className="text-lg font-bold text-slate-900 tracking-tight" style={{ fontFamily: "'Playfair Display', serif" }}>TradeValley</span>
+          <Link to="/home-2" className="flex items-center gap-2">
+            <img src={logo} alt="TradeValley" className="h-8" />
           </Link>
 
           <div className="hidden md:flex items-center gap-8">

@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LineChart, Menu, X, ChevronDown } from 'lucide-react';
+import { Menu, X, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import logo from '@/assets/logo.svg';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   DropdownMenu,
@@ -34,11 +35,8 @@ export const LandingNavbar = () => {
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-slate-900 flex items-center justify-center">
-              <LineChart className="w-5 h-5 text-white" />
-            </div>
-            <span className="text-xl font-bold text-slate-900 tracking-tight">TradeJournal</span>
+          <Link to="/" className="flex items-center gap-2">
+            <img src={logo} alt="TradeValley" className="h-8" />
           </Link>
 
           {/* Desktop Nav */}

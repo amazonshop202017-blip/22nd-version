@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { LineChart } from 'lucide-react';
+import logo from '@/assets/logo.svg';
 
 export const LandingFooter = () => {
   return (
@@ -9,10 +9,7 @@ export const LandingFooter = () => {
           {/* Brand */}
           <div className="md:col-span-1">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center">
-                <LineChart className="w-5 h-5 text-slate-900" />
-              </div>
-              <span className="text-lg font-bold tracking-tight">TradeJournal</span>
+              <img src={logo} alt="TradeValley" className="h-7 brightness-0 invert" />
             </div>
             <p className="text-sm text-slate-400 leading-relaxed">
               The premium trading journal built for traders who refuse to stay average.
@@ -47,7 +44,7 @@ export const LandingFooter = () => {
         </div>
 
         <div className="border-t border-slate-800 mt-12 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-slate-500">© {new Date().getFullYear()} TradeJournal. All rights reserved.</p>
+          <p className="text-xs text-slate-500">© {new Date().getFullYear()} TradeValley. All rights reserved.</p>
           <p className="text-xs text-slate-500">Built for traders, by traders.</p>
         </div>
       </div>
