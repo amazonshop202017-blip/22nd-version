@@ -2,12 +2,18 @@ import { useState, useMemo, useCallback, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useFilteredTrades } from '@/hooks/useFilteredTrades';
 import { prepareExitTrades, computeHeatmap, HeatmapCell } from '@/lib/exitAnalyzerCalc';
-import { Crosshair, Info, X } from 'lucide-react';
+import { Crosshair, Info, X, Zap, PenLine } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { cn } from '@/lib/utils';
 import {
   ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip,
   ResponsiveContainer, ReferenceLine, Cell as RechartsCell
 } from 'recharts';
+
+const subTabs = [
+  { id: 'auto', label: 'Auto', icon: Zap },
+  { id: 'manual', label: 'Manual', icon: PenLine },
+];
 
 // ─── Inputs Section ───
 const InputField = ({ label, value, onChange, min }: {
