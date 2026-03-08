@@ -33,7 +33,10 @@ export const WinRateGauge = ({ value, label, winners = 0, losers = 0, breakeven 
           <PieChart
             series={[
               {
-                data: pieData,
+                data: pieData.map(d => ({
+                  ...d,
+                  label: `${d.label}: ${d.value} (${total > 0 ? ((d.value / total) * 100).toFixed(1) : 0}%)`,
+                })),
                 innerRadius: 20,
                 outerRadius: 38,
                 startAngle: -90,
@@ -43,6 +46,7 @@ export const WinRateGauge = ({ value, label, winners = 0, losers = 0, breakeven 
                 cx: 45,
                 cy: 50,
                 arcLabel: () => '',
+                highlightScope: { fade: 'global', highlight: 'item' },
               },
             ]}
             width={100}
