@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LineChart, Menu, X, ChevronDown } from 'lucide-react';
+import { Menu, X, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import logo from '@/assets/logo.svg';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   DropdownMenu,
