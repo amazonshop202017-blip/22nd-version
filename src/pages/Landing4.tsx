@@ -269,7 +269,7 @@ const Landing4 = () => {
       {/* ════════════════════════════════════════
           SECTION 2 — HERO
       ════════════════════════════════════════ */}
-      <section className="min-h-screen flex items-center pt-3 px-6 lg:px-8">
+      <section className="pt-24 pb-16 px-6 lg:px-8">
         <div className="max-w-7xl mx-auto w-full">
           <div className="grid lg:grid-cols-[55%_45%] gap-12 lg:gap-16 items-center">
             {/* Left column */}
