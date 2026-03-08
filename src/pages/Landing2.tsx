@@ -1,20 +1,18 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowRight, Play, TrendingDown, Timer, HelpCircle, XCircle, Sparkles } from 'lucide-react';
-import { LandingFooter } from '@/components/landing/LandingFooter';
-import logo from '@/assets/logo.svg';
+import { ArrowRight } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 // ─── Animations ───
 const fadeUp = {
-  hidden: { opacity: 0, y: 30 },
+  hidden: { opacity: 0, y: 24 },
   visible: (i: number = 0) => ({
     opacity: 1, y: 0,
-    transition: { duration: 0.6, delay: i * 0.12, ease: [0.22, 1, 0.36, 1] as const },
+    transition: { duration: 0.5, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] as const },
   }),
 };
 
-// ─── Navbar (custom for Landing2) ───
+// ─── SECTION 1: NAVBAR ───
 const Landing2Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
 
@@ -25,22 +23,55 @@ const Landing2Navbar = () => {
   }, []);
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl transition-all duration-300 ${scrolled ? 'border-b border-slate-200/60' : ''}`}>
-      <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          <Link to="/home-2" className="flex items-center gap-2">
-            <img src={logo} alt="TradeValley" className="h-8" />
+    <nav
+      className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
+      style={{
+        backgroundColor: scrolled ? 'rgba(255,255,255,0.92)' : 'transparent',
+        backdropFilter: scrolled ? 'blur(16px)' : 'none',
+        borderBottom: scrolled ? '1px solid #EBEBEB' : '1px solid transparent',
+      }}
+    >
+      <div className="max-w-7xl mx-auto" style={{ padding: '0 80px' }}>
+        <div className="flex items-center justify-between h-16 max-[768px]:px-6" style={{ fontFamily: "'DM Sans', 'Inter', sans-serif" }}>
+          {/* Logo */}
+          <Link to="/home-2" className="flex items-center gap-0 text-xl tracking-tight" style={{ color: '#0F0F0F' }}>
+            <span className="font-normal">Trade</span>
+            <span className="font-bold">Valley</span>
           </Link>
 
+          {/* Center links */}
           <div className="hidden md:flex items-center gap-8">
-            <Link to="/features" className="text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors">Features</Link>
-            <Link to="/pricing" className="text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors">Pricing</Link>
-            <a href="#how-it-works" className="text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors">How It Works</a>
+            <Link to="/features" className="text-sm font-medium transition-colors" style={{ color: '#8A8A8A' }}
+              onMouseEnter={e => (e.currentTarget.style.color = '#0F0F0F')}
+              onMouseLeave={e => (e.currentTarget.style.color = '#8A8A8A')}
+            >Features</Link>
+            <Link to="/pricing" className="text-sm font-medium transition-colors" style={{ color: '#8A8A8A' }}
+              onMouseEnter={e => (e.currentTarget.style.color = '#0F0F0F')}
+              onMouseLeave={e => (e.currentTarget.style.color = '#8A8A8A')}
+            >Pricing</Link>
+            <a href="#how-it-works" className="text-sm font-medium transition-colors" style={{ color: '#8A8A8A' }}
+              onMouseEnter={e => (e.currentTarget.style.color = '#0F0F0F')}
+              onMouseLeave={e => (e.currentTarget.style.color = '#8A8A8A')}
+            >How It Works</a>
           </div>
 
+          {/* CTA */}
           <Link
             to="/entering"
-            className="hidden md:inline-flex text-sm font-semibold text-white bg-emerald-700 hover:bg-emerald-800 px-5 py-2.5 rounded-lg transition-colors"
+            className="hidden md:inline-flex text-sm font-semibold px-5 py-2.5 transition-all duration-200"
+            style={{
+              backgroundColor: '#0F0F0F',
+              color: '#FFFFFF',
+              borderRadius: '4px',
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.transform = 'translateY(-1px)';
+              e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,0,0,0.12)';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = 'none';
+            }}
           >
             Start Free — 14 Days
           </Link>
@@ -50,8 +81,8 @@ const Landing2Navbar = () => {
   );
 };
 
-// ─── Heatmap Visual (simplified representation) ───
-const HeatmapVisual = () => {
+// ─── Heatmap Visual ───
+const HeatmapVisual = ({ large = false }: { large?: boolean }) => {
   const heatmapData = [
     [32, 41, 55, 48, 37, 29],
     [45, 58, 72, 65, 52, 40],
@@ -62,31 +93,62 @@ const HeatmapVisual = () => {
   ];
 
   const getColor = (val: number) => {
-    if (val >= 80) return 'bg-emerald-500';
-    if (val >= 65) return 'bg-emerald-400';
-    if (val >= 55) return 'bg-emerald-300/80';
-    if (val >= 45) return 'bg-amber-300/70';
-    if (val >= 35) return 'bg-orange-300/70';
-    return 'bg-orange-400/70';
+    if (val >= 80) return '#B45309';
+    if (val >= 65) return '#CA8A04';
+    if (val >= 55) return '#D4A853';
+    if (val >= 45) return '#E8D5A8';
+    if (val >= 35) return '#D4976A';
+    return '#C2703A';
+  };
+
+  // Using warm tones instead of green/teal
+  const getColorDark = (val: number) => {
+    if (val >= 80) return '#1a5c2e';
+    if (val >= 65) return '#2d7a42';
+    if (val >= 55) return '#4a9960';
+    if (val >= 45) return '#93b89e';
+    if (val >= 35) return '#c4a882';
+    return '#b08968';
+  };
+
+  // Actually use neutral/warm palette per spec (no green/teal except final CTA)
+  const getCellColor = (val: number) => {
+    if (val >= 80) return '#3d3d3d';
+    if (val >= 65) return '#5a5a5a';
+    if (val >= 55) return '#7a7a7a';
+    if (val >= 45) return '#a0a0a0';
+    if (val >= 35) return '#c0c0c0';
+    return '#d8d8d8';
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-2xl shadow-slate-200/60 border border-slate-100 p-6 max-w-md mx-auto">
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Exit Analyzer</p>
-          <p className="text-sm font-bold text-slate-800 mt-0.5">SL / TP Heatmap</p>
-        </div>
-        <div className="flex items-center gap-1.5 text-xs text-slate-400">
-          <span className="w-2 h-2 rounded-full bg-emerald-500" /> High
-          <span className="w-2 h-2 rounded-full bg-orange-400 ml-2" /> Low
+    <div
+      className={large ? 'w-full' : 'w-full max-w-lg'}
+      style={{
+        backgroundColor: '#FFFFFF',
+        border: '1px solid #EBEBEB',
+        boxShadow: '0 8px 40px rgba(0,0,0,0.08)',
+        borderRadius: '8px',
+        padding: large ? '28px' : '24px',
+      }}
+    >
+      {/* Label */}
+      <p className="text-[10px] font-semibold uppercase tracking-[0.15em] mb-4" style={{ color: '#8A8A8A', fontFamily: "'JetBrains Mono', monospace" }}>
+        EXIT ANALYZER
+      </p>
+
+      <div className="flex items-center justify-between mb-3">
+        <p className="text-sm font-semibold" style={{ color: '#0F0F0F' }}>SL / TP Heatmap</p>
+        <div className="flex items-center gap-2 text-[10px]" style={{ color: '#8A8A8A' }}>
+          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full" style={{ backgroundColor: '#3d3d3d' }} /> High</span>
+          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full" style={{ backgroundColor: '#d8d8d8' }} /> Low</span>
         </div>
       </div>
 
       {/* TP Labels */}
       <div className="flex gap-1 mb-1 pl-10">
         {['0.5', '1.0', '1.5', '2.0', '2.5', '3.0'].map(tp => (
-          <div key={tp} className="flex-1 text-center text-[10px] font-mono text-slate-400">{tp}</div>
+          <div key={tp} className="flex-1 text-center text-[10px]" style={{ fontFamily: "'JetBrains Mono', monospace", color: '#8A8A8A' }}>{tp}</div>
         ))}
       </div>
 
@@ -94,30 +156,35 @@ const HeatmapVisual = () => {
       <div className="space-y-1">
         {heatmapData.map((row, ri) => (
           <div key={ri} className="flex items-center gap-1">
-            <div className="w-8 text-right text-[10px] font-mono text-slate-400 pr-1">{['0.3', '0.5', '0.8', '1.0', '1.5', '2.0'][ri]}</div>
+            <div className="w-8 text-right text-[10px] pr-1" style={{ fontFamily: "'JetBrains Mono', monospace", color: '#8A8A8A' }}>
+              {['0.3', '0.5', '0.8', '1.0', '1.5', '2.0'][ri]}
+            </div>
             {row.map((val, ci) => (
               <motion.div
                 key={ci}
-                initial={{ opacity: 0, scale: 0.8 }}
+                initial={{ opacity: 0, scale: 0.85 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.8 + (ri * 6 + ci) * 0.02, duration: 0.3 }}
-                className={`flex-1 aspect-square rounded-md ${getColor(val)} flex items-center justify-center`}
+                transition={{ delay: 0.6 + (ri * 6 + ci) * 0.02, duration: 0.25 }}
+                className="flex-1 aspect-square flex items-center justify-center"
+                style={{ backgroundColor: getCellColor(val), borderRadius: '4px' }}
               >
-                <span className="text-[9px] font-mono font-semibold text-white/90">{val}</span>
+                <span className="text-[9px] font-semibold text-white/90" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{val}</span>
               </motion.div>
             ))}
           </div>
         ))}
       </div>
 
-      {/* Scatter plot hint */}
-      <div className="mt-4 pt-4 border-t border-slate-100">
-        <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-2">Exit Score Trend</p>
-        <div className="h-12 relative">
+      {/* Scatter plot */}
+      <div className="mt-5 pt-4" style={{ borderTop: '1px solid #EBEBEB' }}>
+        <p className="text-[10px] font-semibold uppercase tracking-[0.12em] mb-3" style={{ color: '#8A8A8A', fontFamily: "'JetBrains Mono', monospace" }}>
+          Exit Score Trend
+        </p>
+        <div className="h-14 relative">
           <svg viewBox="0 0 200 40" className="w-full h-full">
-            <path d="M0,35 Q30,30 50,28 T100,20 T150,14 T200,8" fill="none" stroke="#059669" strokeWidth="2" strokeLinecap="round" />
+            <path d="M0,35 Q30,30 50,28 T100,20 T150,14 T200,8" fill="none" stroke="#0F0F0F" strokeWidth="1.5" strokeLinecap="round" opacity="0.3" />
             {[10, 30, 55, 75, 95, 120, 140, 160, 185].map((x, i) => (
-              <circle key={i} cx={x} cy={35 - i * 3 + Math.sin(i) * 4} r="2.5" fill="#059669" opacity="0.6" />
+              <circle key={i} cx={x} cy={35 - i * 3 + Math.sin(i) * 4} r="2.5" fill="#0F0F0F" opacity="0.4" />
             ))}
           </svg>
         </div>
@@ -126,31 +193,27 @@ const HeatmapVisual = () => {
   );
 };
 
-// ─── Pain Cards ───
+// ─── Pain Cards Data ───
 const painCards = [
   {
-    icon: TrendingDown,
     title: 'Exiting winners too early',
     body: "It's not impatience. It's the absence of data showing you what your best exits actually look like. Once you see it — you can't unsee it.",
   },
   {
-    icon: Timer,
     title: 'Holding losers longer than planned',
     body: "Nobody does this intentionally. It happens when there's no clear record of how many times hope has cost more than a clean cut would have.",
   },
   {
-    icon: HelpCircle,
     title: "Not knowing why some days work and others don't",
     body: "The difference between your best and worst trading days isn't luck. It's a pattern. It's in your data. You just haven't been shown it yet.",
   },
   {
-    icon: XCircle,
     title: 'Trying journals before — and quitting',
     body: "Not because you lack discipline. Because the tools gave you 50 metrics and zero clarity on what to actually do differently tomorrow.",
   },
 ];
 
-// ─── Testimonials ───
+// ─── Testimonials Data ───
 const testimonials = [
   {
     quote: "I discovered I lose on 71% of my trades in the first 30 minutes of market open. I stopped trading that window entirely. One insight from TradeValley paid for years of subscription.",
@@ -169,75 +232,102 @@ const testimonials = [
   },
 ];
 
+// ─── Feature list items for Exit Analyzer section ───
+const exitFeatures = [
+  'Automated SL/TP heatmap across all your historical trades',
+  'Manual scenario testing — "What if I held 15 more minutes?"',
+  'Scatter plot showing your exit quality trend over time',
+  'Per-trade Exit Score from 0 to 100',
+];
+
 // ─── MAIN PAGE ───
 const Landing2 = () => {
   return (
-    <div className="min-h-screen bg-white text-slate-900 overflow-x-hidden">
+    <div className="min-h-screen overflow-x-hidden" style={{ backgroundColor: '#FFFFFF', color: '#0F0F0F', fontFamily: "'DM Sans', 'Inter', sans-serif" }}>
       <Landing2Navbar />
 
       {/* ════════════════════════════════════════════
           SECTION 2 — HERO
       ════════════════════════════════════════════ */}
-      <section className="pt-28 pb-20 lg:pt-36 lg:pb-28 px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
+      <section className="pt-28 pb-16 lg:pt-36 lg:pb-24" style={{ padding: '0 80px' }}>
+        <div className="max-w-7xl mx-auto max-[768px]:px-6">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-            {/* Left — Copy */}
+            {/* Left — Copy Stack */}
             <div>
+              {/* Eyebrow */}
               <motion.p
                 initial="hidden" animate="visible" variants={fadeUp} custom={0}
-                className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700 mb-6"
+                className="text-[11px] font-semibold uppercase tracking-[0.2em] mb-6"
+                style={{ color: '#8A8A8A' }}
               >
                 For Traders Who Are Done Guessing
               </motion.p>
 
+              {/* Headline — 3 lines, strict hierarchy */}
               <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={1}>
-                <h1 className="text-3xl sm:text-4xl lg:text-[3.2rem] font-bold tracking-tight flex flex-col whitespace-nowrap" style={{ fontFamily: "'Playfair Display', serif" }}>
-                  <span className="text-slate-400 leading-[1.2]">"Most traders have data."</span>
-                  <span className="text-slate-400 leading-[1.2]">"Almost none have answers."</span>
-                  <span className="text-slate-900 leading-[1.2] mt-3">TradeValley gives you both.</span>
+                <h1 className="flex flex-col" style={{ fontFamily: "'Playfair Display', serif" }}>
+                  <span className="text-2xl sm:text-3xl lg:text-[2.4rem] italic leading-[1.25]" style={{ color: '#555555' }}>
+                    "Most traders have data."
+                  </span>
+                  <span className="text-2xl sm:text-3xl lg:text-[2.4rem] italic leading-[1.25] mt-1" style={{ color: '#555555' }}>
+                    "Almost none have answers."
+                  </span>
+                  <span className="text-3xl sm:text-4xl lg:text-[3.2rem] font-bold leading-[1.15] mt-3" style={{ color: '#0F0F0F' }}>
+                    TradeValley gives you both.
+                  </span>
                 </h1>
               </motion.div>
 
+              {/* Sub-headline */}
               <motion.p
                 initial="hidden" animate="visible" variants={fadeUp} custom={2}
-                className="mt-6 text-base lg:text-lg text-slate-500 leading-relaxed max-w-xl"
+                className="mt-5 leading-relaxed"
+                style={{ fontSize: '17px', color: '#8A8A8A' }}
               >
-                TradeValley turns your complete trade history into clear, brutally honest insights — so you stop repeating the same mistakes and start building a real edge.
+                Your past trades know things about you that you don't.
               </motion.p>
 
-
-              {/* Buttons */}
+              {/* CTA + Demo link */}
               <motion.div
-                initial="hidden" animate="visible" variants={fadeUp} custom={4}
-                className="mt-8 flex flex-wrap items-center gap-4"
+                initial="hidden" animate="visible" variants={fadeUp} custom={3}
+                className="mt-8 flex flex-col items-start gap-3"
               >
                 <Link
                   to="/entering"
-                  className="inline-flex items-center gap-2 text-sm font-semibold text-white bg-emerald-700 hover:bg-emerald-800 px-6 py-3 rounded-lg transition-colors"
+                  className="inline-flex items-center gap-2 text-sm font-semibold px-6 py-3 transition-all duration-200"
+                  style={{ backgroundColor: '#0F0F0F', color: '#FFFFFF', borderRadius: '4px' }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.transform = 'translateY(-1px)';
+                    e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,0,0,0.12)';
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = 'none';
+                  }}
                 >
                   Discover Your Edge Free <ArrowRight className="w-4 h-4" />
                 </Link>
-                <button className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-slate-900 px-5 py-3 rounded-lg border border-slate-200 hover:border-slate-300 transition-colors">
-                  <Play className="w-4 h-4" /> Watch 2-min Demo
-                </button>
+                <span className="text-sm" style={{ color: '#8A8A8A' }}>
+                  ▷ Watch 2-min Demo
+                </span>
               </motion.div>
 
               {/* Micro Stats */}
               <motion.div
-                initial="hidden" animate="visible" variants={fadeUp} custom={5}
-                className="mt-8 flex flex-wrap items-center gap-0 text-xs text-slate-400"
+                initial="hidden" animate="visible" variants={fadeUp} custom={4}
+                className="mt-10 flex flex-wrap items-start gap-0"
               >
-                <div className="flex flex-col pr-5 border-r border-slate-200">
-                  <span className="font-bold text-slate-700 text-sm">₹499/month</span>
-                  <span>Half the cost of every alternative</span>
+                <div className="flex flex-col pr-6" style={{ borderRight: '1px solid #EBEBEB' }}>
+                  <span className="font-bold text-sm" style={{ color: '#0F0F0F', fontFamily: "'JetBrains Mono', monospace" }}>₹499/month</span>
+                  <span className="text-xs mt-0.5" style={{ color: '#8A8A8A' }}>Half the cost of every alternative</span>
                 </div>
-                <div className="flex flex-col px-5 border-r border-slate-200">
-                  <span className="font-bold text-slate-700 text-sm">14-day free trial</span>
-                  <span>No card needed</span>
+                <div className="flex flex-col px-6" style={{ borderRight: '1px solid #EBEBEB' }}>
+                  <span className="font-bold text-sm" style={{ color: '#0F0F0F', fontFamily: "'JetBrains Mono', monospace" }}>14-day free trial</span>
+                  <span className="text-xs mt-0.5" style={{ color: '#8A8A8A' }}>No card needed</span>
                 </div>
-                <div className="flex flex-col pl-5">
-                  <span className="font-bold text-slate-700 text-sm">8+ brokers supported</span>
-                  <span>File import ready · Auto-sync coming</span>
+                <div className="flex flex-col pl-6">
+                  <span className="font-bold text-sm" style={{ color: '#0F0F0F', fontFamily: "'JetBrains Mono', monospace" }}>8+ brokers supported</span>
+                  <span className="text-xs mt-0.5" style={{ color: '#8A8A8A' }}>File import ready · Auto-sync coming</span>
                 </div>
               </motion.div>
             </div>
@@ -258,45 +348,47 @@ const Landing2 = () => {
       {/* ════════════════════════════════════════════
           SECTION 3 — PAIN
       ════════════════════════════════════════════ */}
-      <section className="py-20 lg:py-28 px-6 lg:px-8 bg-slate-50/70">
-        <div className="max-w-5xl mx-auto">
+      <section className="py-16 lg:py-24" style={{ backgroundColor: '#F8F7F5', padding: '64px 80px' }}>
+        <div className="max-w-5xl mx-auto max-[768px]:px-6">
           <motion.div
             initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.3 }}
             variants={fadeUp} custom={0}
-            className="text-center mb-14"
+            className="text-center mb-12"
           >
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight" style={{ fontFamily: "'Playfair Display', serif" }}>
+            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight" style={{ fontFamily: "'Playfair Display', serif", color: '#0F0F0F' }}>
               The market isn't the problem.
             </h2>
-            <p className="mt-4 text-base lg:text-lg text-slate-500 max-w-2xl mx-auto leading-relaxed">
+            <p className="mt-4 text-base leading-relaxed mx-auto" style={{ color: '#8A8A8A', maxWidth: '560px', fontFamily: "'DM Sans', 'Inter', sans-serif" }}>
               These aren't signs of a bad trader. They're signs of a trader who's been flying without instruments.
             </p>
           </motion.div>
 
+          {/* 2×2 Grid */}
           <div className="grid sm:grid-cols-2 gap-5">
             {painCards.map((card, i) => (
               <motion.div
                 key={card.title}
                 initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.2 }}
                 variants={fadeUp} custom={i}
-                className="bg-white rounded-xl border border-slate-100 p-6 hover:shadow-lg hover:shadow-slate-100/80 transition-shadow duration-300"
+                className="p-6"
+                style={{
+                  backgroundColor: '#FFFFFF',
+                  border: '1px solid #EBEBEB',
+                  borderRadius: '8px',
+                }}
               >
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center">
-                    <card.icon className="w-4.5 h-4.5 text-slate-500" />
-                  </div>
-                  <h3 className="font-semibold text-slate-800 text-sm">{card.title}</h3>
-                </div>
-                <p className="text-sm text-slate-500 leading-relaxed">{card.body}</p>
+                <h3 className="font-semibold text-sm mb-3" style={{ color: '#0F0F0F' }}>{card.title}</h3>
+                <p className="text-sm leading-relaxed" style={{ color: '#8A8A8A' }}>{card.body}</p>
               </motion.div>
             ))}
           </div>
 
+          {/* Closing line */}
           <motion.p
             initial="hidden" whileInView="visible" viewport={{ once: true }}
             variants={fadeUp} custom={5}
-            className="text-center mt-12 text-base italic text-slate-500"
-            style={{ fontFamily: "'Playfair Display', serif" }}
+            className="text-center mt-12 text-base italic"
+            style={{ fontFamily: "'Playfair Display', serif", color: '#8A8A8A' }}
           >
             "Your edge isn't missing. It's just been invisible."
           </motion.p>
@@ -306,45 +398,48 @@ const Landing2 = () => {
       {/* ════════════════════════════════════════════
           SECTION 4 — EXIT ANALYZER
       ════════════════════════════════════════════ */}
-      <section id="how-it-works" className="py-20 lg:py-28 px-6 lg:px-8 bg-white">
-        <div className="max-w-7xl mx-auto">
+      <section id="how-it-works" className="py-16 lg:py-24" style={{ backgroundColor: '#FFFFFF', padding: '64px 80px' }}>
+        <div className="max-w-7xl mx-auto max-[768px]:px-6">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
             {/* Left — Copy */}
             <motion.div
               initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.3 }}
             >
+              {/* Badge */}
               <motion.div variants={fadeUp} custom={0} className="mb-6">
-                <span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-full">
-                  <Sparkles className="w-3.5 h-3.5" /> Exclusive to TradeValley · Not available in any other journal
+                <span
+                  className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider px-3 py-1.5"
+                  style={{
+                    color: '#C9943A',
+                    border: '1px solid #C9943A',
+                    borderRadius: '20px',
+                  }}
+                >
+                  ✦ Exclusive to TradeValley · Not available in any other journal
                 </span>
               </motion.div>
 
               <motion.h2 variants={fadeUp} custom={1}
-                className="text-3xl sm:text-4xl font-bold tracking-tight leading-[1.15]"
+                className="text-3xl sm:text-4xl tracking-tight leading-[1.15]"
                 style={{ fontFamily: "'Playfair Display', serif" }}
               >
-                <span className="text-slate-900">"You had the right entry."</span>
+                <span className="italic" style={{ color: '#8A8A8A' }}>"You had the right entry."</span>
                 <br />
-                <span className="text-slate-400">"Did you have the right exit?"</span>
+                <span className="italic font-bold text-[2.5rem]" style={{ color: '#0F0F0F' }}>"Did you have the right exit?"</span>
               </motion.h2>
 
               <motion.p variants={fadeUp} custom={2}
-                className="mt-5 text-base text-slate-500 leading-relaxed max-w-lg"
+                className="mt-5 text-base leading-relaxed max-w-lg"
+                style={{ color: '#8A8A8A' }}
               >
                 Run automated heatmaps across every SL/TP combination. Test manual scenarios. Score every exit. For the first time — see exactly what your exit decisions are costing you, on every single trade.
               </motion.p>
 
-              <motion.ul variants={fadeUp} custom={3}
-                className="mt-6 space-y-3"
-              >
-                {[
-                  'Automated SL/TP heatmap across all your historical trades',
-                  'Manual scenario testing — "What if I held 15 more minutes?"',
-                  'Scatter plot showing your exit quality trend over time',
-                  'Per-trade Exit Score from 0 to 100',
-                ].map((line) => (
-                  <li key={line} className="flex items-start gap-3 text-sm text-slate-600">
-                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5 flex-shrink-0" />
+              {/* Feature list with gold dots */}
+              <motion.ul variants={fadeUp} custom={3} className="mt-6 space-y-3">
+                {exitFeatures.map((line) => (
+                  <li key={line} className="flex items-start gap-3 text-sm" style={{ color: '#555555' }}>
+                    <span className="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0" style={{ backgroundColor: '#C9943A' }} />
                     {line}
                   </li>
                 ))}
@@ -353,7 +448,16 @@ const Landing2 = () => {
               <motion.div variants={fadeUp} custom={4} className="mt-8">
                 <Link
                   to="/entering"
-                  className="inline-flex items-center gap-2 text-sm font-semibold text-white bg-emerald-700 hover:bg-emerald-800 px-6 py-3 rounded-lg transition-colors"
+                  className="inline-flex items-center gap-2 text-sm font-semibold px-6 py-3 transition-all duration-200"
+                  style={{ backgroundColor: '#0F0F0F', color: '#FFFFFF', borderRadius: '4px' }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.transform = 'translateY(-1px)';
+                    e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,0,0,0.12)';
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = 'none';
+                  }}
                 >
                   Analyze Your First Trade Free <ArrowRight className="w-4 h-4" />
                 </Link>
@@ -368,7 +472,7 @@ const Landing2 = () => {
               transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
               className="flex justify-center lg:justify-end"
             >
-              <HeatmapVisual />
+              <HeatmapVisual large />
             </motion.div>
           </div>
         </div>
@@ -377,14 +481,14 @@ const Landing2 = () => {
       {/* ════════════════════════════════════════════
           SECTION 5 — SOCIAL PROOF
       ════════════════════════════════════════════ */}
-      <section className="py-20 lg:py-28 px-6 lg:px-8 bg-slate-50/70">
-        <div className="max-w-5xl mx-auto">
+      <section className="py-16 lg:py-24" style={{ backgroundColor: '#F8F7F5', padding: '64px 80px' }}>
+        <div className="max-w-5xl mx-auto max-[768px]:px-6">
           <motion.div
             initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.3 }}
             variants={fadeUp} custom={0}
-            className="text-center mb-14"
+            className="text-center mb-12"
           >
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight" style={{ fontFamily: "'Playfair Display', serif" }}>
+            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight" style={{ fontFamily: "'Playfair Display', serif", color: '#0F0F0F' }}>
               What changes when you finally see your patterns.
             </h2>
           </motion.div>
@@ -395,12 +499,19 @@ const Landing2 = () => {
                 key={t.name}
                 initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.2 }}
                 variants={fadeUp} custom={i}
-                className="bg-white rounded-xl border border-slate-100 p-6 flex flex-col hover:shadow-lg hover:shadow-slate-100/80 transition-shadow duration-300"
+                className="p-6 flex flex-col"
+                style={{
+                  backgroundColor: '#FFFFFF',
+                  border: '1px solid #EBEBEB',
+                  borderRadius: '8px',
+                }}
               >
-                <p className="text-sm text-slate-600 leading-relaxed flex-1 italic">"{t.quote}"</p>
-                <div className="mt-5 pt-4 border-t border-slate-100">
-                  <p className="text-sm font-semibold text-slate-800">{t.name}</p>
-                  <p className="text-xs text-slate-400 mt-0.5">{t.role}</p>
+                <p className="text-sm leading-relaxed flex-1 italic" style={{ fontFamily: "'Playfair Display', serif", color: '#555555' }}>
+                  "{t.quote}"
+                </p>
+                <div className="mt-5 pt-4" style={{ borderTop: '1px solid #EBEBEB' }}>
+                  <p className="text-sm font-semibold" style={{ color: '#0F0F0F' }}>{t.name}</p>
+                  <p className="text-xs mt-0.5" style={{ color: '#8A8A8A' }}>{t.role}</p>
                 </div>
               </motion.div>
             ))}
@@ -409,15 +520,15 @@ const Landing2 = () => {
       </section>
 
       {/* ════════════════════════════════════════════
-          SECTION 6 — FINAL CTA
+          SECTION 6 — FINAL CTA STRIP
       ════════════════════════════════════════════ */}
-      <section className="py-20 lg:py-28 px-6 lg:px-8 bg-emerald-900">
-        <div className="max-w-3xl mx-auto text-center">
+      <section className="py-20 lg:py-28" style={{ backgroundColor: '#0D3D2A', padding: '80px' }}>
+        <div className="max-w-3xl mx-auto text-center max-[768px]:px-6">
           <motion.h2
             initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.3 }}
             variants={fadeUp} custom={0}
-            className="text-3xl sm:text-4xl font-bold text-white tracking-tight"
-            style={{ fontFamily: "'Playfair Display', serif" }}
+            className="text-3xl sm:text-4xl font-bold tracking-tight"
+            style={{ fontFamily: "'Playfair Display', serif", color: '#FFFFFF' }}
           >
             The only trader you can truly improve is yourself.
           </motion.h2>
@@ -425,7 +536,8 @@ const Landing2 = () => {
           <motion.p
             initial="hidden" whileInView="visible" viewport={{ once: true }}
             variants={fadeUp} custom={1}
-            className="mt-4 text-base text-emerald-200/80"
+            className="mt-4 text-base"
+            style={{ color: 'rgba(255,255,255,0.7)' }}
           >
             Start with your data. See your patterns. Trade better.
           </motion.p>
@@ -437,7 +549,16 @@ const Landing2 = () => {
           >
             <Link
               to="/entering"
-              className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-900 bg-white hover:bg-emerald-50 px-7 py-3.5 rounded-lg transition-colors"
+              className="inline-flex items-center gap-2 text-sm font-semibold px-7 py-3.5 transition-all duration-200"
+              style={{ backgroundColor: '#FFFFFF', color: '#0D3D2A', borderRadius: '4px' }}
+              onMouseEnter={e => {
+                e.currentTarget.style.transform = 'translateY(-1px)';
+                e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,0,0,0.2)';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = 'none';
+              }}
             >
               Start Free for 14 Days <ArrowRight className="w-4 h-4" />
             </Link>
@@ -446,14 +567,64 @@ const Landing2 = () => {
           <motion.p
             initial="hidden" whileInView="visible" viewport={{ once: true }}
             variants={fadeUp} custom={3}
-            className="mt-5 text-xs text-emerald-300/60"
+            className="mt-5 text-xs"
+            style={{ color: 'rgba(255,255,255,0.5)' }}
           >
             No credit card · Cancel anytime · Up and running in under 5 minutes
           </motion.p>
         </div>
       </section>
 
-      <LandingFooter />
+      {/* ════════════════════════════════════════════
+          FOOTER
+      ════════════════════════════════════════════ */}
+      <footer style={{ backgroundColor: '#0F0F0F' }}>
+        <div className="max-w-7xl mx-auto py-16" style={{ padding: '64px 80px' }}>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-10 max-[768px]:px-6">
+            {/* Brand */}
+            <div className="md:col-span-1">
+              <div className="flex items-center gap-0 text-xl tracking-tight mb-4" style={{ color: '#FFFFFF' }}>
+                <span className="font-normal">Trade</span>
+                <span className="font-bold">Valley</span>
+              </div>
+              <p className="text-sm leading-relaxed" style={{ color: '#8A8A8A' }}>
+                The trading journal for traders who refuse to stay average.
+              </p>
+            </div>
+
+            {/* Product */}
+            <div>
+              <h4 className="text-xs font-semibold uppercase tracking-wider mb-4" style={{ color: '#8A8A8A' }}>Product</h4>
+              <ul className="space-y-3">
+                <li><Link to="/features" className="text-sm transition-colors hover:text-white" style={{ color: '#BFBFBF' }}>Features</Link></li>
+                <li><Link to="/pricing" className="text-sm transition-colors hover:text-white" style={{ color: '#BFBFBF' }}>Pricing</Link></li>
+              </ul>
+            </div>
+
+            {/* Resources */}
+            <div>
+              <h4 className="text-xs font-semibold uppercase tracking-wider mb-4" style={{ color: '#8A8A8A' }}>Resources</h4>
+              <ul className="space-y-3">
+                <li><Link to="/entering" className="text-sm transition-colors hover:text-white" style={{ color: '#BFBFBF' }}>Get Started</Link></li>
+              </ul>
+            </div>
+
+            {/* Legal */}
+            <div>
+              <h4 className="text-xs font-semibold uppercase tracking-wider mb-4" style={{ color: '#8A8A8A' }}>Legal</h4>
+              <ul className="space-y-3">
+                <li><span className="text-sm cursor-default" style={{ color: '#666666' }}>Privacy Policy</span></li>
+                <li><span className="text-sm cursor-default" style={{ color: '#666666' }}>Terms of Service</span></li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="mt-12 pt-8 flex flex-col md:flex-row items-center justify-between gap-4 max-[768px]:px-6" style={{ borderTop: '1px solid #2a2a2a' }}>
+            <p className="text-xs" style={{ color: '#666666' }}>© {new Date().getFullYear()} TradeValley. All rights reserved.</p>
+            <p className="text-xs" style={{ color: '#666666' }}>Built by traders, for traders.</p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };
