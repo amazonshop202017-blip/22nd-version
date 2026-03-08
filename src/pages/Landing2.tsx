@@ -191,12 +191,10 @@ const Landing2 = () => {
               </motion.p>
 
               <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={1}>
-                <h1 className="text-4xl sm:text-5xl lg:text-[3.4rem] leading-[1.1] font-bold tracking-tight" style={{ fontFamily: "'Playfair Display', serif" }}>
-                  <span className="text-slate-400">"Most traders have data."</span>
-                  <br />
-                  <span className="text-slate-400">"Almost none have answers."</span>
-                  <br />
-                  <span className="text-slate-900 mt-2 inline-block">TradeValley gives you both.</span>
+                <h1 className="text-4xl sm:text-5xl lg:text-[3.4rem] font-bold tracking-tight flex flex-col" style={{ fontFamily: "'Playfair Display', serif" }}>
+                  <span className="text-slate-400 leading-[1.15]">"Most traders have data."</span>
+                  <span className="text-slate-400 leading-[1.15]">"Almost none have answers."</span>
+                  <span className="text-slate-900 leading-[1.15] mt-3">TradeValley gives you both.</span>
                 </h1>
               </motion.div>
 
@@ -209,7 +207,7 @@ const Landing2 = () => {
 
               <motion.div
                 initial="hidden" animate="visible" variants={fadeUp} custom={3}
-                className="mt-4 text-sm text-slate-400 leading-relaxed max-w-xl space-y-1"
+                className="mt-5 text-sm text-slate-400 leading-relaxed max-w-xl space-y-2"
               >
                 <p>Import your trades in minutes. No complexity. No overwhelming dashboards.</p>
                 <p>Just the patterns quietly costing you money — finally visible.</p>
