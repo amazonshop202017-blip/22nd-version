@@ -82,7 +82,7 @@ const Landing2Navbar = () => {
 };
 
 // ─── Heatmap Visual ───
-const HeatmapVisual = ({ large = false }: { large?: boolean }) => {
+const HeatmapVisual = ({ large = false, variant = 'neutral' }: { large?: boolean; variant?: 'neutral' | 'classic' }) => {
   const heatmapData = [
     [32, 41, 55, 48, 37, 29],
     [45, 58, 72, 65, 52, 40],
@@ -92,27 +92,15 @@ const HeatmapVisual = ({ large = false }: { large?: boolean }) => {
     [35, 48, 62, 58, 50, 38],
   ];
 
-  const getColor = (val: number) => {
-    if (val >= 80) return '#B45309';
-    if (val >= 65) return '#CA8A04';
-    if (val >= 55) return '#D4A853';
-    if (val >= 45) return '#E8D5A8';
-    if (val >= 35) return '#D4976A';
-    return '#C2703A';
-  };
-
-  // Using warm tones instead of green/teal
-  const getColorDark = (val: number) => {
-    if (val >= 80) return '#1a5c2e';
-    if (val >= 65) return '#2d7a42';
-    if (val >= 55) return '#4a9960';
-    if (val >= 45) return '#93b89e';
-    if (val >= 35) return '#c4a882';
-    return '#b08968';
-  };
-
-  // Actually use neutral/warm palette per spec (no green/teal except final CTA)
   const getCellColor = (val: number) => {
+    if (variant === 'classic') {
+      if (val >= 80) return '#34d399';
+      if (val >= 65) return '#6ee7b7';
+      if (val >= 55) return '#a7f3d0';
+      if (val >= 45) return '#fde68a';
+      if (val >= 35) return '#fdba74';
+      return '#fb923c';
+    }
     if (val >= 80) return '#3d3d3d';
     if (val >= 65) return '#5a5a5a';
     if (val >= 55) return '#7a7a7a';
@@ -120,6 +108,13 @@ const HeatmapVisual = ({ large = false }: { large?: boolean }) => {
     if (val >= 35) return '#c0c0c0';
     return '#d8d8d8';
   };
+
+  const highColor = variant === 'classic' ? '#34d399' : '#3d3d3d';
+  const lowColor = variant === 'classic' ? '#fb923c' : '#d8d8d8';
+  const trendStroke = variant === 'classic' ? '#059669' : '#0F0F0F';
+  const trendOpacity = variant === 'classic' ? 0.6 : 0.3;
+  const dotFill = variant === 'classic' ? '#059669' : '#0F0F0F';
+  const dotOpacity = variant === 'classic' ? 0.6 : 0.4;
 
   return (
     <div
@@ -140,8 +135,8 @@ const HeatmapVisual = ({ large = false }: { large?: boolean }) => {
       <div className="flex items-center justify-between mb-3">
         <p className="text-sm font-semibold" style={{ color: '#0F0F0F' }}>SL / TP Heatmap</p>
         <div className="flex items-center gap-2 text-[10px]" style={{ color: '#8A8A8A' }}>
-          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full" style={{ backgroundColor: '#3d3d3d' }} /> High</span>
-          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full" style={{ backgroundColor: '#d8d8d8' }} /> Low</span>
+          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full" style={{ backgroundColor: highColor }} /> High</span>
+          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full" style={{ backgroundColor: lowColor }} /> Low</span>
         </div>
       </div>
 
@@ -182,9 +177,9 @@ const HeatmapVisual = ({ large = false }: { large?: boolean }) => {
         </p>
         <div className="h-14 relative">
           <svg viewBox="0 0 200 40" className="w-full h-full">
-            <path d="M0,35 Q30,30 50,28 T100,20 T150,14 T200,8" fill="none" stroke="#0F0F0F" strokeWidth="1.5" strokeLinecap="round" opacity="0.3" />
+            <path d="M0,35 Q30,30 50,28 T100,20 T150,14 T200,8" fill="none" stroke={trendStroke} strokeWidth="1.5" strokeLinecap="round" opacity={trendOpacity} />
             {[10, 30, 55, 75, 95, 120, 140, 160, 185].map((x, i) => (
-              <circle key={i} cx={x} cy={35 - i * 3 + Math.sin(i) * 4} r="2.5" fill="#0F0F0F" opacity="0.4" />
+              <circle key={i} cx={x} cy={35 - i * 3 + Math.sin(i) * 4} r="2.5" fill={dotFill} opacity={dotOpacity} />
             ))}
           </svg>
         </div>
@@ -472,7 +467,7 @@ const Landing2 = () => {
               transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
               className="flex justify-center lg:justify-end"
             >
-              <HeatmapVisual large />
+              <HeatmapVisual large variant="classic" />
             </motion.div>
           </div>
         </div>
