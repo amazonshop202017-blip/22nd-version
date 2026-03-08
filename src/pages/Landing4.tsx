@@ -275,7 +275,7 @@ const Landing4 = () => {
             {/* Left column */}
             <div>
               {/* Tagline mark */}
-              <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0} className="mb-8">
+              <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0} className="mb-8 pt-1.5">
                 <div className="flex items-center gap-2 text-xs lg:text-sm tracking-[0.15em]" style={{ fontFamily: "'DM Sans', 'Inter', sans-serif" }}>
                   <span className="font-normal" style={{ color: '#8A8A8A' }}>Look inward</span>
                   <span className="text-base font-light" style={{ color: '#059669' }}>/</span>
