@@ -41,11 +41,13 @@ export const WinRateGauge = ({ value, label, winners = 0, losers = 0, breakeven 
                 cornerRadius: 4,
                 cx: 45,
                 cy: 50,
+                arcLabel: () => '',
               },
             ]}
             width={100}
             height={65}
-          skipAnimation={false}
+            hideLegend
+            skipAnimation={false}
           />
           {/* Percentage overlay */}
           <div className="absolute inset-0 flex items-end justify-center pb-0">

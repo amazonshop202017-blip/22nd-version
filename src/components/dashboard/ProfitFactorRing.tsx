@@ -46,10 +46,12 @@ export const ProfitFactorRing = ({
               cornerRadius: 3,
               cx: 26,
               cy: 26,
+              arcLabel: () => '',
             },
           ]}
           width={60}
           height={60}
+          hideLegend
           skipAnimation={false}
         />
       </div>
