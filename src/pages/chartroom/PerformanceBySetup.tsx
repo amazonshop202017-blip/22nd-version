@@ -287,10 +287,7 @@ const PerformanceBySetup = () => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-foreground">Performance by Setup</h1>
-        <p className="text-muted-foreground mt-1">Analyze your trading performance across different setups and patterns.</p>
-      </div>
+      <PageHeader title="Performance by Setup" tooltip="See which setups are profitable and which are costing you money." />
 
       {/* Side-by-side Comparison Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">

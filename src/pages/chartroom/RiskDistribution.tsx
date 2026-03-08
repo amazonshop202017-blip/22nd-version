@@ -329,12 +329,7 @@ const RiskDistribution = () => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-foreground">Risk Distribution</h1>
-        <p className="text-muted-foreground mt-1">
-          Analyze how your trade outcomes are distributed across {displayType === 'rMultiple' ? 'R-Multiple' : 'Return %'} ranges.
-        </p>
-      </div>
+      <PageHeader title="Risk Distribution" tooltip="Understand how your trade outcomes spread across risk ranges to spot outliers." />
 
       {/* Controls */}
       <div className="flex flex-wrap items-center gap-4">

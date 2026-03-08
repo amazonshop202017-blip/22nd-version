@@ -269,10 +269,7 @@ const PerformanceBySymbol = () => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-foreground">Performance by Symbol</h1>
-        <p className="text-muted-foreground mt-1">Analyze your trading performance across different symbols.</p>
-      </div>
+      <PageHeader title="Performance by Symbol" tooltip="Break down your results by instrument to focus on what works best." />
 
       {/* Side-by-side Comparison Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">

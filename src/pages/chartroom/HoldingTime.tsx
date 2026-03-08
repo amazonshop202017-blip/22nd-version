@@ -203,10 +203,7 @@ const HoldingTime = () => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-foreground">Holding Time</h1>
-        <p className="text-muted-foreground mt-1">Analyze your trade holding durations and performance.</p>
-      </div>
+      <PageHeader title="Holding Time" tooltip="See how trade duration impacts your P&L — are you holding too long or cutting too short?" />
 
       {/* Chart Container */}
       <Card className="bg-card border-border">

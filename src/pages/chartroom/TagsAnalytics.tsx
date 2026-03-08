@@ -336,10 +336,7 @@ const PerformanceRatio = () => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-foreground">Tags / Comments Analysis</h1>
-        <p className="text-muted-foreground mt-1">Analyze your trading performance grouped by tags or trade comments.</p>
-      </div>
+      <PageHeader title="Tags / Comments Analysis" tooltip="See how your tagged patterns and comments correlate with performance." />
 
       {/* Selection Panel (shared across both charts) */}
       <div className="flex flex-wrap items-center gap-4">

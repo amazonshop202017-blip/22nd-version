@@ -326,11 +326,7 @@ const ConsecutiveWinnersLosers = () => {
     <div className="space-y-6">
       {/* Page Header */}
       <div className="flex items-center gap-3">
-        <TrendingUp className="w-8 h-8 text-primary" />
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Consecutive Winners/Losers</h1>
-          <p className="text-muted-foreground">Analyze your winning and losing streaks</p>
-        </div>
+        <PageHeader title="Consecutive Winners/Losers" tooltip="Track your winning and losing streaks to understand momentum patterns." />
       </div>
 
       {/* Stats Cards */}

@@ -300,10 +300,7 @@ const ExitAnalysis = () => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-foreground">Exit Analysis</h1>
-        <p className="text-muted-foreground mt-1">Analyze your exit strategies and timing.</p>
-      </div>
+      <PageHeader title="Exit Analysis" tooltip="Evaluate how well you're timing exits and capturing available moves." />
 
       {/* Chart Container */}
       <Card className="bg-card border-border">

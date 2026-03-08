@@ -190,10 +190,7 @@ const TradeManagement = () => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-foreground">Trade Management</h1>
-        <p className="text-muted-foreground mt-1">Compare your actual performance vs set-and-forget and market potential</p>
-      </div>
+      <PageHeader title="Trade Management" tooltip="Compare your actual exits vs set-and-forget and full market potential to find management edge." />
 
       <Card>
         <CardHeader>

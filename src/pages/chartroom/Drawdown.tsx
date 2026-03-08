@@ -278,10 +278,7 @@ const Drawdown = () => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-foreground">Drawdown</h1>
-        <p className="text-muted-foreground mt-1">Analyze your drawdown patterns and recovery periods.</p>
-      </div>
+      <PageHeader title="Drawdown" tooltip="Visualize your drawdown depth and recovery periods to understand risk exposure." />
       
       {/* Chart Container */}
       <Card className="bg-card border-border">

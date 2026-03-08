@@ -12,8 +12,7 @@ const Diary = () => {
         animate={{ opacity: 1, y: 0 }}
         className="mb-4"
       >
-        <h1 className="text-3xl font-bold tracking-tight">Diary</h1>
-        <p className="text-muted-foreground mt-1">Record your thoughts, emotions, and lessons learned</p>
+        <PageHeader title="Diary" tooltip="Record your thoughts, emotions, and lessons to build self-awareness over time." />
       </motion.div>
 
       <motion.div
