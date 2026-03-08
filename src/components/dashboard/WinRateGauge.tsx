@@ -55,7 +55,7 @@ export const WinRateGauge = ({ value, label, winners = 0, losers = 0, breakeven 
             skipAnimation={false}
           />
           {/* Percentage overlay */}
-          <div className="absolute inset-0 flex items-end justify-center pb-0">
+          <div className="absolute inset-0 flex items-end justify-center pb-0 pointer-events-none">
             <span className="font-bold font-mono" style={{ fontSize: 13 }}>{clampedValue.toFixed(2)}%</span>
           </div>
         </div>
