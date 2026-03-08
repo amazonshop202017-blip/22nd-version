@@ -500,6 +500,9 @@ const Landing4 = () => {
               className="flex justify-end"
             >
               <div className="w-full max-w-lg">
+                <p className="text-[10px] uppercase tracking-[0.2em] mb-3" style={{ color: '#8A8A8A', fontFamily: "'JetBrains Mono', monospace" }}>
+                  EXIT ANALYZER — LIVE PREVIEW
+                </p>
                 <HeatmapCard large />
               </div>
             </motion.div>
