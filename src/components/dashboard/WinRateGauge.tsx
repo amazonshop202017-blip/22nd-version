@@ -10,18 +10,19 @@ interface WinRateGaugeProps {
 }
 
 export const WinRateGauge = ({ value, label, winners = 0, losers = 0, breakeven = 0 }: WinRateGaugeProps) => {
-  const clampedValue = Math.min(100, Math.max(0, value));
-  const lossValue = 100 - clampedValue;
+  const total = winners + losers + breakeven;
 
   const pieData = [
-    { id: 0, value: clampedValue, label: 'Win', color: 'hsl(142, 76%, 45%)' },
-    { id: 1, value: lossValue, label: 'Loss', color: 'hsl(0, 84%, 60%)' },
+    { id: 0, value: winners, label: 'Win', color: 'hsl(142, 76%, 45%)' },
+    { id: 1, value: breakeven, label: 'Breakeven', color: 'hsl(var(--muted-foreground))' },
+    { id: 2, value: losers, label: 'Loss', color: 'hsl(0, 84%, 60%)' },
   ].filter(d => d.value > 0);
 
-  // If no data at all, show empty
   if (pieData.length === 0) {
     pieData.push({ id: 0, value: 1, label: 'No Data', color: 'hsl(var(--muted))' });
   }
+
+  const clampedValue = Math.min(100, Math.max(0, value));
 
   return (
     <TooltipProvider>
