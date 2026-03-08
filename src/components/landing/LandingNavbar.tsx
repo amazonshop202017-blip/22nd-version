@@ -19,18 +19,24 @@ const homeLinks = [
   { label: 'Home 5', path: '/home-5' },
 ];
 
+const pricingLinks = [
+  { label: 'Pricing 1', path: '/pricing' },
+  { label: 'Pricing 2', path: '/pricing-2' },
+];
+
 const navLinks = [
   { label: 'Features', path: '/features' },
   { label: 'Supported Platforms', path: '/supported-platforms' },
-  { label: 'Pricing', path: '/pricing' },
 ];
 
 export const LandingNavbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileHomeOpen, setMobileHomeOpen] = useState(false);
+  const [mobilePricingOpen, setMobilePricingOpen] = useState(false);
   const location = useLocation();
 
   const isHomePage = ['/', '/home-2', '/home-3', '/home-4', '/home-5'].includes(location.pathname);
+  const isPricingPage = ['/pricing', '/pricing-2'].includes(location.pathname);
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200/60">
@@ -82,6 +88,31 @@ export const LandingNavbar = () => {
                 {link.label}
               </Link>
             ))}
+
+            {/* Pricing Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger className={cn(
+                "text-sm font-medium transition-colors flex items-center gap-1 outline-none",
+                isPricingPage ? "text-slate-900" : "text-slate-500 hover:text-slate-900"
+              )}>
+                Pricing <ChevronDown className="w-3.5 h-3.5" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="min-w-[140px]">
+                {pricingLinks.map((link) => (
+                  <DropdownMenuItem key={link.path} asChild>
+                    <Link
+                      to={link.path}
+                      className={cn(
+                        "w-full cursor-pointer",
+                        location.pathname === link.path && "font-semibold"
+                      )}
+                    >
+                      {link.label}
+                    </Link>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
           {/* CTA Buttons */}
@@ -164,6 +195,40 @@ export const LandingNavbar = () => {
                   {link.label}
                 </Link>
               ))}
+
+              {/* Mobile Pricing Accordion */}
+              <button
+                onClick={() => setMobilePricingOpen(!mobilePricingOpen)}
+                className="flex items-center justify-between w-full text-sm font-medium text-slate-600 hover:text-slate-900 py-2"
+              >
+                Pricing <ChevronDown className={cn("w-4 h-4 transition-transform", mobilePricingOpen && "rotate-180")} />
+              </button>
+              <AnimatePresence>
+                {mobilePricingOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="pl-4 space-y-1 overflow-hidden"
+                  >
+                    {pricingLinks.map((link) => (
+                      <Link
+                        key={link.path}
+                        to={link.path}
+                        onClick={() => setMobileOpen(false)}
+                        className={cn(
+                          "block text-sm py-1.5",
+                          location.pathname === link.path
+                            ? "text-slate-900 font-semibold"
+                            : "text-slate-500"
+                        )}
+                      >
+                        {link.label}
+                      </Link>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
               <div className="pt-3 border-t border-slate-100 space-y-2">
                 <Link
                   to="/entering"
