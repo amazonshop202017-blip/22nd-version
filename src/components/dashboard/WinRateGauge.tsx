@@ -29,7 +29,7 @@ export const WinRateGauge = ({ value, label, winners = 0, losers = 0, breakeven 
       <div className="flex flex-col items-center w-full">
         <span className="text-xs text-muted-foreground mb-1">{label}</span>
         
-        <div className="relative" style={{ width: 100, height: 60 }}>
+        <div className="relative" style={{ width: 120, height: 70 }}>
           <PieChart
             series={[
               {
@@ -37,20 +37,20 @@ export const WinRateGauge = ({ value, label, winners = 0, losers = 0, breakeven 
                   ...d,
                   label: `${d.label}: ${d.value} (${total > 0 ? ((d.value / total) * 100).toFixed(1) : 0}%)`,
                 })),
-                innerRadius: 20,
-                outerRadius: 38,
+                innerRadius: 24,
+                outerRadius: 46,
                 startAngle: -90,
                 endAngle: 90,
                 paddingAngle: 2,
                 cornerRadius: 4,
-                cx: 45,
-                cy: 50,
+                cx: 55,
+                cy: 58,
                 arcLabel: () => '',
                 highlightScope: { fade: 'global', highlight: 'item' },
               },
             ]}
-            width={100}
-            height={65}
+            width={120}
+            height={75}
             hideLegend
             skipAnimation={false}
           />
