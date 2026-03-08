@@ -19,10 +19,14 @@ const homeLinks = [
   { label: 'Home 5', path: '/home-5' },
 ];
 
+const pricingLinks = [
+  { label: 'Pricing 1', path: '/pricing' },
+  { label: 'Pricing 2', path: '/pricing-2' },
+];
+
 const navLinks = [
   { label: 'Features', path: '/features' },
   { label: 'Supported Platforms', path: '/supported-platforms' },
-  { label: 'Pricing', path: '/pricing' },
 ];
 
 export const LandingNavbar = () => {
