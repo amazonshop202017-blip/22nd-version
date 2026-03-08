@@ -246,7 +246,7 @@ const Landing3 = () => {
               initial={{ opacity: 0, x: 40 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
-              className="flex justify-center lg:justify-end"
+              className="flex justify-end"
             >
               <HeatmapVisual />
             </motion.div>
