@@ -72,7 +72,7 @@ const HeatmapVisual = () => {
 
   return (
     <div
-      className="bg-white rounded-2xl p-8 w-full max-w-lg mx-auto"
+      className="bg-white rounded-2xl p-7 w-full max-w-md mx-auto"
       style={{ boxShadow: '0 8px 40px rgba(0,0,0,0.08)', border: '1px solid #EBEBEB' }}
     >
       <div className="flex items-center justify-between mb-6">
