@@ -258,9 +258,6 @@ const painCards = [
 ];
 
 
-// ─── Broker logos (text-based, muted) ───
-const brokers = ['Zerodha', 'Upstox', 'Angel One', 'MT5', 'Tradovate'];
-
 // ═══════════════════════════════════════
 // MAIN PAGE
 // ═══════════════════════════════════════
