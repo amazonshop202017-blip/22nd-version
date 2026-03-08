@@ -271,7 +271,7 @@ const Landing4 = () => {
       ════════════════════════════════════════ */}
       <section className="pt-24 pb-16 px-6 lg:px-8">
         <div className="max-w-7xl mx-auto w-full">
-          <div className="grid lg:grid-cols-[55%_45%] gap-12 lg:gap-16 items-center">
+          <div className="grid lg:grid-cols-[55%_45%] gap-12 lg:gap-16 items-start">
             {/* Left column */}
             <div>
               {/* Tagline mark */}
