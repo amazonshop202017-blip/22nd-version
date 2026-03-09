@@ -15,6 +15,8 @@ import {
   rectSortingStrategy,
 } from '@dnd-kit/sortable';
 import { Pencil, Check } from 'lucide-react';
+import { AddWidgetPlaceholder } from '@/components/dashboard/AddWidgetPlaceholder';
+import { ChartLibraryModal } from '@/components/dashboard/ChartLibraryModal';
 import { RecentTrades } from '@/components/dashboard/RecentTrades';
 import { WinRateGauge } from '@/components/dashboard/WinRateGauge';
 import { ProfitFactorRing } from '@/components/dashboard/ProfitFactorRing';
