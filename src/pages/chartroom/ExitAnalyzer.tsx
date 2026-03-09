@@ -348,7 +348,7 @@ const ExitAnalyzer = () => {
       exitTrades,
       heatmapRange.minSL, heatmapRange.maxSL, heatmapRange.slStep,
       heatmapRange.minTP, heatmapRange.maxTP, heatmapRange.tpStep
-    );
+    ).filter(c => c.tradesCount >= minTradeCount);
   }, [exitTrades, heatmapRange, isValidRange]);
 
   // Build grid structure
