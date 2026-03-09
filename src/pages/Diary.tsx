@@ -17,8 +17,18 @@ const mainTabs = [
 
 const Diary = () => {
   const [activeMainTab, setActiveMainTab] = useState('diary');
+  const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
+  const { screenshotTags } = useScreenshotTagsContext();
 
   const activeMain = mainTabs.find(tab => tab.id === activeMainTab);
+
+  const toggleTag = (tagId: string) => {
+    setSelectedTagIds(prev => 
+      prev.includes(tagId) 
+        ? prev.filter(id => id !== tagId)
+        : [...prev, tagId]
+    );
+  };
 
   return (
     <div className="h-[calc(100vh-8rem)]">
