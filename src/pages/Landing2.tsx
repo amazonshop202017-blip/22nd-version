@@ -140,7 +140,7 @@ const testimonials = [
 const Landing2 = () => {
   return (
     <div className="min-h-screen bg-white text-slate-900 overflow-x-hidden">
-      <Landing2Navbar />
+      <SharedNavbar />
 
       {/* ════════════════════════════════════════════
           SECTION 2 — HERO

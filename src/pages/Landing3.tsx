@@ -139,7 +139,7 @@ const testimonials = [
 const Landing3 = () => {
   return (
     <div className="min-h-screen bg-white text-slate-900 overflow-x-hidden">
-      <Landing3Navbar />
+      <SharedNavbar />
 
       {/* ════════════════════════════════════════════
           HERO — spacing reduced ~30%
