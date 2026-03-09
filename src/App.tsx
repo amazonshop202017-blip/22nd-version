@@ -56,7 +56,7 @@ const AuthenticatedApp = () => {
     return (
       <Routes>
         <Route path="/" element={<Landing4 />} />
-        <Route path="/home-1" element={<Landing />} />
+        {/* Home 1 is served at "/" via Landing4 */}
         <Route path="/home-2" element={<Landing2 />} />
         <Route path="/home-3" element={<Landing3 />} />
         <Route path="/features" element={<Features />} />
