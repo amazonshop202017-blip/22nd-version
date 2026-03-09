@@ -64,6 +64,7 @@ const ManualExitTab = () => {
   const [tpStep, setTpStep] = useState(1);
   const [optimiseMetric, setOptimiseMetric] = useState<'winrate' | 'expectancy'>('expectancy');
   const [treatMissingAsZero, setTreatMissingAsZero] = useState(true);
+  const [minTradeCount, setMinTradeCount] = useState(1);
 
   // Draggable selection
   const [selectedSL, setSelectedSL] = useState<number | null>(null);
@@ -75,13 +76,13 @@ const ManualExitTab = () => {
   );
 
   const slSweep = useMemo(
-    () => computeSLSweep(exitTrades, fixedTP, slRangeMin, slRangeMax, slStep),
-    [exitTrades, fixedTP, slRangeMin, slRangeMax, slStep]
+    () => computeSLSweep(exitTrades, fixedTP, slRangeMin, slRangeMax, slStep).filter(p => p.tradesCount >= minTradeCount),
+    [exitTrades, fixedTP, slRangeMin, slRangeMax, slStep, minTradeCount]
   );
 
   const tpSweep = useMemo(
-    () => computeTPSweep(exitTrades, fixedSL, tpRangeMin, tpRangeMax, tpStep),
-    [exitTrades, fixedSL, tpRangeMin, tpRangeMax, tpStep]
+    () => computeTPSweep(exitTrades, fixedSL, tpRangeMin, tpRangeMax, tpStep).filter(p => p.tradesCount >= minTradeCount),
+    [exitTrades, fixedSL, tpRangeMin, tpRangeMax, tpStep, minTradeCount]
   );
 
   // Find best point for display
@@ -154,6 +155,8 @@ const ManualExitTab = () => {
               </button>
             </div>
           </div>
+          <div className="w-px h-9 bg-border" />
+          <InputField label="Min Trades" value={minTradeCount} onChange={setMinTradeCount} min={1} />
           <div className="w-px h-9 bg-border" />
           <label className="flex items-center gap-2 cursor-pointer select-none pb-0.5">
             <input
@@ -315,6 +318,7 @@ const ExitAnalyzer = () => {
   const [tpStep, setTpStep] = useState(5);
   const [activeTab, setActiveTab] = useState('auto');
   const [treatMissingAsZero, setTreatMissingAsZero] = useState(true);
+  const [minTradeCount, setMinTradeCount] = useState(1);
   const [coloringMode, setColoringMode] = useState<'expectancy' | 'winrate'>('expectancy');
 
   // Selection
@@ -344,8 +348,8 @@ const ExitAnalyzer = () => {
       exitTrades,
       heatmapRange.minSL, heatmapRange.maxSL, heatmapRange.slStep,
       heatmapRange.minTP, heatmapRange.maxTP, heatmapRange.tpStep
-    );
-  }, [exitTrades, heatmapRange, isValidRange]);
+    ).filter(c => c.tradesCount >= minTradeCount);
+  }, [exitTrades, heatmapRange, isValidRange, minTradeCount]);
 
   // Build grid structure
   const { tpValues, slValues, cellMap } = useMemo(() => {
@@ -439,6 +443,8 @@ const ExitAnalyzer = () => {
             <InputField label="Max TP" value={maxTP} onChange={setMaxTP} />
             <InputField label="TP Step" value={tpStep} onChange={setTpStep} />
           </div>
+          <div className="w-px h-9 bg-border" />
+          <InputField label="Min Trades" value={minTradeCount} onChange={setMinTradeCount} min={1} />
           <div className="w-px h-9 bg-border" />
           <label className="flex items-center gap-2 cursor-pointer select-none pb-0.5">
             <input
