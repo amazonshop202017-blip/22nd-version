@@ -72,6 +72,7 @@ const Dashboard = () => {
   const { formatCurrency } = useGlobalFilters();
   const { isPrivacyMode, maskCurrency } = usePrivacyMode();
   const [isEditMode, setIsEditMode] = useState(false);
+  const [isLibraryOpen, setIsLibraryOpen] = useState(false);
   const [chartOrder, setChartOrder] = useState<string[]>(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
