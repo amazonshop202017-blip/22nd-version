@@ -15,9 +15,9 @@ const fadeUp = {
 
 const plans = [
   {
-    name: 'Starter',
-    price: 'Free',
-    period: '',
+    name: 'Solo',
+    price: '₹499',
+    period: '/month',
     description: 'Everything you need to begin your journaling discipline.',
     features: [
       'Unlimited trade logging',
@@ -32,11 +32,11 @@ const plans = [
   },
   {
     name: 'Professional',
-    price: '$29',
+    price: '₹799',
     period: '/month',
     description: 'For traders who are serious about finding their edge.',
     features: [
-      'Everything in Starter',
+      'Everything in Solo',
       'Full Chart Room (10 modules)',
       'Exit Analyzer (Auto & Manual)',
       'Trading Diary with rich text',
@@ -49,22 +49,6 @@ const plans = [
     ],
     cta: 'Go Professional',
     highlighted: true,
-  },
-  {
-    name: 'Institution',
-    price: '$79',
-    period: '/month',
-    description: 'For prop firms and trading teams.',
-    features: [
-      'Everything in Professional',
-      'Team dashboards',
-      'Custom branding',
-      'API access',
-      'Dedicated account manager',
-      'Custom integrations',
-    ],
-    cta: 'Contact Sales',
-    highlighted: false,
   },
 ];
 
@@ -122,7 +106,7 @@ const Pricing = () => {
       {/* Plans */}
       <section className="pb-24">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
             {plans.map((plan, i) => (
               <motion.div
                 key={plan.name}
