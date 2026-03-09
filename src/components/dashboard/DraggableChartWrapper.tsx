@@ -50,13 +50,18 @@ export const DraggableChartWrapper = ({
           <div
             {...attributes}
             {...listeners}
-            className="absolute -top-2 -left-2 z-10 p-1.5 bg-primary text-primary-foreground rounded-md cursor-grab active:cursor-grabbing shadow-lg hover:bg-primary/90 transition-colors"
+            className="absolute top-0 left-0 right-0 h-10 z-10 cursor-grab active:cursor-grabbing rounded-t-xl"
+          />
+          <div
+            {...attributes}
+            {...listeners}
+            className="absolute -top-2 -left-2 z-20 p-1.5 bg-primary text-primary-foreground rounded-md cursor-grab active:cursor-grabbing shadow-lg hover:bg-primary/90 transition-colors"
           >
             <GripVertical className="h-4 w-4" />
           </div>
           <button
             onClick={() => onRemove?.(id)}
-            className="absolute -top-2 -right-2 z-10 p-1.5 bg-destructive text-destructive-foreground rounded-md shadow-lg hover:bg-destructive/90 transition-colors"
+            className="absolute -top-2 -right-2 z-20 p-1.5 bg-destructive text-destructive-foreground rounded-md shadow-lg hover:bg-destructive/90 transition-colors"
           >
             <X className="h-4 w-4" />
           </button>
