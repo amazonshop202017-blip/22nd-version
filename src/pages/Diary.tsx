@@ -26,7 +26,7 @@ const Diary = () => {
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
   const [viewingScreenshot, setViewingScreenshot] = useState<string | null>(null);
   const { screenshotTags } = useScreenshotTagsContext();
-  const { trades } = useTradesContext();
+  const { filteredTrades: trades } = useFilteredTrades();
   const { openModal } = useTradeModal();
 
   const activeMain = mainTabs.find(tab => tab.id === activeMainTab);
