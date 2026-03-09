@@ -199,7 +199,7 @@ const Landing3 = () => {
                 </div>
                 <div className="flex flex-col px-6 border-r-2 border-slate-200">
                   <span className="font-bold text-slate-700 text-sm">14-day free trial</span>
-                  <span className="mt-0.5">No card needed</span>
+                  <span className="mt-0.5">Full access</span>
                 </div>
                 <div className="flex flex-col pl-6">
                   <span className="font-bold text-slate-700 text-sm">8+ brokers supported</span>

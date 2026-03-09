@@ -275,7 +275,7 @@ const Landing4 = () => {
                 </div>
                 <div className="flex flex-col px-7" style={{ borderRight: '1px solid #EBEBEB' }}>
                   <span className="font-bold text-sm" style={{ color: '#0F0F0F', fontFamily: "'JetBrains Mono', monospace" }}>14-day free trial</span>
-                  <span className="mt-0.5">No card needed</span>
+                  <span className="mt-0.5">Full access</span>
                 </div>
                 <div className="flex flex-col pl-7">
                   <span className="font-bold text-sm" style={{ color: '#0F0F0F', fontFamily: "'JetBrains Mono', monospace" }}>8+ brokers</span>
