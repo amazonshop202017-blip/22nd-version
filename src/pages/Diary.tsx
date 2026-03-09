@@ -90,14 +90,63 @@ const Diary = () => {
             </div>
           </div>
         ) : activeMainTab === 'screenshots' ? (
-          <div className="glass-card rounded-2xl p-12 flex flex-col items-center justify-center min-h-[400px]">
-            <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center mb-6">
-              <Image className="w-10 h-10 text-primary" />
+          <div className="space-y-6">
+            {/* Filters */}
+            <div className="flex items-center gap-4">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="h-9">
+                    <Image className="w-4 h-4 mr-2" />
+                    {selectedTagIds.length > 0 
+                      ? `${selectedTagIds.length} tag${selectedTagIds.length > 1 ? 's' : ''} selected`
+                      : 'Select Tags'
+                    }
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-56 p-2" align="start">
+                  <div className="space-y-1">
+                    {screenshotTags.length === 0 ? (
+                      <p className="text-sm text-muted-foreground px-2 py-1.5">
+                        No tags available
+                      </p>
+                    ) : (
+                      screenshotTags.map((tag) => (
+                        <button
+                          key={tag.id}
+                          onClick={() => toggleTag(tag.id)}
+                          className={cn(
+                            "flex items-center gap-2 w-full px-2 py-1.5 rounded-md text-sm transition-colors",
+                            selectedTagIds.includes(tag.id)
+                              ? "bg-primary/10 text-primary"
+                              : "hover:bg-muted"
+                          )}
+                        >
+                          <div 
+                            className="w-3 h-3 rounded-full" 
+                            style={{ backgroundColor: tag.color }}
+                          />
+                          <span className="flex-1 text-left">{tag.name}</span>
+                          {selectedTagIds.includes(tag.id) && (
+                            <Check className="w-4 h-4" />
+                          )}
+                        </button>
+                      ))
+                    )}
+                  </div>
+                </PopoverContent>
+              </Popover>
             </div>
-            <h3 className="text-2xl font-semibold mb-3">Screenshots</h3>
-            <p className="text-muted-foreground text-center max-w-md">
-              Screenshot gallery coming soon.
-            </p>
+
+            {/* Empty State */}
+            <div className="glass-card rounded-2xl p-12 flex flex-col items-center justify-center min-h-[400px]">
+              <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center mb-6">
+                <Image className="w-10 h-10 text-primary" />
+              </div>
+              <h3 className="text-2xl font-semibold mb-3">Screenshots</h3>
+              <p className="text-muted-foreground text-center max-w-md">
+                Screenshot gallery coming soon.
+              </p>
+            </div>
           </div>
         ) : null}
       </motion.div>
