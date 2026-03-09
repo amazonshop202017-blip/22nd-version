@@ -191,11 +191,11 @@ const Pricing = () => {
               Frequently Asked Questions
             </h2>
           </div>
-          <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {faqs.map((faq) => (
-              <div key={faq.q} className="bg-white rounded-xl p-6 border border-slate-100">
-                <h4 className="text-base font-bold text-slate-900 mb-2">{faq.q}</h4>
-                <p className="text-sm text-slate-500 leading-relaxed">{faq.a}</p>
+              <div key={faq.q} className="bg-white rounded-xl p-5 border border-slate-100">
+                <h4 className="text-sm font-bold text-slate-900 mb-2">{faq.q}</h4>
+                <p className="text-xs text-slate-500 leading-relaxed">{faq.a}</p>
               </div>
             ))}
           </div>
