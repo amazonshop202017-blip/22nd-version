@@ -16,11 +16,10 @@ interface ScreenshotsTabProps {
 export const ScreenshotsTab = ({ screenshots, onScreenshotsChange }: ScreenshotsTabProps) => {
   const { screenshotTags } = useScreenshotTagsContext();
   const [inputValue, setInputValue] = useState('');
-  const [selectedTagId, setSelectedTagId] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
-  const [selectedScreenshot, setSelectedScreenshot] = useState<TradeScreenshot | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Extract TradingView snapshot ID from URL or text
