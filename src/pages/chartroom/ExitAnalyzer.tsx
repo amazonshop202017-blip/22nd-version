@@ -444,6 +444,8 @@ const ExitAnalyzer = () => {
             <InputField label="TP Step" value={tpStep} onChange={setTpStep} />
           </div>
           <div className="w-px h-9 bg-border" />
+          <InputField label="Min Trades" value={minTradeCount} onChange={setMinTradeCount} min={1} />
+          <div className="w-px h-9 bg-border" />
           <label className="flex items-center gap-2 cursor-pointer select-none pb-0.5">
             <input
               type="checkbox"
