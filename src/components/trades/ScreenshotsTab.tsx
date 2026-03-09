@@ -52,13 +52,12 @@ export const ScreenshotsTab = ({ screenshots, onScreenshotsChange }: Screenshots
     const newScreenshot: TradeScreenshot = {
       id: crypto.randomUUID(),
       imageData,
-      tagId: selectedTagId || undefined,
       createdAt: new Date().toISOString(),
     };
     onScreenshotsChange([...screenshots, newScreenshot]);
     setInputValue('');
     setError(null);
-  }, [screenshots, onScreenshotsChange, selectedTagId]);
+  }, [screenshots, onScreenshotsChange]);
 
   // Fetch TradingView snapshot
   const fetchTradingViewSnapshot = async (snapshotId: string) => {
