@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowRight, CheckCircle2, Sparkles } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Sparkles, XCircle } from 'lucide-react';
 import { LandingNavbar } from '@/components/landing/LandingNavbar';
 import { LandingFooter } from '@/components/landing/LandingFooter';
 
@@ -13,19 +13,29 @@ const fadeUp = {
   }),
 };
 
-const plans = [
+interface Feature {
+  text: string;
+  included: boolean;
+}
+
+const plans: {
+  name: string;
+  price: string;
+  period: string;
+  description: string;
+  features: Feature[];
+  cta: string;
+  highlighted: boolean;
+}[] = [
   {
     name: 'Solo',
     price: '₹499',
     period: '/month',
     description: 'Everything you need to begin your journaling discipline.',
     features: [
-      'Unlimited trade logging',
-      'Performance dashboard',
-      'Day view & calendar',
-      'Basic reports',
-      '1 trading account',
-      'Manual trade entry',
+      { text: 'Can add upto 1 account', included: true },
+      { text: 'Add upto 3 Setups', included: true },
+      { text: 'Mentor Mode', included: false },
     ],
     cta: 'Start Free',
     highlighted: false,
@@ -36,16 +46,9 @@ const plans = [
     period: '/month',
     description: 'For traders who are serious about finding their edge.',
     features: [
-      'Everything in Solo',
-      'Full Chart Room (10 modules)',
-      'Exit Analyzer (Auto & Manual)',
-      'Trading Diary with rich text',
-      'Setup & strategy tracking',
-      'Multi-account support',
-      'Compare tool & advanced reports',
-      'CSV import/export',
-      'Privacy mode',
-      'Priority support',
+      { text: 'Can add Unlimited Accounts', included: true },
+      { text: 'Add unlimited setups', included: true },
+      { text: 'Mentor Mode', included: true },
     ],
     cta: 'Go Professional',
     highlighted: true,
