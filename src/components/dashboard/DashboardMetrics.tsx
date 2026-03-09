@@ -174,6 +174,12 @@ export const DashboardMetrics = ({ isEditMode }: DashboardMetricsProps) => {
             <AvgWinLossRatio avgWin={stats.avgWin} avgLoss={stats.avgLoss} />
           </motion.div>
         );
+      case 'currentStreak':
+        return (
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay }} className="glass-card rounded-xl px-4 py-3 h-full">
+            <CurrentStreakMetric />
+          </motion.div>
+        );
       default:
         return null;
     }
