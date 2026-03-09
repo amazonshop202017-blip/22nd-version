@@ -1,8 +1,8 @@
 import { useState, useMemo, useCallback, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useFilteredTrades } from '@/hooks/useFilteredTrades';
-import { prepareExitTrades, computeHeatmap, HeatmapCell } from '@/lib/exitAnalyzerCalc';
-import { Info, X, Zap, PenLine } from 'lucide-react';
+import { prepareExitTrades, computeHeatmap, computeSLSweep, computeTPSweep, HeatmapCell, SweepPoint } from '@/lib/exitAnalyzerCalc';
+import { Info, X, Zap, PenLine, GripVertical } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { cn } from '@/lib/utils';
