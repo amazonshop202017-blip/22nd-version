@@ -583,6 +583,8 @@ export const TradeModal = () => {
       // MFE/MAE in ticks — start with existing values for edits, null for new trades
       mfeTickPip: editingTrade ? editingTrade.mfeTickPip ?? null : null,
       maeTickPip: editingTrade ? editingTrade.maeTickPip ?? null : null,
+      // Screenshots
+      screenshots: screenshots.length > 0 ? screenshots : undefined,
     };
 
     // Auto-calculate MFE/MAE in tick/pip units (independently) for BOTH new and edited trades
