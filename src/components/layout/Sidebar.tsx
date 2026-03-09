@@ -60,18 +60,21 @@ export const Sidebar = () => {
     >
       {/* Logo Section */}
       <div className="p-4 border-b border-sidebar-border">
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col items-center justify-center">
           <AnimatePresence>
             {!isCollapsed ? (
               <motion.div
                 initial={{ opacity: 0, width: 0 }}
                 animate={{ opacity: 1, width: 'auto' }}
                 exit={{ opacity: 0, width: 0 }}
-                className="overflow-hidden"
+                className="overflow-hidden flex flex-col items-center"
               >
-                <span className="text-lg tracking-tight whitespace-nowrap" style={{ fontFamily: "'DM Sans', 'Inter', sans-serif" }}>
+                <span className="text-2xl tracking-tight whitespace-nowrap" style={{ fontFamily: "'DM Sans', 'Inter', sans-serif" }}>
                   <span className="font-normal text-white">Trade</span>
                   <span className="font-bold text-white">Valley</span>
+                </span>
+                <span className="text-[9px] tracking-widest uppercase text-white/40 mt-0.5 whitespace-nowrap" style={{ fontFamily: "'DM Sans', 'Inter', sans-serif" }}>
+                  Look inward · Trade forward
                 </span>
               </motion.div>
             ) : (
