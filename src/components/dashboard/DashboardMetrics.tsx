@@ -1,4 +1,4 @@
-import { useState, useEffect, ReactNode } from 'react';
+import { useState, useEffect, useMemo, ReactNode } from 'react';
 import {
   DndContext,
   closestCenter,
@@ -29,6 +29,9 @@ import { MetricsLibraryModal } from '@/components/dashboard/MetricsLibraryModal'
 import { useFilteredTrades } from '@/hooks/useFilteredTrades';
 import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { usePrivacyMode } from '@/hooks/usePrivacyMode';
+import { calculateTradeMetrics } from '@/types/trade';
+import { parseISO, format } from 'date-fns';
+import { ResponsiveContainer, AreaChart, Area } from 'recharts';
 
 const DEFAULT_METRICS_ORDER = ['netPnl', 'tradeWinRate', 'profitFactor', 'dayWinRate', 'avgWinLoss'];
 const METRICS_STORAGE_KEY = 'dashboard-metrics-order';
@@ -89,10 +92,27 @@ interface DashboardMetricsProps {
 }
 
 export const DashboardMetrics = ({ isEditMode }: DashboardMetricsProps) => {
-  const { stats } = useFilteredTrades();
+  const { stats, filteredTrades } = useFilteredTrades();
   const { formatCurrency } = useGlobalFilters();
   const { isPrivacyMode, maskCurrency } = usePrivacyMode();
   const [isMetricsLibraryOpen, setIsMetricsLibraryOpen] = useState(false);
+
+  const microChartData = useMemo(() => {
+    if (filteredTrades.length === 0) return [];
+    const dailyPnL = new Map<string, number>();
+    filteredTrades.forEach(t => {
+      const m = calculateTradeMetrics(t);
+      if (m.openDate) {
+        const d = format(parseISO(m.openDate), 'yyyy-MM-dd');
+        dailyPnL.set(d, (dailyPnL.get(d) || 0) + m.netPnl);
+      }
+    });
+    let cum = 0;
+    return Array.from(dailyPnL.keys()).sort().map(d => {
+      cum += dailyPnL.get(d) || 0;
+      return { v: cum };
+    });
+  }, [filteredTrades]);
 
   const [metricsOrder, setMetricsOrder] = useState<string[]>(() => {
     const saved = localStorage.getItem(METRICS_STORAGE_KEY);
@@ -150,6 +170,28 @@ export const DashboardMetrics = ({ isEditMode }: DashboardMetricsProps) => {
             <p className={`text-2xl font-bold font-mono ${isPrivacyMode ? 'text-foreground' : stats.netPnl >= 0 ? 'profit-text' : 'loss-text'}`}>
               {maskCurrency(stats.netPnl, formatCurrency)}
             </p>
+            {microChartData.length > 1 && (
+              <div className="h-8 mt-1 -mx-1">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={microChartData} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="microPnlGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor={stats.netPnl >= 0 ? 'hsl(var(--profit))' : 'hsl(var(--loss))'} stopOpacity={0.3} />
+                        <stop offset="100%" stopColor={stats.netPnl >= 0 ? 'hsl(var(--profit))' : 'hsl(var(--loss))'} stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <Area
+                      type="monotone"
+                      dataKey="v"
+                      stroke={stats.netPnl >= 0 ? 'hsl(var(--profit))' : 'hsl(var(--loss))'}
+                      strokeWidth={1.5}
+                      fill="url(#microPnlGradient)"
+                      isAnimationActive={false}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            )}
           </motion.div>
         );
       case 'tradeWinRate':
