@@ -70,6 +70,8 @@ export interface Trade {
   accountBalanceSnapshot?: number;
   // Contract size snapshot — captured at trade creation, never re-read from registry
   contractSize?: number;
+  // Screenshots attached to trade
+  screenshots?: TradeScreenshot[];
 }
 
 // Calculated values (not stored, computed on-the-fly)

@@ -3,6 +3,7 @@ import { useTradedSymbols } from '@/hooks/useTradedSymbols';
 import { X, Calendar, Star, Settings2, Clock, ChevronDown, Check, Plus, Info, Tags } from 'lucide-react';
 import { ScaleInOutModal } from './ScaleInOutModal';
 import { AssignTagsModal } from './AssignTagsModal';
+import { ScreenshotsTab } from './ScreenshotsTab';
 import { TypeableCombobox } from './TypeableCombobox';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Input } from '@/components/ui/input';
