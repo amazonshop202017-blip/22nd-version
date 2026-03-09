@@ -988,8 +988,8 @@ export const GlobalHeader = () => {
               <ChevronDown className="w-4 h-4 text-muted-foreground ml-auto" />
             </Button>
           </PopoverTrigger>
-        <PopoverContent className="w-fit p-0 bg-popover border-border z-50" align="end">
-          <div className="flex">
+        <PopoverContent className="!w-auto p-0 bg-popover border-border z-50 max-w-none" align="end">
+          <div className="flex w-max">
             {/* Calendar */}
             <div className="p-3 border-r border-border">
               <Calendar
