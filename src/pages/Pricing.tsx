@@ -145,14 +145,18 @@ const Pricing = () => {
                 </div>
                 <ul className="space-y-3 mb-8">
                   {plan.features.map((feat) => (
-                    <li key={feat} className="flex items-start gap-2 text-sm">
-                      <CheckCircle2
-                        className={`w-4 h-4 mt-0.5 flex-shrink-0 ${
-                          plan.highlighted ? 'text-amber-400' : 'text-emerald-500'
-                        }`}
-                      />
-                      <span className={plan.highlighted ? 'text-slate-300' : 'text-slate-600'}>
-                        {feat}
+                    <li key={feat.text} className="flex items-start gap-2 text-sm">
+                      {feat.included ? (
+                        <CheckCircle2
+                          className={`w-4 h-4 mt-0.5 flex-shrink-0 ${
+                            plan.highlighted ? 'text-amber-400' : 'text-emerald-500'
+                          }`}
+                        />
+                      ) : (
+                        <XCircle className="w-4 h-4 mt-0.5 flex-shrink-0 text-red-500" />
+                      )}
+                      <span className={`${plan.highlighted ? 'text-slate-300' : 'text-slate-600'} ${!feat.included ? 'text-slate-400' : ''}`}>
+                        {feat.text}
                       </span>
                     </li>
                   ))}
