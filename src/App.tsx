@@ -34,7 +34,7 @@ import Landing5 from "./pages/Landing5";
 import Features from "./pages/Features";
 import Pricing from "./pages/Pricing";
 import Pricing2 from "./pages/Pricing2";
-import Pricing4 from "./pages/Pricing4";
+
 import SupportedPlatforms from "./pages/SupportedPlatforms";
 import Drawdown from "./pages/chartroom/Drawdown";
 import ConsecutiveWinnersLosers from "./pages/chartroom/ConsecutiveWinnersLosers";
