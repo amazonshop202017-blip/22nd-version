@@ -21,6 +21,7 @@ import { motion } from 'framer-motion';
 import { WinRateGauge } from '@/components/dashboard/WinRateGauge';
 import { ProfitFactorRing } from '@/components/dashboard/ProfitFactorRing';
 import { AvgWinLossRatio } from '@/components/dashboard/AvgWinLossRatio';
+import { CurrentStreakMetric } from '@/components/dashboard/CurrentStreakMetric';
 import { AddWidgetPlaceholder } from '@/components/dashboard/AddWidgetPlaceholder';
 import { MetricsLibraryModal } from '@/components/dashboard/MetricsLibraryModal';
 import { useFilteredTrades } from '@/hooks/useFilteredTrades';
