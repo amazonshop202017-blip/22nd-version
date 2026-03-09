@@ -69,11 +69,14 @@ export const Sidebar = () => {
                 exit={{ opacity: 0, width: 0 }}
                 className="overflow-hidden"
               >
-                <img src={logo} alt="TradeValley" className="h-8 brightness-0 invert" />
+                <span className="text-lg tracking-tight whitespace-nowrap" style={{ fontFamily: "'DM Sans', 'Inter', sans-serif" }}>
+                  <span className="font-normal text-white">Trade</span>
+                  <span className="font-bold text-white">Valley</span>
+                </span>
               </motion.div>
             ) : (
               <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center flex-shrink-0">
-                <img src={logo} alt="TV" className="h-5 brightness-0 invert object-contain" style={{ objectPosition: 'left' }} />
+                <span className="text-sm font-bold text-primary-foreground" style={{ fontFamily: "'DM Sans', 'Inter', sans-serif" }}>TV</span>
               </div>
             )}
           </AnimatePresence>
