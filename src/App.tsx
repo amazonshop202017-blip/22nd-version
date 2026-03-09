@@ -8,6 +8,7 @@ import { TradeModalProvider } from "@/contexts/TradeModalContext";
 import { TradesProvider } from "@/contexts/TradesContext";
 import { TagsProvider } from "@/contexts/TagsContext";
 import { CategoriesProvider } from "@/contexts/CategoriesContext";
+import { ScreenshotTagsProvider } from "@/contexts/ScreenshotTagsContext";
 import { StrategiesProvider } from "@/contexts/StrategiesContext";
 import { AccountsProvider } from "@/contexts/AccountsContext";
 import { GlobalFiltersProvider } from "@/contexts/GlobalFiltersContext";
