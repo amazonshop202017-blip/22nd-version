@@ -666,6 +666,18 @@ const Settings = () => {
               <Tag className="w-4 h-4" />
               Tags
             </button>
+            <button
+              onClick={() => setActiveTagsSubTab('screenshot-tags')}
+              className={cn(
+                "flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors",
+                activeTagsSubTab === 'screenshot-tags'
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+              )}
+            >
+              <Image className="w-4 h-4" />
+              Screenshot Tags
+            </button>
           </div>
 
           {/* Categories Sub-tab */}
@@ -679,6 +691,13 @@ const Settings = () => {
           {activeTagsSubTab === 'tags' && (
             <div className="glass-card rounded-2xl p-6">
               <TagsManagement />
+            </div>
+          )}
+
+          {/* Screenshot Tags Sub-tab */}
+          {activeTagsSubTab === 'screenshot-tags' && (
+            <div className="glass-card rounded-2xl p-6">
+              <ScreenshotTagsManagement />
             </div>
           )}
         </div>
