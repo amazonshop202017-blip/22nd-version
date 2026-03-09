@@ -7,7 +7,7 @@ import { DiaryFolderSidebar } from '@/components/diary/DiaryFolderSidebar';
 import { DiaryNotesList } from '@/components/diary/DiaryNotesList';
 import { DiaryNoteEditor } from '@/components/diary/DiaryNoteEditor';
 import { useScreenshotTagsContext } from '@/contexts/ScreenshotTagsContext';
-import { useTradesContext } from '@/contexts/TradesContext';
+import { useFilteredTrades } from '@/hooks/useFilteredTrades';
 import { useTradeModal } from '@/contexts/TradeModalContext';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
@@ -26,7 +26,7 @@ const Diary = () => {
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
   const [viewingScreenshot, setViewingScreenshot] = useState<string | null>(null);
   const { screenshotTags } = useScreenshotTagsContext();
-  const { trades } = useTradesContext();
+  const { filteredTrades: trades } = useFilteredTrades();
   const { openModal } = useTradeModal();
 
   const activeMain = mainTabs.find(tab => tab.id === activeMainTab);
