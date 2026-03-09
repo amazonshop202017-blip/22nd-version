@@ -20,6 +20,7 @@ export const ScreenshotsTab = ({ screenshots, onScreenshotsChange }: Screenshots
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [viewingScreenshot, setViewingScreenshot] = useState<TradeScreenshot | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Extract TradingView snapshot ID from URL or text
