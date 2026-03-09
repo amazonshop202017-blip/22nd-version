@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { ArrowRight, Play, Sparkles } from 'lucide-react';
 import logo from '@/assets/logo.svg';
 import { useState, useEffect } from 'react';
+import { SharedNavbar } from '@/components/landing/SharedNavbar';
 
 // ─── Animations ───
 const fadeUp = {
