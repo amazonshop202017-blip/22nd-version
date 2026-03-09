@@ -318,6 +318,7 @@ const ExitAnalyzer = () => {
   const [tpStep, setTpStep] = useState(5);
   const [activeTab, setActiveTab] = useState('auto');
   const [treatMissingAsZero, setTreatMissingAsZero] = useState(true);
+  const [minTradeCount, setMinTradeCount] = useState(1);
   const [coloringMode, setColoringMode] = useState<'expectancy' | 'winrate'>('expectancy');
 
   // Selection
