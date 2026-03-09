@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils';
 import DepositWithdrawModal from '@/components/settings/DepositWithdrawModal';
 import { CategoriesManagement } from '@/components/settings/CategoriesManagement';
 import { TagsManagement } from '@/components/settings/TagsManagement';
+import { ScreenshotTagsManagement } from '@/components/settings/ScreenshotTagsManagement';
 import { TradeCommentsManagement } from '@/components/settings/TradeCommentsManagement';
 import { AccountImportModal } from '@/components/settings/AccountImportModal';
 import { SymbolTickSizeManagement } from '@/components/settings/SymbolTickSizeManagement';
