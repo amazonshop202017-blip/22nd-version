@@ -331,13 +331,8 @@ export const MonthlyPerformanceCalendar = () => {
                         ${isCurrentMonth ? 'cursor-pointer hover:ring-1 hover:ring-primary/50' : ''}
                       `}
                     >
-                      <div className="flex flex-col items-start">
-                        <span className={`text-xs font-medium ${isCurrentMonth ? 'text-foreground' : 'text-muted-foreground'}`}>
-                          {format(day, 'd')}
-                        </span>
-                        {hasData && (
-                          <span className={`w-1.5 h-1.5 rounded-full mt-0.5 ${stats.pnl >= 0 ? 'bg-[hsl(var(--profit))]' : 'bg-[hsl(var(--loss))]'}`} />
-                        )}
+                      <div className={`text-xs font-medium mb-1 ${isCurrentMonth ? 'text-primary' : 'text-muted-foreground'}`}>
+                        {format(day, 'd')}
                       </div>
                       
                       {hasData && (
