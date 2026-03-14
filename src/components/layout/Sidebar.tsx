@@ -332,13 +332,17 @@ export const Sidebar = () => {
         )}
       </nav>
 
-      {/* Bottom Section - Settings (Pinned) */}
+      {/* Bottom Section - Theme Toggle & Settings (Pinned) */}
       <div className="px-3 mt-auto">
-        {/* Divider above Settings */}
+        {/* Divider above bottom section */}
         <div className="py-2">
           <Separator className="bg-sidebar-border/50" />
         </div>
+
+        {/* Theme Toggle */}
+        <ThemeToggle isCollapsed={isCollapsed} />
         
+        {/* Settings */}
         <Tooltip>
           <TooltipTrigger asChild>
             <NavLink to="/settings" className="block">
