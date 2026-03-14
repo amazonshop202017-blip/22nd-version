@@ -95,9 +95,10 @@ export const Sidebar = () => {
             <motion.button
               onClick={() => openModal()}
               className={cn(
-                "w-full bg-primary text-primary-foreground rounded-xl font-medium flex items-center justify-center gap-2 transition-all duration-200 hover:bg-primary/90",
+                "w-full text-primary-foreground rounded-xl font-medium flex items-center justify-center gap-2 transition-all duration-200 hover:opacity-90",
                 isCollapsed ? "h-10 px-0" : "h-11 px-4"
               )}
+              style={{ backgroundColor: 'hsl(var(--primary-active))' }}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
@@ -135,10 +136,9 @@ export const Sidebar = () => {
                   "flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200",
                   isCollapsed ? "justify-center" : "",
                   location.pathname === dashboardItem.path
-                    ? "text-primary-foreground shadow-lg"
+                    ? "bg-primary text-primary-foreground shadow-lg"
                     : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                 )}
-                style={location.pathname === dashboardItem.path ? { backgroundColor: 'hsl(var(--primary-active))' } : undefined}
                 whileHover={{ x: location.pathname === dashboardItem.path || isCollapsed ? 0 : 4 }}
                 whileTap={{ scale: 0.98 }}
               >
@@ -182,10 +182,9 @@ export const Sidebar = () => {
                       "flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200",
                       isCollapsed ? "justify-center" : "",
                       isActive
-                        ? "text-primary-foreground shadow-lg"
+                        ? "bg-primary text-primary-foreground shadow-lg"
                         : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                     )}
-                    style={isActive ? { backgroundColor: 'hsl(var(--primary-active))' } : undefined}
                     whileHover={{ x: isActive || isCollapsed ? 0 : 4 }}
                     whileTap={{ scale: 0.98 }}
                   >
@@ -232,10 +231,9 @@ export const Sidebar = () => {
                       "flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200",
                       isCollapsed ? "justify-center" : "",
                       isActive
-                        ? "text-primary-foreground shadow-lg"
+                        ? "bg-primary text-primary-foreground shadow-lg"
                         : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                     )}
-                    style={isActive ? { backgroundColor: 'hsl(var(--primary-active))' } : undefined}
                     whileHover={{ x: isActive || isCollapsed ? 0 : 4 }}
                     whileTap={{ scale: 0.98 }}
                   >
@@ -273,10 +271,9 @@ export const Sidebar = () => {
                   className={cn(
                     "flex items-center justify-center px-3 py-3 rounded-xl transition-all duration-200",
                     isChartRoomActive
-                      ? "text-primary-foreground shadow-lg"
+                      ? "bg-primary text-primary-foreground shadow-lg"
                       : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                   )}
-                  style={isChartRoomActive ? { backgroundColor: 'hsl(var(--primary-active))' } : undefined}
                   whileTap={{ scale: 0.98 }}
                 >
                   <BarChart3 className="w-5 h-5 flex-shrink-0" />
@@ -294,10 +291,9 @@ export const Sidebar = () => {
                 className={cn(
                   "w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200",
                   isChartRoomActive
-                    ? "text-primary-foreground shadow-lg"
+                    ? "bg-primary text-primary-foreground shadow-lg"
                     : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                 )}
-                style={isChartRoomActive ? { backgroundColor: 'hsl(var(--primary-active))' } : undefined}
                 whileHover={{ x: isChartRoomActive ? 0 : 4 }}
                 whileTap={{ scale: 0.98 }}
               >
