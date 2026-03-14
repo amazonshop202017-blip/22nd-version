@@ -89,7 +89,6 @@ export const SidebarAccountMenu = ({ isCollapsed }: { isCollapsed: boolean }) =>
           </button>
         </div>
 
-        <Separator className="my-1" />
 
         {/* Settings */}
         <button
