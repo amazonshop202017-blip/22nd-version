@@ -74,7 +74,7 @@ export const SidebarAccountMenu = ({ isCollapsed }: { isCollapsed: boolean }) =>
           >
             <Sun className={cn(
               "absolute left-1.5 w-3.5 h-3.5 transition-colors",
-              !isDark ? "text-amber-500" : "text-muted-foreground/40"
+              !isDark ? "text-primary" : "text-muted-foreground/40"
             )} />
             <Moon className={cn(
               "absolute right-1.5 w-3.5 h-3.5 transition-colors",
