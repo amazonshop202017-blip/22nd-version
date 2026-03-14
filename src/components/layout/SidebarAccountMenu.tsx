@@ -89,17 +89,11 @@ export const SidebarAccountMenu = ({ isCollapsed }: { isCollapsed: boolean }) =>
           </button>
         </div>
 
-        <Separator className="my-1" />
 
         {/* Settings */}
         <button
           onClick={() => navigate('/settings')}
-          className={cn(
-            "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors",
-            location.pathname === '/settings'
-              ? "bg-accent text-accent-foreground font-medium"
-              : "text-foreground hover:bg-accent hover:text-accent-foreground"
-          )}
+          className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
         >
           <Settings className="w-4 h-4" />
           Settings
@@ -119,7 +113,7 @@ export const SidebarAccountMenu = ({ isCollapsed }: { isCollapsed: boolean }) =>
           Account
         </button>
 
-        <Separator className="my-1" />
+        
 
         {/* Logout */}
         <button
