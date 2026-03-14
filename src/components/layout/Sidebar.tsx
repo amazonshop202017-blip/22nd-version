@@ -271,10 +271,9 @@ export const Sidebar = () => {
                   className={cn(
                     "flex items-center justify-center px-3 py-3 rounded-xl transition-all duration-200",
                     isChartRoomActive
-                      ? "text-primary-foreground shadow-lg"
+                      ? "bg-primary text-primary-foreground shadow-lg"
                       : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                   )}
-                  style={isChartRoomActive ? { backgroundColor: 'hsl(var(--primary-active))' } : undefined}
                   whileTap={{ scale: 0.98 }}
                 >
                   <BarChart3 className="w-5 h-5 flex-shrink-0" />
