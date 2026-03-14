@@ -135,7 +135,7 @@ const Settings = () => {
       
       <div>
         <h1 className="text-3xl font-bold text-foreground mb-2">Settings</h1>
-        <p className="text-muted-foreground">Manage your trading journal configuration</p>
+        <p className="text-sm text-muted-foreground">Manage your trading journal configuration</p>
       </div>
 
       {/* Settings Navigation Menu */}

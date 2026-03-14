@@ -68,13 +68,13 @@ export const SidebarAccountMenu = ({ isCollapsed }: { isCollapsed: boolean }) =>
           <button
             onClick={toggleTheme}
             className={cn(
-              "relative inline-flex h-7 w-14 items-center rounded-full transition-colors duration-200",
-              isDark ? "bg-muted" : "bg-muted"
+              "relative inline-flex h-7 w-14 items-center rounded-full transition-colors duration-200 border",
+              isDark ? "bg-muted border-white/30" : "bg-muted border-border"
             )}
           >
             <Sun className={cn(
               "absolute left-1.5 w-3.5 h-3.5 transition-colors",
-              !isDark ? "text-primary" : "text-muted-foreground/40"
+              !isDark ? "text-yellow-400" : "text-yellow-300/80"
             )} />
             <Moon className={cn(
               "absolute right-1.5 w-3.5 h-3.5 transition-colors",
