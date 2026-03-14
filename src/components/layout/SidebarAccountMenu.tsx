@@ -116,7 +116,7 @@ export const SidebarAccountMenu = ({ isCollapsed }: { isCollapsed: boolean }) =>
         <button
           onClick={() => navigate('/account')}
           className={cn(
-            "w-full flex items-center gap-4 px-3 py-2 rounded-lg text-sm transition-colors",
+            "w-full flex items-center gap-6 px-3 py-2 rounded-lg text-sm transition-colors",
             location.pathname === '/account'
               ? "bg-accent text-accent-foreground font-medium"
               : "text-foreground hover:bg-accent hover:text-accent-foreground"
