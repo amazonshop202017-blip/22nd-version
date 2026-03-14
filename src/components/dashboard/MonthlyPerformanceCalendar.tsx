@@ -148,6 +148,8 @@ export const MonthlyPerformanceCalendar = () => {
   const monthlyStats = useMemo(() => {
     let pnl = 0;
     let tradingDays = 0;
+    let totalTrades = 0;
+    let winningTrades = 0;
 
     const monthDays = eachDayOfInterval({
       start: startOfMonth(currentMonth),
@@ -160,10 +162,14 @@ export const MonthlyPerformanceCalendar = () => {
       if (stats?.hasData) {
         pnl += stats.pnl;
         tradingDays += 1;
+        totalTrades += stats.trades;
+        winningTrades += Math.round(stats.trades * (stats.winRate / 100));
       }
     });
 
-    return { pnl, tradingDays };
+    const monthlyWinRate = totalTrades > 0 ? (winningTrades / totalTrades) * 100 : 0;
+
+    return { pnl, tradingDays, totalTrades, monthlyWinRate };
   }, [currentMonth, dayStatsMap]);
 
   const formatCurrency = (value: number) => {
