@@ -156,6 +156,8 @@ export const MonthlyPerformanceCalendar = () => {
       end: endOfMonth(currentMonth),
     });
 
+    let winningDays = 0;
+
     monthDays.forEach(day => {
       const dayKey = format(day, 'yyyy-MM-dd');
       const stats = dayStatsMap[dayKey];
@@ -164,12 +166,14 @@ export const MonthlyPerformanceCalendar = () => {
         tradingDays += 1;
         totalTrades += stats.trades;
         winningTrades += Math.round(stats.trades * (stats.winRate / 100));
+        if (stats.pnl > 0) winningDays += 1;
       }
     });
 
     const monthlyWinRate = totalTrades > 0 ? (winningTrades / totalTrades) * 100 : 0;
+    const daysWinRate = tradingDays > 0 ? (winningDays / tradingDays) * 100 : 0;
 
-    return { pnl, tradingDays, totalTrades, monthlyWinRate };
+    return { pnl, tradingDays, totalTrades, monthlyWinRate, daysWinRate };
   }, [currentMonth, dayStatsMap]);
 
   const formatCurrency = (value: number) => {
@@ -238,8 +242,12 @@ export const MonthlyPerformanceCalendar = () => {
             <span className={`font-mono font-semibold ${isPrivacyMode ? 'text-foreground' : monthlyStats.pnl >= 0 ? 'profit-text' : 'loss-text'}`}>
               {formatCurrencyDecimal(monthlyStats.pnl)}
             </span>
-            <span className="text-muted-foreground bg-secondary px-2 py-0.5 rounded text-xs">
-              {monthlyStats.tradingDays} days
+            <span className="bg-secondary px-2 py-0.5 rounded text-xs flex items-center gap-1.5">
+              <span className="text-muted-foreground">{monthlyStats.tradingDays} days</span>
+              <span className="text-border">|</span>
+              <span className={monthlyStats.daysWinRate >= 50 ? 'text-profit' : 'text-loss'}>
+                {monthlyStats.daysWinRate.toFixed(1)}% WR
+              </span>
             </span>
             <span className="bg-secondary px-2 py-0.5 rounded text-xs flex items-center gap-1.5">
               <span className="text-muted-foreground">{monthlyStats.totalTrades} trades</span>
