@@ -30,7 +30,7 @@ export const SidebarAccountMenu = ({ isCollapsed }: { isCollapsed: boolean }) =>
                   ? "bg-primary text-primary-foreground shadow-lg"
                   : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
               )}
-              whileHover={{ x: isCollapsed ? 0 : 4 }}
+              whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
               <CircleUser className="w-5 h-5 flex-shrink-0" />
