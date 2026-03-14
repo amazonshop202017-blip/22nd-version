@@ -186,7 +186,7 @@ export const Sidebar = () => {
                         ? "text-primary-foreground shadow-lg"
                         : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                     )}
-                    style={isActive ? { backgroundColor: 'hsl(var(--primary-active))' } : undefined
+                    style={isActive ? { backgroundColor: 'hsl(var(--primary-active))' } : undefined}
                     )}
                     whileHover={{ x: isActive || isCollapsed ? 0 : 4 }}
                     whileTap={{ scale: 0.98 }}
