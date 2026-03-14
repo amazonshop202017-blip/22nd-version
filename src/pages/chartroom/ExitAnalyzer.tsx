@@ -213,13 +213,13 @@ const ManualExitTab = () => {
               onChange={e => setTreatMissingAsZero(e.target.checked)}
               className="h-4 w-4 rounded border-border accent-primary"
             />
-            <span className="text-sm text-muted-foreground">Treat missing as 0</span>
+            <span className="text-sm text-muted-foreground">Fill missing as 0</span>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Info className="h-3.5 w-3.5 text-muted-foreground" />
               </TooltipTrigger>
               <TooltipContent>
-                <p className="max-w-[200px] text-xs">When one of MFE/MAE is present and the other is missing, treat the missing value as 0. When disabled, such trades are excluded.</p>
+                <p className="max-w-[240px] text-xs">If a trade has one value (e.g. MFE) but the other is empty (e.g. MAE), the missing one is treated as 0 — meaning the trade never moved in that direction. When disabled, such trades are excluded entirely.</p>
               </TooltipContent>
             </Tooltip>
           </label>
@@ -501,13 +501,13 @@ const ExitAnalyzer = () => {
               onChange={e => setTreatMissingAsZero(e.target.checked)}
               className="h-4 w-4 rounded border-border accent-primary"
             />
-            <span className="text-sm text-muted-foreground">Treat missing as 0</span>
+            <span className="text-sm text-muted-foreground">Fill missing as 0</span>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Info className="h-3.5 w-3.5 text-muted-foreground" />
               </TooltipTrigger>
               <TooltipContent>
-                <p className="max-w-[200px] text-xs">When enabled, trades without MFE/MAE data are treated as 0 ticks movement. When disabled, they are excluded.</p>
+                <p className="max-w-[240px] text-xs">If a trade has one value (e.g. MFE) but the other is empty (e.g. MAE), the missing one is treated as 0 — meaning the trade never moved in that direction. When disabled, such trades are excluded entirely.</p>
               </TooltipContent>
             </Tooltip>
           </label>
