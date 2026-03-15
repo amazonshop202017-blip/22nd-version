@@ -2,12 +2,26 @@ import { createContext, useContext, useState, useEffect, ReactNode, useCallback 
 import { useTradesContext } from './TradesContext';
 import { calculateTradeMetrics } from '@/types/trade';
 
+export type AccountMode = 'normal' | 'propfirm';
+export type PropFirmStep = 'step1' | 'step2' | 'instant';
+export type DrawdownType = 'static' | 'live' | 'eod';
+
+export interface PropFirmSettings {
+  step: PropFirmStep;
+  targetPercent: number;
+  totalDrawdownPercent: number;
+  dailyDrawdownPercent: number;
+  drawdownType: DrawdownType;
+}
+
 export interface Account {
   id: string;
   name: string;
   startingBalance: number;
   createdAt: string;
   isArchived?: boolean;
+  accountMode: AccountMode;
+  propFirmSettings?: PropFirmSettings;
 }
 
 export interface Transaction {
@@ -28,7 +42,7 @@ export interface AccountWithStats extends Account {
 interface AccountsContextType {
   accounts: Account[];
   transactions: Transaction[];
-  addAccount: (name: string, startingBalance: number) => Account;
+  addAccount: (name: string, startingBalance: number, accountMode?: AccountMode, propFirmSettings?: PropFirmSettings) => Account;
   removeAccount: (id: string) => void;
   updateAccount: (id: string, name: string, startingBalance: number) => void;
   getAccountById: (id: string) => Account | undefined;
@@ -81,13 +95,15 @@ export const AccountsProvider = ({ children }: { children: ReactNode }) => {
     setTransactions(newTransactions);
   }, []);
 
-  const addAccount = useCallback((name: string, startingBalance: number) => {
+  const addAccount = useCallback((name: string, startingBalance: number, accountMode: AccountMode = 'normal', propFirmSettings?: PropFirmSettings) => {
     const newAccount: Account = {
       id: crypto.randomUUID(),
       name: name.trim(),
       startingBalance,
       createdAt: new Date().toISOString(),
       isArchived: false,
+      accountMode,
+      ...(propFirmSettings && { propFirmSettings }),
     };
     saveAccounts([...accounts, newAccount]);
     return newAccount;

@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { DeleteAccountDialog } from '@/components/settings/DeleteAccountDialog';
+import { NewAccountModal } from '@/components/settings/NewAccountModal';
 import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Trash2, Edit2, Check, X, Tag, Wallet, TrendingUp, TrendingDown, Settings as SettingsIcon, Download, DollarSign, FolderOpen, Archive, ArchiveRestore, ChevronDown, ChevronUp, Target, MessageSquare, Ruler, MoreVertical, ArrowRightLeft, Eraser, LogOut, Image } from 'lucide-react';
@@ -81,12 +82,10 @@ const Settings = () => {
   const [activeTagsSubTab, setActiveTagsSubTab] = useState<'categories' | 'tags' | 'screenshot-tags'>('categories');
 
   // Account state
-  const [newAccountName, setNewAccountName] = useState('');
-  const [newAccountBalance, setNewAccountBalance] = useState('');
   const [editingAccount, setEditingAccount] = useState<string | null>(null);
   const [editAccountName, setEditAccountName] = useState('');
   const [editAccountBalance, setEditAccountBalance] = useState('');
-  
+  const [showNewAccountModal, setShowNewAccountModal] = useState(false);
   // Deposit/Withdraw modal state
   const [depositWithdrawAccountId, setDepositWithdrawAccountId] = useState<string | null>(null);
 
@@ -100,21 +99,16 @@ const Settings = () => {
   const activeAccountsWithStats = getActiveAccountsWithStats();
   const archivedAccountsWithStats = getArchivedAccountsWithStats();
 
-  // Account handlers
-  const handleAddAccount = () => {
-    if (newAccountName.trim() && newAccountBalance) {
-      addAccount(newAccountName.trim(), parseFloat(newAccountBalance) || 0);
-      setNewAccountName('');
-      setNewAccountBalance('');
-    }
+  // Account handlers - new modal-based creation
+  const handleCreateAccount = (data: {
+    name: string;
+    startingBalance: number;
+    accountMode: import('@/contexts/AccountsContext').AccountMode;
+    propFirmSettings?: import('@/contexts/AccountsContext').PropFirmSettings;
+  }) => {
+    addAccount(data.name, data.startingBalance, data.accountMode, data.propFirmSettings);
+    toast.success(`Account "${data.name}" created`);
   };
-
-  const handleAccountKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleAddAccount();
-    }
-  };
-
   const startEditingAccount = (account: { id: string; name: string; startingBalance: number }) => {
     setEditingAccount(account.id);
     setEditAccountName(account.name);
@@ -291,6 +285,14 @@ const Settings = () => {
           {/* Account Import Modal */}
           <AccountImportModal open={showImportModal} onOpenChange={setShowImportModal} />
           
+          {/* New Account Modal */}
+          <NewAccountModal
+            open={showNewAccountModal}
+            onOpenChange={setShowNewAccountModal}
+            onCreateAccount={handleCreateAccount}
+            currencySymbol={currencyConfig.symbol}
+          />
+
           {/* Accounts Section */}
           <div className="glass-card rounded-2xl p-6">
             <div className="flex items-center gap-3 mb-6">
@@ -303,36 +305,11 @@ const Settings = () => {
               </div>
             </div>
 
-            <div className="flex gap-3 mb-6">
-              <Input
-                placeholder="Account name..."
-                value={newAccountName}
-                onChange={(e) => setNewAccountName(e.target.value)}
-                onKeyDown={handleAccountKeyDown}
-                className="bg-input border-border flex-1"
-              />
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">{currencyConfig.symbol}</span>
-                <Input
-                  type="number"
-                  placeholder="Starting balance"
-                  value={newAccountBalance}
-                  onChange={(e) => setNewAccountBalance(e.target.value)}
-                  onKeyDown={handleAccountKeyDown}
-                  className="bg-input border-border w-40 pl-7"
-                />
-              </div>
-              <Button onClick={handleAddAccount} disabled={!newAccountName.trim() || !newAccountBalance}>
-                <Plus className="w-4 h-4 mr-2" />
-                Add Account
-              </Button>
-            </div>
-
             {activeAccountsWithStats.length === 0 && archivedAccountsWithStats.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">
                 <Wallet className="w-12 h-12 mx-auto mb-4 opacity-30" />
                 <p>No accounts created yet</p>
-                <p className="text-sm">Add your first account above to start tracking balances</p>
+                <p className="text-sm">Create your first account to start tracking balances</p>
               </div>
             ) : (
               <div className="space-y-4">
@@ -532,6 +509,18 @@ const Settings = () => {
                 )}
               </div>
             )}
+
+            {/* New Account CTA */}
+            <div className="mt-6">
+              <Button
+                onClick={() => setShowNewAccountModal(true)}
+                className="w-full gap-2"
+                size="lg"
+              >
+                <Plus className="w-4 h-4" />
+                New Account
+              </Button>
+            </div>
           </div>
         </>
       )}
