@@ -1085,7 +1085,7 @@ export const GlobalHeader = () => {
           
           <DropdownMenuSeparator />
           <DropdownMenuItem 
-            onClick={() => navigate('/settings')}
+            onClick={() => navigate('/settings?tab=accounts')}
             className="cursor-pointer"
           >
             <Settings className="w-4 h-4 mr-2" />

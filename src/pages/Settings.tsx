@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Trash2, Edit2, Check, X, Tag, Wallet, TrendingUp, TrendingDown, Settings as SettingsIcon, Download, DollarSign, FolderOpen, Archive, ArchiveRestore, ChevronDown, ChevronUp, Target, MessageSquare, Ruler, MoreVertical, ArrowRightLeft, Eraser, LogOut, Image } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -17,6 +18,8 @@ import { AccountImportModal } from '@/components/settings/AccountImportModal';
 import { SymbolTickSizeManagement } from '@/components/settings/SymbolTickSizeManagement';
 import { TpSlSettings } from '@/components/settings/TpSlSettings';
 import { FeesSettings } from '@/components/settings/FeesSettings';
+import { SettingsLayout } from '@/components/settings/SettingsLayout';
+import { SettingsTab } from '@/components/settings/SettingsSidebar';
 import { toast } from 'sonner';
 import {
   DropdownMenu,
@@ -33,6 +36,7 @@ import {
 } from '@/components/ui/select';
 
 const Settings = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const { accounts, addAccount, updateAccount, getActiveAccountsWithStats, getArchivedAccountsWithStats, archiveAccount, unarchiveAccount, deleteAccountPermanently, addTransaction, getTransactionsForAccount } = useAccountsContext();
   const { trades, deleteTradesByAccountId, deleteTradesByAccountName } = useTradesContext();
   const { logout } = useAuth();
@@ -68,8 +72,8 @@ const Settings = () => {
     });
   };
 
-  // Settings tab state - now with 4 tabs
-  const [activeSettingsTab, setActiveSettingsTab] = useState<'main' | 'accounts' | 'custom-tags' | 'trade-comments' | 'symbol-tick' | 'tpsl' | 'fees'>('main');
+  const activeSettingsTab = (searchParams.get('tab') as SettingsTab) || 'main';
+  const setActiveSettingsTab = (tab: SettingsTab) => setSearchParams({ tab });
   
   // Custom Tags sub-tab state
   const [activeTagsSubTab, setActiveTagsSubTab] = useState<'categories' | 'tags' | 'screenshot-tags'>('categories');
@@ -131,101 +135,8 @@ const Settings = () => {
   };
 
   return (
+    <SettingsLayout activeTab={activeSettingsTab} onTabChange={setActiveSettingsTab}>
     <div className="space-y-8 animate-fade-in">
-      
-      <div>
-        <h1 className="text-3xl font-bold text-foreground mb-2">Settings</h1>
-        <p className="text-sm text-muted-foreground">Manage your trading journal configuration</p>
-      </div>
-
-      {/* Settings Navigation Menu */}
-      <div className="flex gap-2 p-1 bg-muted/30 rounded-lg w-fit">
-        <button
-          onClick={() => setActiveSettingsTab('main')}
-          className={cn(
-            "flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors",
-            activeSettingsTab === 'main'
-              ? "bg-background text-foreground shadow-sm"
-              : "text-muted-foreground hover:text-foreground hover:bg-background/50"
-          )}
-        >
-          <SettingsIcon className="w-4 h-4" />
-          Main
-        </button>
-        <button
-          onClick={() => setActiveSettingsTab('accounts')}
-          className={cn(
-            "flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors",
-            activeSettingsTab === 'accounts'
-              ? "bg-background text-foreground shadow-sm"
-              : "text-muted-foreground hover:text-foreground hover:bg-background/50"
-          )}
-        >
-          <Wallet className="w-4 h-4" />
-          Accounts
-        </button>
-        <button
-          onClick={() => setActiveSettingsTab('custom-tags')}
-          className={cn(
-            "flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors",
-            activeSettingsTab === 'custom-tags'
-              ? "bg-background text-foreground shadow-sm"
-              : "text-muted-foreground hover:text-foreground hover:bg-background/50"
-          )}
-        >
-          <Tag className="w-4 h-4" />
-          Custom Tags
-        </button>
-        <button
-          onClick={() => setActiveSettingsTab('trade-comments')}
-          className={cn(
-            "flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors",
-            activeSettingsTab === 'trade-comments'
-              ? "bg-background text-foreground shadow-sm"
-              : "text-muted-foreground hover:text-foreground hover:bg-background/50"
-          )}
-        >
-          <MessageSquare className="w-4 h-4" />
-          Trade Comments
-        </button>
-        <button
-          onClick={() => setActiveSettingsTab('symbol-tick')}
-          className={cn(
-            "flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors",
-            activeSettingsTab === 'symbol-tick'
-              ? "bg-background text-foreground shadow-sm"
-              : "text-muted-foreground hover:text-foreground hover:bg-background/50"
-          )}
-        >
-          <Ruler className="w-4 h-4" />
-          Symbol Tick / Pip
-        </button>
-        <button
-          onClick={() => setActiveSettingsTab('tpsl')}
-          className={cn(
-            "flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors",
-            activeSettingsTab === 'tpsl'
-              ? "bg-background text-foreground shadow-sm"
-              : "text-muted-foreground hover:text-foreground hover:bg-background/50"
-          )}
-        >
-          <Target className="w-4 h-4" />
-          TP / SL Settings
-        </button>
-        <button
-          onClick={() => setActiveSettingsTab('fees')}
-          className={cn(
-            "flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors",
-            activeSettingsTab === 'fees'
-              ? "bg-background text-foreground shadow-sm"
-              : "text-muted-foreground hover:text-foreground hover:bg-background/50"
-          )}
-        >
-          <DollarSign className="w-4 h-4" />
-          Fees Settings
-        </button>
-      </div>
-
       {/* Main Tab Content */}
       {activeSettingsTab === 'main' && (
         <>
@@ -743,6 +654,7 @@ const Settings = () => {
         );
       })()}
     </div>
+    </SettingsLayout>
   );
 };
 
