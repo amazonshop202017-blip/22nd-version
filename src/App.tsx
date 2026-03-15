@@ -106,7 +106,6 @@ const AuthenticatedApp = () => {
                                   <Route path="/chart-room/risk-distribution" element={<RiskDistribution />} />
                                   <Route path="/chart-room/trade-management" element={<TradeManagement />} />
                                   <Route path="/exit-analyzer" element={<ExitAnalyzer />} />
-                                  <Route path="/settings" element={<Settings />} />
                                   <Route path="/entering" element={<Navigate to="/" replace />} />
                                   <Route path="*" element={<NotFound />} />
                                 </Routes>
