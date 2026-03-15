@@ -277,11 +277,16 @@ const Settings = () => {
           {/* Account Import Modal */}
           <AccountImportModal open={showImportModal} onOpenChange={setShowImportModal} />
           
-          {/* New Account Modal */}
+          {/* Account Modal (New + Edit) */}
           <NewAccountModal
             open={showNewAccountModal}
-            onOpenChange={setShowNewAccountModal}
+            onOpenChange={(val) => {
+              setShowNewAccountModal(val);
+              if (!val) setEditingAccountData(null);
+            }}
             onCreateAccount={handleCreateAccount}
+            onUpdateAccount={handleUpdateAccount}
+            editingAccount={editingAccountData}
             currencySymbol={currencyConfig.symbol}
           />
 
