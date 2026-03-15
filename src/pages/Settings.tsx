@@ -655,6 +655,7 @@ const Settings = () => {
       })()}
     </div>
     </SettingsLayout>
+  );
 };
 
 export default Settings;
