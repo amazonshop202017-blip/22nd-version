@@ -512,13 +512,7 @@ const Settings = () => {
                                   <Button
                                     size="sm"
                                     variant="ghost"
-                                    onClick={() => {
-                                      if (window.confirm(`Are you sure you want to permanently delete "${account.name}"? This will also delete ALL trades and data associated with this account. This action cannot be undone.`)) {
-                                        deleteTradesByAccountId(account.id);
-                                        deleteTradesByAccountName(account.name);
-                                        deleteAccountPermanently(account.id);
-                                      }
-                                    }}
+                                    onClick={() => setDeleteTarget({ id: account.id, name: account.name })}
                                     className="text-loss hover:text-loss h-7 text-xs gap-1"
                                     title="Permanently delete"
                                   >
