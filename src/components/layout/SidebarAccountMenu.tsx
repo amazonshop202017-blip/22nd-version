@@ -17,6 +17,9 @@ export const SidebarAccountMenu = ({ isCollapsed }: { isCollapsed: boolean }) =>
 
   const isAccountActive = location.pathname === '/settings' || location.pathname === '/account';
 
+  // Get display name from email
+  const displayName = user?.email?.split('@')[0] || 'Account';
+
   return (
     <Popover>
       <Tooltip>
@@ -24,25 +27,31 @@ export const SidebarAccountMenu = ({ isCollapsed }: { isCollapsed: boolean }) =>
           <PopoverTrigger asChild>
             <motion.button
               className={cn(
-                "w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200",
-                isCollapsed ? "justify-center" : "",
-                isAccountActive
-                  ? "bg-primary text-primary-foreground shadow-lg"
-                  : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                "w-full flex items-center gap-3 rounded-2xl transition-all duration-200",
+                isCollapsed ? "justify-center p-2" : "px-3 py-3",
+                "bg-sidebar-accent/60 border border-sidebar-border/50 backdrop-blur-sm",
+                "hover:bg-sidebar-accent hover:border-sidebar-border"
               )}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
-              <CircleUser className="w-5 h-5 flex-shrink-0" />
+              <div className={cn(
+                "rounded-full bg-primary flex items-center justify-center flex-shrink-0",
+                isCollapsed ? "w-8 h-8" : "w-9 h-9"
+              )}>
+                <span className="text-xs font-bold text-primary-foreground uppercase">
+                  {displayName.slice(0, 2)}
+                </span>
+              </div>
               <AnimatePresence>
                 {!isCollapsed && (
                   <motion.span
                     initial={{ opacity: 0, width: 0 }}
                     animate={{ opacity: 1, width: 'auto' }}
                     exit={{ opacity: 0, width: 0 }}
-                    className="font-bold overflow-hidden whitespace-nowrap text-sm truncate"
+                    className="font-semibold overflow-hidden whitespace-nowrap text-sm truncate text-sidebar-foreground"
                   >
-                    {user?.email || 'Account'}
+                    {displayName}
                   </motion.span>
                 )}
               </AnimatePresence>
