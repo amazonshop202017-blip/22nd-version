@@ -101,7 +101,7 @@ export const NewAccountModal = ({ open, onOpenChange, onCreateAccount, currencyS
           </div>
         </DialogHeader>
 
-        <div className="space-y-5 py-2">
+        <div className="space-y-5 py-2 overflow-y-auto flex-1 min-h-0 pr-1">
           {/* Account Name */}
           <div className="space-y-2">
             <Label className="flex items-center gap-2 text-sm font-medium">
