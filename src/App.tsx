@@ -83,6 +83,7 @@ const AuthenticatedApp = () => {
                       <DiaryProvider>
                         <TradeModalProvider>
                           <Routes>
+                            <Route path="/settings" element={<Settings />} />
                             <Route path="/account/*" element={<Account />} />
                             <Route path="*" element={
                               <AppLayout>
