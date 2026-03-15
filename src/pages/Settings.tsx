@@ -82,10 +82,8 @@ const Settings = () => {
   const [activeTagsSubTab, setActiveTagsSubTab] = useState<'categories' | 'tags' | 'screenshot-tags'>('categories');
 
   // Account state
-  const [editingAccount, setEditingAccount] = useState<string | null>(null);
-  const [editAccountName, setEditAccountName] = useState('');
-  const [editAccountBalance, setEditAccountBalance] = useState('');
   const [showNewAccountModal, setShowNewAccountModal] = useState(false);
+  const [editingAccountData, setEditingAccountData] = useState<import('@/contexts/AccountsContext').Account | null>(null);
   // Deposit/Withdraw modal state
   const [depositWithdrawAccountId, setDepositWithdrawAccountId] = useState<string | null>(null);
 
@@ -95,11 +93,9 @@ const Settings = () => {
   // Archived accounts toggle
   const [showArchivedAccounts, setShowArchivedAccounts] = useState(false);
 
-
   const activeAccountsWithStats = getActiveAccountsWithStats();
   const archivedAccountsWithStats = getArchivedAccountsWithStats();
 
-  // Account handlers - new modal-based creation
   const handleCreateAccount = (data: {
     name: string;
     startingBalance: number;
@@ -109,25 +105,21 @@ const Settings = () => {
     addAccount(data.name, data.startingBalance, data.accountMode, data.propFirmSettings);
     toast.success(`Account "${data.name}" created`);
   };
-  const startEditingAccount = (account: { id: string; name: string; startingBalance: number }) => {
-    setEditingAccount(account.id);
-    setEditAccountName(account.name);
-    setEditAccountBalance(account.startingBalance.toString());
+
+  const handleUpdateAccount = (data: {
+    id: string;
+    name: string;
+    startingBalance: number;
+    accountMode: import('@/contexts/AccountsContext').AccountMode;
+    propFirmSettings?: import('@/contexts/AccountsContext').PropFirmSettings;
+  }) => {
+    updateAccount(data.id, data.name, data.startingBalance, data.accountMode, data.propFirmSettings);
+    toast.success(`Account "${data.name}" updated`);
   };
 
-  const saveAccountEdit = () => {
-    if (editingAccount && editAccountName.trim()) {
-      updateAccount(editingAccount, editAccountName.trim(), parseFloat(editAccountBalance) || 0);
-    }
-    setEditingAccount(null);
-    setEditAccountName('');
-    setEditAccountBalance('');
-  };
-
-  const cancelAccountEdit = () => {
-    setEditingAccount(null);
-    setEditAccountName('');
-    setEditAccountBalance('');
+  const startEditingAccount = (account: import('@/contexts/AccountsContext').Account) => {
+    setEditingAccountData(account);
+    setShowNewAccountModal(true);
   };
 
   return (
@@ -285,11 +277,16 @@ const Settings = () => {
           {/* Account Import Modal */}
           <AccountImportModal open={showImportModal} onOpenChange={setShowImportModal} />
           
-          {/* New Account Modal */}
+          {/* Account Modal (New + Edit) */}
           <NewAccountModal
             open={showNewAccountModal}
-            onOpenChange={setShowNewAccountModal}
+            onOpenChange={(val) => {
+              setShowNewAccountModal(val);
+              if (!val) setEditingAccountData(null);
+            }}
             onCreateAccount={handleCreateAccount}
+            onUpdateAccount={handleUpdateAccount}
+            editingAccount={editingAccountData}
             currencySymbol={currencyConfig.symbol}
           />
 
@@ -324,100 +321,68 @@ const Settings = () => {
                         exit={{ opacity: 0, x: -20 }}
                         className="flex items-center justify-between p-4 bg-input rounded-lg border border-border"
                       >
-                        {editingAccount === account.id ? (
-                          <div className="flex items-center gap-2 flex-1">
-                            <Input
-                              value={editAccountName}
-                              onChange={(e) => setEditAccountName(e.target.value)}
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter') saveAccountEdit();
-                                if (e.key === 'Escape') cancelAccountEdit();
-                              }}
-                              className="bg-background border-border h-8 flex-1"
-                              autoFocus
-                            />
-                            <div className="relative">
-                              <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">{currencyConfig.symbol}</span>
-                              <Input
-                                type="number"
-                                value={editAccountBalance}
-                                onChange={(e) => setEditAccountBalance(e.target.value)}
-                                className="bg-background border-border h-8 w-32 pl-6"
-                              />
-                            </div>
-                            <Button size="sm" variant="ghost" onClick={saveAccountEdit}>
-                              <Check className="w-4 h-4 text-profit" />
-                            </Button>
-                            <Button size="sm" variant="ghost" onClick={cancelAccountEdit}>
-                              <X className="w-4 h-4 text-loss" />
-                            </Button>
+                        <div className="flex items-center gap-4 flex-1">
+                          <div className="flex items-center gap-3">
+                            <div className="w-2 h-2 rounded-full bg-primary" />
+                            <span className="font-medium">{account.name}</span>
                           </div>
-                        ) : (
-                          <>
-                            <div className="flex items-center gap-4 flex-1">
-                              <div className="flex items-center gap-3">
-                                <div className="w-2 h-2 rounded-full bg-primary" />
-                                <span className="font-medium">{account.name}</span>
-                              </div>
-                              <div className="flex items-center gap-6 text-sm">
-                                <div className="text-muted-foreground">
-                                  <span className="text-xs">Starting:</span>{' '}
-                                  <span className="font-mono text-foreground">{currencyConfig.symbol}{account.startingBalance.toLocaleString()}</span>
-                                </div>
-                                <div className="text-muted-foreground">
-                                  <span className="text-xs">Current:</span>{' '}
-                                  <span className="font-mono text-foreground">{currencyConfig.symbol}{account.currentBalance.toLocaleString()}</span>
-                                </div>
-                                <div className={cn(
-                                  "flex items-center gap-1",
-                                  account.pnl >= 0 ? "text-profit" : "text-loss"
-                                )}>
-                                  {account.pnl >= 0 ? (
-                                    <TrendingUp className="w-3 h-3" />
-                                  ) : (
-                                    <TrendingDown className="w-3 h-3" />
-                                  )}
-                                  <span className="font-mono text-sm">
-                                    {account.roi >= 0 ? '+' : ''}{account.roi.toFixed(2)}%
-                                  </span>
-                                </div>
-                              </div>
+                          <div className="flex items-center gap-6 text-sm">
+                            <div className="text-muted-foreground">
+                              <span className="text-xs">Starting:</span>{' '}
+                              <span className="font-mono text-foreground">{currencyConfig.symbol}{account.startingBalance.toLocaleString()}</span>
                             </div>
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
-                                  <MoreVertical className="w-4 h-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end" className="bg-popover border-border z-50 w-48">
-                                <DropdownMenuItem onClick={() => setShowImportModal(true)} className="cursor-pointer">
-                                  <Download className="w-4 h-4 mr-2" />
-                                  Import
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => setDepositWithdrawAccountId(account.id)} className="cursor-pointer">
-                                  <DollarSign className="w-4 h-4 mr-2" />
-                                  Deposit / Withdraw
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => startEditingAccount(account)} className="cursor-pointer">
-                                  <Edit2 className="w-4 h-4 mr-2" />
-                                  Edit
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => archiveAccount(account.id)} className="cursor-pointer">
-                                  <Archive className="w-4 h-4 mr-2" />
-                                  Archive
-                                </DropdownMenuItem>
-                                <DropdownMenuItem disabled className="cursor-not-allowed opacity-50">
-                                  <ArrowRightLeft className="w-4 h-4 mr-2" />
-                                  Transfer All Data
-                                </DropdownMenuItem>
-                                <DropdownMenuItem disabled className="cursor-not-allowed opacity-50">
-                                  <Eraser className="w-4 h-4 mr-2" />
-                                  Clear Trades
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </>
-                        )}
+                            <div className="text-muted-foreground">
+                              <span className="text-xs">Current:</span>{' '}
+                              <span className="font-mono text-foreground">{currencyConfig.symbol}{account.currentBalance.toLocaleString()}</span>
+                            </div>
+                            <div className={cn(
+                              "flex items-center gap-1",
+                              account.pnl >= 0 ? "text-profit" : "text-loss"
+                            )}>
+                              {account.pnl >= 0 ? (
+                                <TrendingUp className="w-3 h-3" />
+                              ) : (
+                                <TrendingDown className="w-3 h-3" />
+                              )}
+                              <span className="font-mono text-sm">
+                                {account.roi >= 0 ? '+' : ''}{account.roi.toFixed(2)}%
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
+                              <MoreVertical className="w-4 h-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="bg-popover border-border z-50 w-48">
+                            <DropdownMenuItem onClick={() => setShowImportModal(true)} className="cursor-pointer">
+                              <Download className="w-4 h-4 mr-2" />
+                              Import
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setDepositWithdrawAccountId(account.id)} className="cursor-pointer">
+                              <DollarSign className="w-4 h-4 mr-2" />
+                              Deposit / Withdraw
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => startEditingAccount(account)} className="cursor-pointer">
+                              <Edit2 className="w-4 h-4 mr-2" />
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => archiveAccount(account.id)} className="cursor-pointer">
+                              <Archive className="w-4 h-4 mr-2" />
+                              Archive
+                            </DropdownMenuItem>
+                            <DropdownMenuItem disabled className="cursor-not-allowed opacity-50">
+                              <ArrowRightLeft className="w-4 h-4 mr-2" />
+                              Transfer All Data
+                            </DropdownMenuItem>
+                            <DropdownMenuItem disabled className="cursor-not-allowed opacity-50">
+                              <Eraser className="w-4 h-4 mr-2" />
+                              Clear Trades
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </motion.div>
                     ))}
                   </AnimatePresence>

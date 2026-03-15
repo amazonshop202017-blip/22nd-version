@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Plus, Wallet } from 'lucide-react';
+import { Plus, Wallet, Save } from 'lucide-react';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from '@/components/ui/dialog';
@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
-import type { AccountMode, PropFirmStep, DrawdownType } from '@/contexts/AccountsContext';
+import type { Account, AccountMode, PropFirmStep, DrawdownType } from '@/contexts/AccountsContext';
 
 interface PhaseData {
   targetPercent: string;
@@ -44,6 +44,20 @@ interface NewAccountModalProps {
       drawdownType: DrawdownType;
     };
   }) => void;
+  onUpdateAccount?: (data: {
+    id: string;
+    name: string;
+    startingBalance: number;
+    accountMode: AccountMode;
+    propFirmSettings?: {
+      step: PropFirmStep;
+      targetPercent: number;
+      totalDrawdownPercent: number;
+      dailyDrawdownPercent: number;
+      drawdownType: DrawdownType;
+    };
+  }) => void;
+  editingAccount?: Account | null;
   currencySymbol: string;
 }
 
@@ -61,7 +75,8 @@ const drawdownOptions: { value: DrawdownType; label: string }[] = [
   { value: 'eod', label: 'EOD' },
 ];
 
-export const NewAccountModal = ({ open, onOpenChange, onCreateAccount, currencySymbol }: NewAccountModalProps) => {
+export const NewAccountModal = ({ open, onOpenChange, onCreateAccount, onUpdateAccount, editingAccount, currencySymbol }: NewAccountModalProps) => {
+  const isEditing = !!editingAccount;
   const [name, setName] = useState('');
   const [balance, setBalance] = useState('');
   const [mode, setMode] = useState<AccountMode>('normal');
@@ -89,6 +104,34 @@ export const NewAccountModal = ({ open, onOpenChange, onCreateAccount, currencyS
     }
   }, [activeTab, mode, open]);
 
+  // Pre-fill form when editing
+  useEffect(() => {
+    if (open && editingAccount) {
+      setName(editingAccount.name);
+      setBalance(editingAccount.startingBalance.toString());
+      setMode(editingAccount.accountMode || 'normal');
+      if (editingAccount.propFirmSettings) {
+        const ps = editingAccount.propFirmSettings;
+        const phaseData: PhaseData = {
+          targetPercent: ps.targetPercent ? ps.targetPercent.toString() : '',
+          totalDrawdown: ps.totalDrawdownPercent ? ps.totalDrawdownPercent.toString() : '',
+          dailyDrawdown: ps.dailyDrawdownPercent ? ps.dailyDrawdownPercent.toString() : '',
+          drawdownType: ps.drawdownType || 'static',
+        };
+        if (ps.step === 'instant') {
+          setInstantData(phaseData);
+          setActiveTab('instant');
+        } else if (ps.step === 'step2') {
+          setStep2Data(phaseData);
+          setActiveTab('step2');
+        } else {
+          setStep1Data(phaseData);
+          setActiveTab('step1');
+        }
+      }
+    }
+  }, [open, editingAccount]);
+
   const resetForm = () => {
     setName('');
     setBalance('');
@@ -113,7 +156,7 @@ export const NewAccountModal = ({ open, onOpenChange, onCreateAccount, currencyS
 
   const canCreate = name.trim() && balance && parseFloat(balance) >= 0;
 
-  const handleCreate = () => {
+  const handleSubmit = () => {
     if (!canCreate) return;
 
     let propFirmSettings;
@@ -127,7 +170,6 @@ export const NewAccountModal = ({ open, onOpenChange, onCreateAccount, currencyS
           drawdownType: instantData.drawdownType,
         };
       } else {
-        // Use the highest filled phase
         const isStep2Filled = isPhaseFilled(step2Data);
         const data = isStep2Filled ? step2Data : step1Data;
         propFirmSettings = {
@@ -140,12 +182,18 @@ export const NewAccountModal = ({ open, onOpenChange, onCreateAccount, currencyS
       }
     }
 
-    onCreateAccount({
+    const accountData = {
       name: name.trim(),
       startingBalance: parseFloat(balance) || 0,
       accountMode: mode,
       ...(propFirmSettings && { propFirmSettings }),
-    });
+    };
+
+    if (isEditing && editingAccount && onUpdateAccount) {
+      onUpdateAccount({ id: editingAccount.id, ...accountData });
+    } else {
+      onCreateAccount(accountData);
+    }
     handleOpenChange(false);
   };
 
@@ -244,12 +292,12 @@ export const NewAccountModal = ({ open, onOpenChange, onCreateAccount, currencyS
       <DialogContent className="sm:max-w-md max-h-[85vh] flex flex-col">
         <DialogHeader className="gap-3">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-              <Plus className="h-5 w-5 text-primary" />
+            <div className={cn("flex h-10 w-10 items-center justify-center rounded-full", isEditing ? "bg-accent/10" : "bg-primary/10")}>
+              {isEditing ? <Save className="h-5 w-5 text-accent" /> : <Plus className="h-5 w-5 text-primary" />}
             </div>
             <div>
-              <DialogTitle>Add New Account</DialogTitle>
-              <DialogDescription>Set up your trading account</DialogDescription>
+              <DialogTitle>{isEditing ? 'Edit Account' : 'Add New Account'}</DialogTitle>
+              <DialogDescription>{isEditing ? 'Update your trading account details' : 'Set up your trading account'}</DialogDescription>
             </div>
           </div>
         </DialogHeader>
@@ -391,15 +439,15 @@ export const NewAccountModal = ({ open, onOpenChange, onCreateAccount, currencyS
 
         <DialogFooter>
           <Button
-            onClick={handleCreate}
+            onClick={handleSubmit}
             disabled={!canCreate}
             className={cn(
               "w-full gap-2",
               mode === 'propfirm' && "bg-propfirm text-propfirm-foreground hover:bg-propfirm/90"
             )}
           >
-            <Plus className="h-4 w-4" />
-            Create Account
+            {isEditing ? <Save className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+            {isEditing ? 'Save Changes' : 'Create Account'}
           </Button>
         </DialogFooter>
       </DialogContent>
