@@ -353,7 +353,7 @@ export const NewAccountModal = ({ open, onOpenChange, onCreateAccount, currencyS
                         className={cn(
                           "relative z-10 flex-1 py-2 rounded-md text-sm font-medium transition-colors duration-200",
                           isActive
-                            ? "text-primary-foreground"
+                            ? "text-propfirm-foreground"
                             : disabled
                               ? "text-muted-foreground/40 cursor-not-allowed"
                               : "text-muted-foreground hover:text-foreground"
