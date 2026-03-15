@@ -651,6 +651,20 @@ const Settings = () => {
       })()}
     </div>
     </SettingsLayout>
+
+    <DeleteAccountDialog
+      open={!!deleteTarget}
+      onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}
+      accountName={deleteTarget?.name ?? ''}
+      onConfirm={() => {
+        if (deleteTarget) {
+          deleteTradesByAccountId(deleteTarget.id);
+          deleteTradesByAccountName(deleteTarget.name);
+          deleteAccountPermanently(deleteTarget.id);
+          setDeleteTarget(null);
+        }
+      }}
+    />
   );
 };
 
