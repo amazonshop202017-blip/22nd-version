@@ -44,6 +44,20 @@ interface NewAccountModalProps {
       drawdownType: DrawdownType;
     };
   }) => void;
+  onUpdateAccount?: (data: {
+    id: string;
+    name: string;
+    startingBalance: number;
+    accountMode: AccountMode;
+    propFirmSettings?: {
+      step: PropFirmStep;
+      targetPercent: number;
+      totalDrawdownPercent: number;
+      dailyDrawdownPercent: number;
+      drawdownType: DrawdownType;
+    };
+  }) => void;
+  editingAccount?: Account | null;
   currencySymbol: string;
 }
 
