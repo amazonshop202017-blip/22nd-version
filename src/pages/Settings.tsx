@@ -137,6 +137,7 @@ const Settings = () => {
   };
 
   return (
+    <>
     <SettingsLayout activeTab={activeSettingsTab} onTabChange={setActiveSettingsTab}>
     <div className="space-y-8 animate-fade-in">
       {/* Main Tab Content */}
