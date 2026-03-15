@@ -4,7 +4,9 @@ import { Trade } from '@/types/trade';
 interface TradeModalContextType {
   isOpen: boolean;
   editingTrade: Trade | null;
+  initialEntryDate: string | null;
   openModal: (trade?: Trade) => void;
+  openModalWithDate: (entryDate: string) => void;
   closeModal: () => void;
 }
 
@@ -13,19 +15,28 @@ const TradeModalContext = createContext<TradeModalContextType | undefined>(undef
 export const TradeModalProvider = ({ children }: { children: ReactNode }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [editingTrade, setEditingTrade] = useState<Trade | null>(null);
+  const [initialEntryDate, setInitialEntryDate] = useState<string | null>(null);
 
   const openModal = (trade?: Trade) => {
     setEditingTrade(trade || null);
+    setInitialEntryDate(null);
+    setIsOpen(true);
+  };
+
+  const openModalWithDate = (entryDate: string) => {
+    setEditingTrade(null);
+    setInitialEntryDate(entryDate);
     setIsOpen(true);
   };
 
   const closeModal = () => {
     setIsOpen(false);
     setEditingTrade(null);
+    setInitialEntryDate(null);
   };
 
   return (
-    <TradeModalContext.Provider value={{ isOpen, editingTrade, openModal, closeModal }}>
+    <TradeModalContext.Provider value={{ isOpen, editingTrade, initialEntryDate, openModal, openModalWithDate, closeModal }}>
       {children}
     </TradeModalContext.Provider>
   );
