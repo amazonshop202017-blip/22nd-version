@@ -2,12 +2,26 @@ import { createContext, useContext, useState, useEffect, ReactNode, useCallback 
 import { useTradesContext } from './TradesContext';
 import { calculateTradeMetrics } from '@/types/trade';
 
+export type AccountMode = 'normal' | 'propfirm';
+export type PropFirmStep = 'step1' | 'step2' | 'instant';
+export type DrawdownType = 'static' | 'live' | 'eod';
+
+export interface PropFirmSettings {
+  step: PropFirmStep;
+  targetPercent: number;
+  totalDrawdownPercent: number;
+  dailyDrawdownPercent: number;
+  drawdownType: DrawdownType;
+}
+
 export interface Account {
   id: string;
   name: string;
   startingBalance: number;
   createdAt: string;
   isArchived?: boolean;
+  accountMode: AccountMode;
+  propFirmSettings?: PropFirmSettings;
 }
 
 export interface Transaction {
