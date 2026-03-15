@@ -35,7 +35,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
-const Settings = () => {
+const [searchParams, setSearchParams] = useSearchParams();
   const { accounts, addAccount, updateAccount, getActiveAccountsWithStats, getArchivedAccountsWithStats, archiveAccount, unarchiveAccount, deleteAccountPermanently, addTransaction, getTransactionsForAccount } = useAccountsContext();
   const { trades, deleteTradesByAccountId, deleteTradesByAccountName } = useTradesContext();
   const { logout } = useAuth();
