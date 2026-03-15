@@ -321,100 +321,68 @@ const Settings = () => {
                         exit={{ opacity: 0, x: -20 }}
                         className="flex items-center justify-between p-4 bg-input rounded-lg border border-border"
                       >
-                        {editingAccount === account.id ? (
-                          <div className="flex items-center gap-2 flex-1">
-                            <Input
-                              value={editAccountName}
-                              onChange={(e) => setEditAccountName(e.target.value)}
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter') saveAccountEdit();
-                                if (e.key === 'Escape') cancelAccountEdit();
-                              }}
-                              className="bg-background border-border h-8 flex-1"
-                              autoFocus
-                            />
-                            <div className="relative">
-                              <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">{currencyConfig.symbol}</span>
-                              <Input
-                                type="number"
-                                value={editAccountBalance}
-                                onChange={(e) => setEditAccountBalance(e.target.value)}
-                                className="bg-background border-border h-8 w-32 pl-6"
-                              />
-                            </div>
-                            <Button size="sm" variant="ghost" onClick={saveAccountEdit}>
-                              <Check className="w-4 h-4 text-profit" />
-                            </Button>
-                            <Button size="sm" variant="ghost" onClick={cancelAccountEdit}>
-                              <X className="w-4 h-4 text-loss" />
-                            </Button>
+                        <div className="flex items-center gap-4 flex-1">
+                          <div className="flex items-center gap-3">
+                            <div className="w-2 h-2 rounded-full bg-primary" />
+                            <span className="font-medium">{account.name}</span>
                           </div>
-                        ) : (
-                          <>
-                            <div className="flex items-center gap-4 flex-1">
-                              <div className="flex items-center gap-3">
-                                <div className="w-2 h-2 rounded-full bg-primary" />
-                                <span className="font-medium">{account.name}</span>
-                              </div>
-                              <div className="flex items-center gap-6 text-sm">
-                                <div className="text-muted-foreground">
-                                  <span className="text-xs">Starting:</span>{' '}
-                                  <span className="font-mono text-foreground">{currencyConfig.symbol}{account.startingBalance.toLocaleString()}</span>
-                                </div>
-                                <div className="text-muted-foreground">
-                                  <span className="text-xs">Current:</span>{' '}
-                                  <span className="font-mono text-foreground">{currencyConfig.symbol}{account.currentBalance.toLocaleString()}</span>
-                                </div>
-                                <div className={cn(
-                                  "flex items-center gap-1",
-                                  account.pnl >= 0 ? "text-profit" : "text-loss"
-                                )}>
-                                  {account.pnl >= 0 ? (
-                                    <TrendingUp className="w-3 h-3" />
-                                  ) : (
-                                    <TrendingDown className="w-3 h-3" />
-                                  )}
-                                  <span className="font-mono text-sm">
-                                    {account.roi >= 0 ? '+' : ''}{account.roi.toFixed(2)}%
-                                  </span>
-                                </div>
-                              </div>
+                          <div className="flex items-center gap-6 text-sm">
+                            <div className="text-muted-foreground">
+                              <span className="text-xs">Starting:</span>{' '}
+                              <span className="font-mono text-foreground">{currencyConfig.symbol}{account.startingBalance.toLocaleString()}</span>
                             </div>
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
-                                  <MoreVertical className="w-4 h-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end" className="bg-popover border-border z-50 w-48">
-                                <DropdownMenuItem onClick={() => setShowImportModal(true)} className="cursor-pointer">
-                                  <Download className="w-4 h-4 mr-2" />
-                                  Import
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => setDepositWithdrawAccountId(account.id)} className="cursor-pointer">
-                                  <DollarSign className="w-4 h-4 mr-2" />
-                                  Deposit / Withdraw
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => startEditingAccount(account)} className="cursor-pointer">
-                                  <Edit2 className="w-4 h-4 mr-2" />
-                                  Edit
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => archiveAccount(account.id)} className="cursor-pointer">
-                                  <Archive className="w-4 h-4 mr-2" />
-                                  Archive
-                                </DropdownMenuItem>
-                                <DropdownMenuItem disabled className="cursor-not-allowed opacity-50">
-                                  <ArrowRightLeft className="w-4 h-4 mr-2" />
-                                  Transfer All Data
-                                </DropdownMenuItem>
-                                <DropdownMenuItem disabled className="cursor-not-allowed opacity-50">
-                                  <Eraser className="w-4 h-4 mr-2" />
-                                  Clear Trades
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </>
-                        )}
+                            <div className="text-muted-foreground">
+                              <span className="text-xs">Current:</span>{' '}
+                              <span className="font-mono text-foreground">{currencyConfig.symbol}{account.currentBalance.toLocaleString()}</span>
+                            </div>
+                            <div className={cn(
+                              "flex items-center gap-1",
+                              account.pnl >= 0 ? "text-profit" : "text-loss"
+                            )}>
+                              {account.pnl >= 0 ? (
+                                <TrendingUp className="w-3 h-3" />
+                              ) : (
+                                <TrendingDown className="w-3 h-3" />
+                              )}
+                              <span className="font-mono text-sm">
+                                {account.roi >= 0 ? '+' : ''}{account.roi.toFixed(2)}%
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
+                              <MoreVertical className="w-4 h-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="bg-popover border-border z-50 w-48">
+                            <DropdownMenuItem onClick={() => setShowImportModal(true)} className="cursor-pointer">
+                              <Download className="w-4 h-4 mr-2" />
+                              Import
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setDepositWithdrawAccountId(account.id)} className="cursor-pointer">
+                              <DollarSign className="w-4 h-4 mr-2" />
+                              Deposit / Withdraw
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => startEditingAccount(account)} className="cursor-pointer">
+                              <Edit2 className="w-4 h-4 mr-2" />
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => archiveAccount(account.id)} className="cursor-pointer">
+                              <Archive className="w-4 h-4 mr-2" />
+                              Archive
+                            </DropdownMenuItem>
+                            <DropdownMenuItem disabled className="cursor-not-allowed opacity-50">
+                              <ArrowRightLeft className="w-4 h-4 mr-2" />
+                              Transfer All Data
+                            </DropdownMenuItem>
+                            <DropdownMenuItem disabled className="cursor-not-allowed opacity-50">
+                              <Eraser className="w-4 h-4 mr-2" />
+                              Clear Trades
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </motion.div>
                     ))}
                   </AnimatePresence>
