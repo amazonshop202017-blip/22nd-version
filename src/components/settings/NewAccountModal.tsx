@@ -439,15 +439,15 @@ export const NewAccountModal = ({ open, onOpenChange, onCreateAccount, onUpdateA
 
         <DialogFooter>
           <Button
-            onClick={handleCreate}
+            onClick={handleSubmit}
             disabled={!canCreate}
             className={cn(
               "w-full gap-2",
               mode === 'propfirm' && "bg-propfirm text-propfirm-foreground hover:bg-propfirm/90"
             )}
           >
-            <Plus className="h-4 w-4" />
-            Create Account
+            {isEditing ? <Save className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+            {isEditing ? 'Save Changes' : 'Create Account'}
           </Button>
         </DialogFooter>
       </DialogContent>
