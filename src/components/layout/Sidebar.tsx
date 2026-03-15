@@ -56,10 +56,24 @@ export const Sidebar = () => {
   return (
     <aside 
       className={cn(
-        "fixed left-0 top-0 h-screen bg-sidebar border-r border-sidebar-border flex flex-col z-40 transition-all duration-300",
+        "fixed left-0 top-0 h-screen bg-sidebar border-r border-sidebar-border flex flex-col z-40 transition-all duration-300 rounded-r-2xl",
         isCollapsed ? "w-16" : "w-52"
       )}
     >
+      {/* Collapse/Expand toggle on the right edge */}
+      <motion.button
+        onClick={() => setIsCollapsed(!isCollapsed)}
+        className="absolute -right-3.5 top-8 z-50 w-7 h-7 rounded-full bg-sidebar border border-sidebar-border shadow-md flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-sidebar-accent transition-colors duration-200"
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+      >
+        {isCollapsed ? (
+          <ChevronRight className="w-4 h-4" />
+        ) : (
+          <ChevronLeft className="w-4 h-4" />
+        )}
+      </motion.button>
+
       {/* Logo Section */}
       <div className="p-4 border-b border-sidebar-border">
         <div className="flex flex-col items-center justify-center">
@@ -340,28 +354,6 @@ export const Sidebar = () => {
           <Separator className="bg-sidebar-border/50" />
         </div>
         <SidebarAccountMenu isCollapsed={isCollapsed} />
-      </div>
-
-      {/* Collapse Button */}
-      <div className="p-4 border-t border-sidebar-border">
-        <motion.button
-          onClick={() => setIsCollapsed(!isCollapsed)}
-          className={cn(
-            "w-full flex items-center gap-3 px-3 py-2 rounded-xl text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-all duration-200",
-            isCollapsed ? "justify-center" : ""
-          )}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-        >
-          {isCollapsed ? (
-            <ChevronRight className="w-5 h-5" />
-          ) : (
-            <>
-              <ChevronLeft className="w-5 h-5" />
-              <span className="text-sm font-medium">Collapse</span>
-            </>
-          )}
-        </motion.button>
       </div>
     </aside>
   );
