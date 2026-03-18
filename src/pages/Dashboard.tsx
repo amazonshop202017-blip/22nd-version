@@ -4,6 +4,7 @@ import {
   closestCenter,
   KeyboardSensor,
   PointerSensor,
+  TouchSensor,
   useSensor,
   useSensors,
   DragEndEvent,
@@ -93,6 +94,12 @@ const Dashboard = () => {
         distance: 8,
       },
     }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 200,
+        tolerance: 8,
+      },
+    }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
@@ -132,16 +139,16 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 md:space-y-8">
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex items-center justify-between"
+        className="flex items-center justify-between gap-2"
       >
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 md:gap-3 min-w-0">
           <PageHeader title="Dashboard" tooltip="Your trading overview — track net P&L, win rates, and key metrics at a glance." />
           {isEditMode && (
-            <span className="text-xs text-muted-foreground bg-secondary px-2 py-1 rounded">
+            <span className="text-xs text-muted-foreground bg-secondary px-2 py-1 rounded hidden sm:inline">
               Drag charts to reorder
             </span>
           )}
@@ -149,11 +156,11 @@ const Dashboard = () => {
         <Button
           variant={isEditMode ? "default" : "ghost"}
           size="sm"
-          className="h-8 gap-1.5 px-3"
+          className="h-8 gap-1.5 px-3 flex-shrink-0"
           onClick={() => setIsEditMode(!isEditMode)}
         >
           {isEditMode ? <Check className="h-4 w-4" /> : <Pencil className="h-4 w-4" />}
-          <span className="text-sm">{isEditMode ? 'Done' : 'Edit'}</span>
+          <span className="text-sm hidden sm:inline">{isEditMode ? 'Done' : 'Edit'}</span>
         </Button>
       </motion.div>
 
@@ -167,7 +174,7 @@ const Dashboard = () => {
         onDragEnd={handleDragEnd}
       >
         <SortableContext items={chartOrder} strategy={rectSortingStrategy}>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
             {chartOrder.map((chartId) => {
               const config = CHART_CONFIGS[chartId];
               if (!config) return null;

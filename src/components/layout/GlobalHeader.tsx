@@ -337,7 +337,7 @@ export const GlobalHeader = () => {
   }, [selectedSymbols, selectedOutcomes, selectedHours, selectedSetups, selectedChecklistItems, selectedDays, lastTradesFilter, selectedDirections, selectedReturnRanges, selectedRMultipleRanges, selectedYear]);
 
   return (
-    <div className="flex items-center gap-3 px-8 py-4 border-b border-border bg-card/50 backdrop-blur-sm">
+    <div className="flex items-center gap-2 md:gap-3 px-4 md:px-8 py-3 md:py-4 border-b border-border bg-card/50 backdrop-blur-sm overflow-x-auto pl-14 md:pl-4">
       {/* Basic Filters Dropdown */}
       <DropdownMenu open={basicFiltersOpen} onOpenChange={setBasicFiltersOpen}>
         <DropdownMenuTrigger asChild>
@@ -352,10 +352,10 @@ export const GlobalHeader = () => {
             <ChevronDown className="w-4 h-4 text-muted-foreground" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-[900px] p-4 bg-popover border-border z-50">
+        <DropdownMenuContent align="start" className="w-[calc(100vw-2rem)] md:w-[900px] p-4 bg-popover border-border z-50 max-h-[80vh] overflow-auto">
           <div className="space-y-4">
             {/* Row 1: Core Trade Context - Symbol, Setup, Checklist of Setup, Outcome, Direction, Starred */}
-            <div className="grid grid-cols-6 gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
               {/* Symbol - Multi-select from trades */}
               <div className="space-y-1.5">
                 <label className="text-xs text-muted-foreground flex items-center gap-1.5">
@@ -619,7 +619,7 @@ export const GlobalHeader = () => {
             </div>
 
             {/* Row 2: Time Context - Year, Month, Day, Hour, Last Trades, (empty) */}
-            <div className="grid grid-cols-6 gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
               {/* Year - Calendar-style year picker */}
               <div className="space-y-1.5">
                 <label className="text-xs text-muted-foreground flex items-center gap-1.5">
@@ -839,7 +839,7 @@ export const GlobalHeader = () => {
             </div>
 
             {/* Row 3: Performance Filters - Return %, R-Multiple Gain, RRR, (empty), (empty), (empty) */}
-            <div className="grid grid-cols-6 gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
               {/* Return % - Multi-select */}
               <div className="space-y-1.5">
                 <label className="text-xs text-muted-foreground flex items-center gap-1.5">

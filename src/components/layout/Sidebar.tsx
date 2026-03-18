@@ -83,9 +83,11 @@ const NavItem = ({ icon: Icon, label, path, isCollapsed, isActive }: {
 interface SidebarProps {
   isCollapsed: boolean;
   setIsCollapsed: (collapsed: boolean) => void;
+  isMobileOpen?: boolean;
+  onMobileClose?: () => void;
 }
 
-export const Sidebar = ({ isCollapsed, setIsCollapsed }: SidebarProps) => {
+export const Sidebar = ({ isCollapsed, setIsCollapsed, isMobileOpen = false, onMobileClose }: SidebarProps) => {
   const location = useLocation();
   const { openModal } = useTradeModal();
   const [chartRoomOpen, setChartRoomOpen] = useState(
@@ -98,13 +100,16 @@ export const Sidebar = ({ isCollapsed, setIsCollapsed }: SidebarProps) => {
     <aside
       className={cn(
         "fixed left-0 top-0 h-screen bg-sidebar border-r border-sidebar-border flex flex-col z-40 transition-all duration-300",
-        isCollapsed ? "w-16" : "w-52"
+        isCollapsed ? "w-16" : "w-52",
+        // Mobile: hidden by default, shown when isMobileOpen
+        "max-md:-translate-x-full max-md:w-52",
+        isMobileOpen && "max-md:translate-x-0"
       )}
     >
-      {/* Collapse/Expand toggle */}
+      {/* Collapse/Expand toggle - hidden on mobile */}
       <motion.button
         onClick={() => setIsCollapsed(!isCollapsed)}
-        className="absolute -right-3.5 top-8 z-50 w-7 h-7 rounded-full bg-sidebar border border-sidebar-border shadow-md flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-sidebar-accent transition-colors duration-200"
+        className="absolute -right-3.5 top-8 z-50 w-7 h-7 rounded-full bg-sidebar border border-sidebar-border shadow-md flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-sidebar-accent transition-colors duration-200 hidden md:flex"
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
       >
