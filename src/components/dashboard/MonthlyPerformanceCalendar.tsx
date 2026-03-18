@@ -217,7 +217,7 @@ export const MonthlyPerformanceCalendar = () => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="glass-card rounded-xl p-6 h-full"
+      className="glass-card rounded-xl p-3 md:p-6 h-full"
     >
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4 md:mb-6">
