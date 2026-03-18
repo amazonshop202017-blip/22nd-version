@@ -105,14 +105,14 @@ export const SharedNavbar = () => {
               onMouseEnter={e => (e.currentTarget.style.color = '#8A8A8A')}
               onMouseLeave={e => (e.currentTarget.style.color = '#0F0F0F')}
             >
-              Create account
+              Sign In
             </Link>
             <Link
               to="/entering"
               className="text-sm font-semibold px-5 py-2 rounded-xl transition-colors"
               style={{ background: '#0F0F0F', color: '#FFFFFF' }}
             >
-              Sign In
+              Get Started
             </Link>
           </div>
 
