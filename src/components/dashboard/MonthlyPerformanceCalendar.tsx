@@ -220,47 +220,46 @@ export const MonthlyPerformanceCalendar = () => {
       className="glass-card rounded-xl p-6 h-full"
     >
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={handlePrevMonth} className="h-8 w-8">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4 md:mb-6">
+        <div className="flex items-center gap-2 md:gap-3">
+          <Button variant="ghost" size="icon" onClick={handlePrevMonth} className="h-7 w-7 md:h-8 md:w-8">
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <h2 className="text-lg font-semibold min-w-[140px] text-center">
+          <h2 className="text-sm md:text-lg font-semibold min-w-[120px] md:min-w-[140px] text-center">
             {format(currentMonth, 'MMMM yyyy')}
           </h2>
-          <Button variant="ghost" size="icon" onClick={handleNextMonth} className="h-8 w-8">
+          <Button variant="ghost" size="icon" onClick={handleNextMonth} className="h-7 w-7 md:h-8 md:w-8">
             <ChevronRight className="h-4 w-4" />
           </Button>
-          <Button variant="outline" size="sm" onClick={handleThisMonth} className="text-xs">
+          <Button variant="outline" size="sm" onClick={handleThisMonth} className="text-xs h-7">
             This month
           </Button>
         </div>
 
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-3 text-sm">
-            <span className="text-muted-foreground">Monthly stats:</span>
+        <div className="flex items-center gap-2 md:gap-4 w-full sm:w-auto">
+          <div className="flex items-center gap-2 md:gap-3 text-xs md:text-sm flex-wrap">
             <span className={`font-mono font-semibold ${isPrivacyMode ? 'text-foreground' : monthlyStats.pnl >= 0 ? 'profit-text' : 'loss-text'}`}>
               {formatCurrencyDecimal(monthlyStats.pnl)}
             </span>
-            <span className="bg-secondary px-2 py-0.5 rounded text-xs flex items-center gap-1.5">
-              <span className="text-muted-foreground">{monthlyStats.tradingDays} days</span>
+            <span className="bg-secondary px-1.5 md:px-2 py-0.5 rounded text-[10px] md:text-xs flex items-center gap-1 md:gap-1.5">
+              <span className="text-muted-foreground">{monthlyStats.tradingDays}d</span>
               <span className="text-border">|</span>
               <span className={monthlyStats.daysWinRate >= 50 ? 'text-profit' : 'text-loss'}>
-                {monthlyStats.daysWinRate.toFixed(1)}% WR
+                {monthlyStats.daysWinRate.toFixed(0)}%
               </span>
             </span>
-            <span className="bg-secondary px-2 py-0.5 rounded text-xs flex items-center gap-1.5">
-              <span className="text-muted-foreground">{monthlyStats.totalTrades} trades</span>
+            <span className="bg-secondary px-1.5 md:px-2 py-0.5 rounded text-[10px] md:text-xs flex items-center gap-1 md:gap-1.5">
+              <span className="text-muted-foreground">{monthlyStats.totalTrades}t</span>
               <span className="text-border">|</span>
               <span className={monthlyStats.monthlyWinRate >= 50 ? 'text-profit' : 'text-loss'}>
-                {monthlyStats.monthlyWinRate.toFixed(1)}% WR
+                {monthlyStats.monthlyWinRate.toFixed(0)}%
               </span>
             </span>
           </div>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
+              <Button variant="ghost" size="icon" className="h-7 w-7 md:h-8 md:w-8 shrink-0">
                 <Settings className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
