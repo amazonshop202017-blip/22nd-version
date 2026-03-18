@@ -243,27 +243,44 @@ export const DashboardMetrics = ({ isEditMode }: DashboardMetricsProps) => {
     }
   };
 
-  // Dynamic grid columns based on metric count
-  const count = metricsOrder.length + (isEditMode && metricsOrder.length < MAX_METRICS ? 1 : 0);
-  const gridColsClass =
-    count <= 1 ? 'grid-cols-1' :
-    count === 2 ? 'grid-cols-2' :
-    count === 3 ? 'grid-cols-3' :
-    count === 4 ? 'grid-cols-2 md:grid-cols-4' :
-    'grid-cols-2 md:grid-cols-3 lg:grid-cols-5';
+  // For clean layouts, use a 6-col sub-grid on tablet so partial rows stretch evenly
+  // Mobile (grid-cols-2): 5 items → 2+2+1, last spans 2
+  // Tablet (grid-cols-6): 5 items → 3×col-span-2 + 2×col-span-3 (fills row cleanly)
+  // Desktop (grid-cols-5): all fit in 1 row
+  const totalItems = metricsOrder.length + (isEditMode && metricsOrder.length < MAX_METRICS ? 1 : 0);
+
+  const getItemClasses = (index: number) => {
+    // Mobile (< md): 2 columns
+    const mobileRemainder = totalItems % 2;
+    const isLastMobileRow = mobileRemainder !== 0 && index >= totalItems - mobileRemainder;
+    const mobileSpan = isLastMobileRow ? 'col-span-2' : 'col-span-1';
+
+    // Tablet (md, < lg): 6-column grid, default span-2 = 3 per row
+    const tabletItemsPerRow = 3;
+    const tabletRemainder = totalItems % tabletItemsPerRow;
+    const isLastTabletRow = tabletRemainder !== 0 && index >= totalItems - tabletRemainder;
+    // e.g. 2 remaining → each gets span-3, 1 remaining → gets span-6
+    const tabletSpan = isLastTabletRow ? `md:col-span-${6 / tabletRemainder}` : 'md:col-span-2';
+
+    return `${mobileSpan} ${tabletSpan} lg:col-span-1`;
+  };
 
   return (
     <>
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleMetricDragEnd}>
         <SortableContext items={metricsOrder} strategy={horizontalListSortingStrategy}>
-          <div className={`grid ${gridColsClass} gap-3`}>
+          <div className={`grid grid-cols-2 md:grid-cols-6 lg:grid-cols-${totalItems > 5 ? 5 : totalItems} gap-3`}>
             {metricsOrder.map((metricId, index) => (
               <SortableMetric key={metricId} id={metricId} isEditMode={isEditMode} onRemove={handleRemoveMetric}>
-                {renderMetric(metricId, index)}
+                <div className={getItemClasses(index)}>
+                  {renderMetric(metricId, index)}
+                </div>
               </SortableMetric>
             ))}
             {isEditMode && metricsOrder.length < MAX_METRICS && (
-              <AddWidgetPlaceholder onClick={() => setIsMetricsLibraryOpen(true)} />
+              <div className={getItemClasses(metricsOrder.length)}>
+                <AddWidgetPlaceholder onClick={() => setIsMetricsLibraryOpen(true)} />
+              </div>
             )}
           </div>
         </SortableContext>
