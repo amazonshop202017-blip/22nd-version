@@ -83,9 +83,11 @@ const NavItem = ({ icon: Icon, label, path, isCollapsed, isActive }: {
 interface SidebarProps {
   isCollapsed: boolean;
   setIsCollapsed: (collapsed: boolean) => void;
+  isMobileOpen?: boolean;
+  onMobileClose?: () => void;
 }
 
-export const Sidebar = ({ isCollapsed, setIsCollapsed }: SidebarProps) => {
+export const Sidebar = ({ isCollapsed, setIsCollapsed, isMobileOpen = false, onMobileClose }: SidebarProps) => {
   const location = useLocation();
   const { openModal } = useTradeModal();
   const [chartRoomOpen, setChartRoomOpen] = useState(
@@ -98,7 +100,10 @@ export const Sidebar = ({ isCollapsed, setIsCollapsed }: SidebarProps) => {
     <aside
       className={cn(
         "fixed left-0 top-0 h-screen bg-sidebar border-r border-sidebar-border flex flex-col z-40 transition-all duration-300",
-        isCollapsed ? "w-16" : "w-52"
+        isCollapsed ? "w-16" : "w-52",
+        // Mobile: hidden by default, shown when isMobileOpen
+        "max-md:-translate-x-full max-md:w-52",
+        isMobileOpen && "max-md:translate-x-0"
       )}
     >
       {/* Collapse/Expand toggle */}
