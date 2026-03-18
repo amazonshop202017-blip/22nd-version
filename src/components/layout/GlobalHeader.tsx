@@ -1002,7 +1002,7 @@ export const GlobalHeader = () => {
             </div>
 
             {/* Row 3: Performance Filters - Return %, R-Multiple Gain, RRR, (empty), (empty), (empty) */}
-            <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
+            <div className="grid grid-cols-2 lg:grid-cols-6 gap-3">
               {/* Return % - Multi-select */}
               <div className="space-y-1.5">
                 <label className="text-xs text-muted-foreground flex items-center gap-1.5">
