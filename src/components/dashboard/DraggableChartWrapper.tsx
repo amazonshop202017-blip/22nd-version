@@ -34,8 +34,8 @@ export const DraggableChartWrapper = ({
     transition,
   };
 
-  const colSpanClass = colSpan === 2 ? 'lg:col-span-2' : 'lg:col-span-1';
-  const rowSpanClass = rowSpan === 2 ? 'lg:row-span-2' : '';
+  const colSpanClass = colSpan === 2 ? 'md:col-span-2 lg:col-span-2' : 'col-span-1';
+  const rowSpanClass = rowSpan === 2 ? 'md:row-span-2 lg:row-span-2' : '';
 
   return (
     <div
