@@ -217,50 +217,49 @@ export const MonthlyPerformanceCalendar = () => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="glass-card rounded-xl p-6 h-full"
+      className="glass-card rounded-xl p-3 md:p-6 h-full"
     >
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={handlePrevMonth} className="h-8 w-8">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4 md:mb-6">
+        <div className="flex items-center gap-2 md:gap-3">
+          <Button variant="ghost" size="icon" onClick={handlePrevMonth} className="h-7 w-7 md:h-8 md:w-8">
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <h2 className="text-lg font-semibold min-w-[140px] text-center">
+          <h2 className="text-sm md:text-lg font-semibold min-w-[120px] md:min-w-[140px] text-center">
             {format(currentMonth, 'MMMM yyyy')}
           </h2>
-          <Button variant="ghost" size="icon" onClick={handleNextMonth} className="h-8 w-8">
+          <Button variant="ghost" size="icon" onClick={handleNextMonth} className="h-7 w-7 md:h-8 md:w-8">
             <ChevronRight className="h-4 w-4" />
           </Button>
-          <Button variant="outline" size="sm" onClick={handleThisMonth} className="text-xs">
+          <Button variant="outline" size="sm" onClick={handleThisMonth} className="text-xs h-7">
             This month
           </Button>
         </div>
 
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-3 text-sm">
-            <span className="text-muted-foreground">Monthly stats:</span>
+        <div className="flex items-center gap-2 md:gap-4 w-full sm:w-auto">
+          <div className="flex items-center gap-2 md:gap-3 text-xs md:text-sm flex-wrap">
             <span className={`font-mono font-semibold ${isPrivacyMode ? 'text-foreground' : monthlyStats.pnl >= 0 ? 'profit-text' : 'loss-text'}`}>
               {formatCurrencyDecimal(monthlyStats.pnl)}
             </span>
-            <span className="bg-secondary px-2 py-0.5 rounded text-xs flex items-center gap-1.5">
-              <span className="text-muted-foreground">{monthlyStats.tradingDays} days</span>
+            <span className="bg-secondary px-1.5 md:px-2 py-0.5 rounded text-[10px] md:text-xs flex items-center gap-1 md:gap-1.5">
+              <span className="text-muted-foreground">{monthlyStats.tradingDays}d</span>
               <span className="text-border">|</span>
               <span className={monthlyStats.daysWinRate >= 50 ? 'text-profit' : 'text-loss'}>
-                {monthlyStats.daysWinRate.toFixed(1)}% WR
+                {monthlyStats.daysWinRate.toFixed(0)}%
               </span>
             </span>
-            <span className="bg-secondary px-2 py-0.5 rounded text-xs flex items-center gap-1.5">
-              <span className="text-muted-foreground">{monthlyStats.totalTrades} trades</span>
+            <span className="bg-secondary px-1.5 md:px-2 py-0.5 rounded text-[10px] md:text-xs flex items-center gap-1 md:gap-1.5">
+              <span className="text-muted-foreground">{monthlyStats.totalTrades}t</span>
               <span className="text-border">|</span>
               <span className={monthlyStats.monthlyWinRate >= 50 ? 'text-profit' : 'text-loss'}>
-                {monthlyStats.monthlyWinRate.toFixed(1)}% WR
+                {monthlyStats.monthlyWinRate.toFixed(0)}%
               </span>
             </span>
           </div>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
+              <Button variant="ghost" size="icon" className="h-7 w-7 md:h-8 md:w-8 shrink-0">
                 <Settings className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
@@ -293,20 +292,21 @@ export const MonthlyPerformanceCalendar = () => {
       {/* Calendar Grid */}
       <div className="flex gap-4">
         {/* Calendar */}
-        <div className="flex-1">
+        <div className="flex-1 min-w-0">
           {/* Week day headers */}
-          <div className="grid grid-cols-7 gap-1 mb-1">
+          <div className="grid grid-cols-7 gap-0.5 md:gap-1 mb-1">
             {weekDays.map(day => (
-              <div key={day} className="text-center text-xs font-medium text-muted-foreground py-2">
-                {day}
+              <div key={day} className="text-center text-[10px] md:text-xs font-medium text-muted-foreground py-1 md:py-2">
+                <span className="hidden sm:inline">{day}</span>
+                <span className="sm:hidden">{day.charAt(0)}</span>
               </div>
             ))}
           </div>
 
           {/* Calendar days */}
-          <div className="space-y-1">
+          <div className="space-y-0.5 md:space-y-1">
             {weeks.map((week, weekIndex) => (
-              <div key={weekIndex} className="grid grid-cols-7 gap-1">
+              <div key={weekIndex} className="grid grid-cols-7 gap-0.5 md:gap-1">
                 {week.map((day, dayIndex) => {
                   const dayKey = format(day, 'yyyy-MM-dd');
                   const stats = dayStatsMap[dayKey];
@@ -325,13 +325,13 @@ export const MonthlyPerformanceCalendar = () => {
                       key={dayKey}
                       onClick={() => isCurrentMonth && handleDayClick(day)}
                       className={`
-                        min-h-[80px] p-2 rounded-lg border-transparent transition-colors
+                        min-h-[48px] md:min-h-[80px] p-1 md:p-2 rounded-md md:rounded-lg border-transparent transition-colors
                         ${isCurrentMonth ? bgClass : 'bg-muted/20 opacity-40'}
                         ${isCurrentMonth ? 'cursor-pointer hover:ring-1 hover:ring-primary/50' : ''}
                       `}
                     >
-                      <div className="flex items-center justify-center w-5 h-5 rounded-full bg-white dark:bg-slate-800 mb-1">
-                        <span className={`text-[10px] font-semibold ${isCurrentMonth ? 'text-black dark:text-white' : 'text-muted-foreground'}`}>
+                      <div className="flex items-center justify-center w-4 h-4 md:w-5 md:h-5 rounded-full bg-white dark:bg-slate-800 mb-0.5 md:mb-1">
+                        <span className={`text-[8px] md:text-[10px] font-semibold ${isCurrentMonth ? 'text-black dark:text-white' : 'text-muted-foreground'}`}>
                           {format(day, 'd')}
                         </span>
                       </div>
@@ -339,22 +339,22 @@ export const MonthlyPerformanceCalendar = () => {
                       {hasData && (
                         <div className="space-y-0.5">
                           {displaySettings.dailyPnl && (
-                            <div className={`text-sm font-bold font-mono ${isPrivacyMode ? 'text-foreground' : stats.pnl >= 0 ? 'profit-text' : 'loss-text'}`}>
+                            <div className={`text-[9px] md:text-sm font-bold font-mono ${isPrivacyMode ? 'text-foreground' : stats.pnl >= 0 ? 'profit-text' : 'loss-text'}`}>
                               {formatCurrencyDecimal(stats.pnl)}
                             </div>
                           )}
                           {displaySettings.numTrades && (
-                            <div className="text-[10px] text-muted-foreground">
+                            <div className="text-[8px] md:text-[10px] text-muted-foreground hidden sm:block">
                               {stats.trades} trade{stats.trades !== 1 ? 's' : ''}
                             </div>
                           )}
                           {displaySettings.winRate && (
-                            <div className="text-[10px] text-muted-foreground">
+                            <div className="text-[8px] md:text-[10px] text-muted-foreground hidden sm:block">
                               {stats.winRate.toFixed(1)}%
                             </div>
                           )}
                           {displaySettings.rMultiple && (
-                            <div className="text-[10px] text-muted-foreground">
+                            <div className="text-[8px] md:text-[10px] text-muted-foreground hidden sm:block">
                               {stats.rMultiple >= 0 ? '+' : ''}{stats.rMultiple.toFixed(2)}R
                             </div>
                           )}
@@ -368,8 +368,8 @@ export const MonthlyPerformanceCalendar = () => {
           </div>
         </div>
 
-        {/* Weekly Summaries */}
-        <div className="w-32 space-y-1 pt-8">
+        {/* Weekly Summaries - hidden on mobile */}
+        <div className="hidden md:block w-32 space-y-1 pt-8">
           {weeklySummaries.map((summary, index) => (
             <div 
               key={index} 

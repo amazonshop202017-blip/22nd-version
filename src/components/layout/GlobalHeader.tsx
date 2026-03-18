@@ -336,12 +336,64 @@ export const GlobalHeader = () => {
     return count;
   }, [selectedSymbols, selectedOutcomes, selectedHours, selectedSetups, selectedChecklistItems, selectedDays, lastTradesFilter, selectedDirections, selectedReturnRanges, selectedRMultipleRanges, selectedYear]);
 
+  const totalActiveFilters = activeBasicFiltersCount + (hasActiveTagFilters ? 1 : 0) + (datePreset !== 'all' ? 1 : 0) + (!isAllAccountsSelected ? 1 : 0);
+
   return (
-    <div className="flex items-center gap-2 md:gap-3 px-4 md:px-8 py-3 md:py-4 border-b border-border bg-card/50 backdrop-blur-sm overflow-x-auto pl-14 md:pl-4">
+    <div className="flex items-center gap-2 md:gap-3 px-4 md:px-8 py-3 md:py-4 border-b border-border bg-card/50 backdrop-blur-sm pl-14 md:pl-4 overflow-hidden">
+      {/* Mobile: Single "Filters" menu button */}
+      <div className="md:hidden">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className="gap-2 bg-background border-border">
+              <Filter className="w-4 h-4 text-muted-foreground" />
+              <span>Filters</span>
+              {totalActiveFilters > 0 && (
+                <span className="ml-1 px-1.5 py-0.5 text-xs rounded-full bg-primary text-primary-foreground">
+                  {totalActiveFilters}
+                </span>
+              )}
+              <ChevronDown className="w-4 h-4 text-muted-foreground" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="w-56 bg-popover border-border z-50">
+            <DropdownMenuItem onClick={() => setBasicFiltersOpen(true)} className="cursor-pointer gap-2">
+              <Filter className="w-4 h-4" />
+              Basic Filters
+              {activeBasicFiltersCount > 0 && (
+                <span className="ml-auto px-1.5 py-0.5 text-xs rounded-full bg-primary text-primary-foreground">
+                  {activeBasicFiltersCount}
+                </span>
+              )}
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setAdvancedFiltersOpen(true)} className="cursor-pointer gap-2">
+              <SlidersHorizontal className="w-4 h-4" />
+              Advanced Filters
+              {hasActiveTagFilters && (
+                <span className="ml-auto px-1.5 py-0.5 text-xs rounded-full bg-primary text-primary-foreground">
+                  Tags
+                </span>
+              )}
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => setDatePickerOpen(true)} className="cursor-pointer gap-2">
+              <CalendarIcon className="w-4 h-4" />
+              {getDateRangeLabel()}
+            </DropdownMenuItem>
+            <DropdownMenuItem className="cursor-pointer gap-2" asChild>
+              <div onClick={(e) => e.preventDefault()}>
+                <Wallet className="w-4 h-4" />
+                {getAccountsLabel()}
+              </div>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
+      {/* Desktop: All filter buttons inline */}
       {/* Basic Filters Dropdown */}
       <DropdownMenu open={basicFiltersOpen} onOpenChange={setBasicFiltersOpen}>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" className="gap-2 bg-background border-border">
+          <Button variant="outline" className="gap-2 bg-background border-border hidden md:flex">
             <Filter className="w-4 h-4 text-muted-foreground" />
             <span>Basic Filters</span>
             {activeBasicFiltersCount > 0 && (
@@ -957,7 +1009,7 @@ export const GlobalHeader = () => {
       {/* Advanced Filters Dropdown */}
       <Popover open={advancedFiltersOpen} onOpenChange={setAdvancedFiltersOpen}>
         <PopoverTrigger asChild>
-          <Button variant="outline" className="gap-2 bg-background border-border">
+          <Button variant="outline" className="gap-2 bg-background border-border hidden md:flex">
             <SlidersHorizontal className="w-4 h-4 text-muted-foreground" />
             <span>Advanced Filters</span>
             {hasActiveTagFilters && (
@@ -974,12 +1026,14 @@ export const GlobalHeader = () => {
       </Popover>
 
       {/* Display Mode Selector */}
-      <DisplayModeSelector />
+      <div className="hidden md:block">
+        <DisplayModeSelector />
+      </div>
 
       <div className="flex-1" />
 
-      {/* Date Range Selector */}
-      <div className="flex items-center">
+      {/* Date Range Selector - hidden on mobile */}
+      <div className="hidden md:flex items-center">
         <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
           <PopoverTrigger asChild>
             <Button variant="outline" className={`gap-2 bg-background border-border min-w-[200px] justify-start ${datePreset !== 'all' ? 'rounded-r-none border-r-0' : ''}`}>
@@ -1045,8 +1099,8 @@ export const GlobalHeader = () => {
         )}
       </div>
 
-      {/* Account Filter */}
-      <div className="flex items-center">
+      {/* Account Filter - hidden on mobile */}
+      <div className="hidden md:flex items-center">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className={`gap-2 bg-background border-border min-w-[150px] justify-start ${!isAllAccountsSelected ? 'rounded-r-none border-r-0' : ''}`}>

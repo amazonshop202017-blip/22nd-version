@@ -236,7 +236,7 @@ export const SelectedFiltersBar = () => {
   if (chips.length === 0) return null;
 
   return (
-    <div className="flex items-center gap-2 px-8 py-2 border-b border-border bg-card/30 flex-wrap">
+    <div className="flex items-center gap-2 px-4 md:px-8 py-2 border-b border-border bg-card/30 flex-wrap overflow-hidden">
       <span className="text-xs font-medium text-muted-foreground shrink-0">Selected Filters:</span>
       {chips.map((chip) => (
         <Badge
