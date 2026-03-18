@@ -1009,7 +1009,7 @@ export const GlobalHeader = () => {
       {/* Advanced Filters Dropdown */}
       <Popover open={advancedFiltersOpen} onOpenChange={setAdvancedFiltersOpen}>
         <PopoverTrigger asChild>
-          <Button variant="outline" className="gap-2 bg-background border-border">
+          <Button variant="outline" className="gap-2 bg-background border-border hidden md:flex">
             <SlidersHorizontal className="w-4 h-4 text-muted-foreground" />
             <span>Advanced Filters</span>
             {hasActiveTagFilters && (
@@ -1026,12 +1026,14 @@ export const GlobalHeader = () => {
       </Popover>
 
       {/* Display Mode Selector */}
-      <DisplayModeSelector />
+      <div className="hidden md:block">
+        <DisplayModeSelector />
+      </div>
 
       <div className="flex-1" />
 
-      {/* Date Range Selector */}
-      <div className="flex items-center">
+      {/* Date Range Selector - hidden on mobile */}
+      <div className="hidden md:flex items-center">
         <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
           <PopoverTrigger asChild>
             <Button variant="outline" className={`gap-2 bg-background border-border min-w-[200px] justify-start ${datePreset !== 'all' ? 'rounded-r-none border-r-0' : ''}`}>
@@ -1097,8 +1099,8 @@ export const GlobalHeader = () => {
         )}
       </div>
 
-      {/* Account Filter */}
-      <div className="flex items-center">
+      {/* Account Filter - hidden on mobile */}
+      <div className="hidden md:flex items-center">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className={`gap-2 bg-background border-border min-w-[150px] justify-start ${!isAllAccountsSelected ? 'rounded-r-none border-r-0' : ''}`}>
