@@ -619,7 +619,7 @@ export const GlobalHeader = () => {
             </div>
 
             {/* Row 2: Time Context - Year, Month, Day, Hour, Last Trades, (empty) */}
-            <div className="grid grid-cols-6 gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
               {/* Year - Calendar-style year picker */}
               <div className="space-y-1.5">
                 <label className="text-xs text-muted-foreground flex items-center gap-1.5">
