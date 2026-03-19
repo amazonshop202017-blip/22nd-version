@@ -652,13 +652,13 @@ const Trades = () => {
 
         {/* Pagination Footer */}
         {totalTrades > 0 && (
-          <div className="flex items-center justify-between px-4 py-3 border-t border-border flex-shrink-0">
+          <div className="flex flex-col sm:flex-row items-center justify-between px-2 sm:px-4 py-2 sm:py-3 gap-2 border-t border-border flex-shrink-0">
             {/* Left side: Trades per page & range */}
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">Trades per page:</span>
+            <div className="flex items-center gap-2 sm:gap-4">
+              <div className="flex items-center gap-1 sm:gap-2">
+                <span className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">Per page:</span>
                 <Select value={String(tradesPerPage)} onValueChange={handleTradesPerPageChange}>
-                  <SelectTrigger className="w-[70px] h-8">
+                  <SelectTrigger className="w-[56px] sm:w-[70px] h-7 sm:h-8 text-xs sm:text-sm">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -669,15 +669,15 @@ const Trades = () => {
                   </SelectContent>
                 </Select>
               </div>
-              <span className="text-sm text-muted-foreground">
-                {startIndex + 1} – {endIndex} of {totalTrades} trades
+              <span className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
+                {startIndex + 1}–{endIndex} of {totalTrades}
               </span>
             </div>
 
             {/* Right side: Pagination controls */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 sm:gap-2">
               <Select value={String(currentPage)} onValueChange={(v) => setCurrentPage(Number(v))}>
-                <SelectTrigger className="w-[60px] h-8">
+                <SelectTrigger className="w-[50px] sm:w-[60px] h-7 sm:h-8 text-xs sm:text-sm">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -689,14 +689,14 @@ const Trades = () => {
                 </SelectContent>
               </Select>
               
-              <span className="text-sm text-muted-foreground">
-                of {totalPages} pages
+              <span className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
+                of {totalPages}
               </span>
               
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8"
+                className="h-7 w-7 sm:h-8 sm:w-8"
                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
               >
@@ -706,7 +706,7 @@ const Trades = () => {
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8"
+                className="h-7 w-7 sm:h-8 sm:w-8"
                 onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
               >
