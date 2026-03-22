@@ -1133,9 +1133,6 @@ export const TradeModal = () => {
               {/* Trade Comments Section */}
               <div className="space-y-3">
                 <h4 className="text-sm font-medium text-foreground">Trade Comments</h4>
-                <div className="grid grid-cols-3 gap-3">
-                {/* Mobile: stack, Desktop: 3-col */}
-                </div>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div className="space-y-1.5">
                     <Label className="text-xs text-muted-foreground">Entry Comments</Label>
