@@ -1208,12 +1208,9 @@ export const GlobalHeader = () => {
                   {dateRange.to ? format(dateRange.to, 'MMMM dd, yyyy') : '—'}
                 </span>
               </div>
-              <Calendar
-                mode="range"
+              <DateRangeCalendar
                 selected={{ from: dateRange.from, to: dateRange.to }}
                 onSelect={handleCustomDateChange}
-                numberOfMonths={2}
-                className="pointer-events-auto"
               />
             </div>
             {/* Presets */}
