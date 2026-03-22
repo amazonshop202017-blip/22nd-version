@@ -41,21 +41,21 @@ const SecurityPage = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <Card className="p-8 relative overflow-hidden">
+        <Card className="p-5 sm:p-8 relative overflow-hidden">
           {/* Decorative */}
           <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-primary/10 to-transparent rounded-bl-full" />
 
-          <div className="flex items-center gap-3 mb-6 relative z-10">
-            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+          <div className="flex items-center gap-3 mb-5 sm:mb-6 relative z-10">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
               <Shield className="w-5 h-5 text-primary" />
             </div>
-            <div>
+            <div className="min-w-0">
               <h3 className="text-lg font-semibold text-foreground">Change Password</h3>
-              <p className="text-sm text-muted-foreground">Update your password to keep your account secure</p>
+              <p className="text-sm text-muted-foreground truncate sm:overflow-visible sm:whitespace-normal">Update your password to keep your account secure</p>
             </div>
           </div>
 
-          <div className="space-y-5 relative z-10">
+          <div className="space-y-4 sm:space-y-5 relative z-10">
             <div className="space-y-2">
               <Label htmlFor="currentPassword" className="text-sm font-medium text-foreground">Current Password</Label>
               <div className="relative">
@@ -64,7 +64,7 @@ const SecurityPage = () => {
                   type={showCurrent ? 'text' : 'password'}
                   value={currentPassword}
                   onChange={(e) => setCurrentPassword(e.target.value)}
-                  className="h-11 pr-10"
+                  className="h-10 sm:h-11 pr-10"
                   placeholder="Enter current password"
                 />
                 <button
@@ -85,7 +85,7 @@ const SecurityPage = () => {
                   type={showNew ? 'text' : 'password'}
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  className="h-11 pr-10"
+                  className="h-10 sm:h-11 pr-10"
                   placeholder="Enter new password"
                 />
                 <button
@@ -106,7 +106,7 @@ const SecurityPage = () => {
                   type={showConfirm ? 'text' : 'password'}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="h-11 pr-10"
+                  className="h-10 sm:h-11 pr-10"
                   placeholder="Confirm new password"
                 />
                 <button
@@ -120,7 +120,7 @@ const SecurityPage = () => {
             </div>
 
             <div className="flex justify-end pt-2">
-              <Button onClick={handleChangePassword} className="px-8 h-11">
+              <Button onClick={handleChangePassword} className="px-6 sm:px-8 h-10 sm:h-11">
                 Change Password
               </Button>
             </div>
