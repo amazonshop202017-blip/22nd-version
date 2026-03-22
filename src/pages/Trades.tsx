@@ -103,7 +103,7 @@ const TableWithStickyHorizontalScroll = ({
         className="flex-1 min-h-0 overflow-auto scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent"
         style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x pan-y' }}
       >
-        <Table className="min-w-max" wrapperClassName="w-max min-w-max overflow-visible">
+        <Table wrapperClassName="min-w-full overflow-visible">
           <TableHeader className="sticky top-0 bg-card z-10">
             <TableRow className="border-border hover:bg-transparent">
               <TableHead className="w-8 px-2">
