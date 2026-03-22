@@ -249,16 +249,19 @@ export const DashboardMetrics = ({ isEditMode }: DashboardMetricsProps) => {
   // md: fits up to 3 in one row. If more, use 2-col grid (last spans full if odd)
   // lg: fits up to 5 in one row. If more, use 2-col grid (last spans full if odd)
   const count = metricsOrder.length + (isEditMode && metricsOrder.length < MAX_METRICS ? 1 : 0);
+  // Mobile: fits up to 2 in one row. md: up to 3. lg: up to 5.
+  const mobileClass = count <= 2 ? ({ 1: 'grid-cols-1', 2: 'grid-cols-2' }[count] || 'grid-cols-1') : 'grid-cols-2';
   const mdColsMap: Record<number, string> = { 1: 'md:grid-cols-1', 2: 'md:grid-cols-2', 3: 'md:grid-cols-3' };
   const lgColsMap: Record<number, string> = { 1: 'lg:grid-cols-1', 2: 'lg:grid-cols-2', 3: 'lg:grid-cols-3', 4: 'lg:grid-cols-4', 5: 'lg:grid-cols-5' };
   const mdClass = count <= 3 ? (mdColsMap[count] || 'md:grid-cols-1') : 'md:grid-cols-2';
   const lgClass = count <= 5 ? (lgColsMap[count] || 'lg:grid-cols-1') : 'lg:grid-cols-2';
-  const gridColsClass = `grid-cols-1 ${mdClass} ${lgClass}`;
+  const gridColsClass = `${mobileClass} ${mdClass} ${lgClass}`;
 
-  // For odd counts that exceed single-row capacity at a breakpoint, last item spans full width
-  // But reset at larger breakpoints where all fit in one row
+  // Last item spans full width if odd count exceeds single-row capacity at that breakpoint
+  const needsMobileSpan = count > 2 && count % 2 !== 0;
   const needsMdSpan = count > 3 && count % 2 !== 0;
-  const resetLgSpan = count <= 5; // at lg all fit, so reset the md col-span
+  const resetMdSpan = count <= 3 && needsMobileSpan; // at md all fit, reset mobile col-span
+  const resetLgSpan = count <= 5; // at lg all fit, reset
   const needsLgSpan = count > 5 && count % 2 !== 0;
 
   const allItems = [
