@@ -15,6 +15,15 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { motion } from 'framer-motion';
 import { DayDetailsModal } from '@/components/dayview/DayDetailsModal';
+import { cn } from '@/lib/utils';
+
+const MONTH_NAMES = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'
+];
+const MONTH_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const currentYearConst = new Date().getFullYear();
+const YEARS = Array.from({ length: 21 }, (_, i) => currentYearConst - 10 + i);
 
 interface DayStats {
   pnl: number;
