@@ -484,13 +484,23 @@ export const GlobalHeader = () => {
                 </button>
               ))}
             </div>
+            {/* Selected range display */}
+            <div className="flex items-center justify-center gap-2 text-sm py-2">
+              <span className="text-foreground font-medium">
+                {dateRange.from ? format(dateRange.from, 'MMMM dd, yyyy') : '—'}
+              </span>
+              <span className="text-muted-foreground">→</span>
+              <span className="text-foreground font-medium px-2 py-0.5 border border-primary rounded">
+                {dateRange.to ? format(dateRange.to, 'MMMM dd, yyyy') : '—'}
+              </span>
+            </div>
             {/* Calendar */}
             <div className="flex justify-center">
               <Calendar
                 mode="range"
                 selected={{ from: dateRange.from, to: dateRange.to }}
                 onSelect={handleCustomDateChange}
-                numberOfMonths={1}
+                numberOfMonths={2}
                 className="pointer-events-auto"
               />
             </div>
