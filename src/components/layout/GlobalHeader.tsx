@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { format } from 'date-fns';
 import { CalendarIcon, ChevronDown, Wallet, Settings, Check, X, Filter, SlidersHorizontal, Globe, TrendingUp, Star, BarChart2, Clock, Percent, Hash, ListFilter, Calendar as CalendarIcon2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calendar';
+import { DateRangeCalendar } from '@/components/layout/DateRangeCalendar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -491,12 +491,9 @@ export const GlobalHeader = () => {
           </div>
           {/* Calendar - scrollable */}
           <div className="flex-1 overflow-y-auto flex justify-center pt-1">
-            <Calendar
-              mode="range"
+            <DateRangeCalendar
               selected={{ from: dateRange.from, to: dateRange.to }}
               onSelect={handleCustomDateChange}
-              numberOfMonths={2}
-              className="pointer-events-auto"
             />
           </div>
         </SheetContent>
@@ -1211,12 +1208,9 @@ export const GlobalHeader = () => {
                   {dateRange.to ? format(dateRange.to, 'MMMM dd, yyyy') : '—'}
                 </span>
               </div>
-              <Calendar
-                mode="range"
+              <DateRangeCalendar
                 selected={{ from: dateRange.from, to: dateRange.to }}
                 onSelect={handleCustomDateChange}
-                numberOfMonths={2}
-                className="pointer-events-auto"
               />
             </div>
             {/* Presets */}
