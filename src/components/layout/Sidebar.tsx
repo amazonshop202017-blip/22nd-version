@@ -301,7 +301,7 @@ export const Sidebar = ({ isCollapsed, setIsCollapsed, isMobileOpen = false, onM
         <Separator className="bg-sidebar-border/50 mb-2" />
         <div className="relative rounded-xl overflow-hidden">
           {/* Liquid glass effect background */}
-          <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-primary/[0.08] via-white/[0.12] to-primary/[0.05] dark:from-primary/[0.12] dark:via-white/[0.08] dark:to-primary/[0.06] backdrop-blur-sm border border-white/[0.15] dark:border-white/[0.1] shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)] pointer-events-none" />
+          <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-primary/[0.06] via-primary/[0.03] to-transparent border border-primary/[0.12] shadow-[inset_0_1px_2px_rgba(0,0,0,0.04)] dark:from-primary/[0.12] dark:via-white/[0.08] dark:to-primary/[0.06] dark:border-white/[0.1] dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)] backdrop-blur-sm pointer-events-none" />
           <div className="relative z-10">
             <SidebarAccountMenu isCollapsed={isCollapsed} />
           </div>
