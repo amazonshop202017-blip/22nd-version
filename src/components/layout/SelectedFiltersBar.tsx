@@ -74,13 +74,7 @@ export const SelectedFiltersBar = () => {
       });
     }
 
-    // Accounts
-    selectedAccounts.forEach(acc => {
-      result.push({
-        id: `account-${acc}`, label: 'Account', value: acc,
-        onRemove: () => setSelectedAccounts(selectedAccounts.filter(a => a !== acc)),
-      });
-    });
+    // Accounts — excluded from selected filters bar (still works in filtering)
 
     // Symbols
     selectedSymbols.forEach(sym => {
