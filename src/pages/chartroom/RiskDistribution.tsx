@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useFilteredTrades } from '@/hooks/useFilteredTrades';
 import { useGlobalFilters } from '@/contexts/GlobalFiltersContext';
 import { calculateTradeMetrics } from '@/types/trade';
@@ -41,6 +41,14 @@ const RiskDistribution = () => {
   const { currencyConfig } = useGlobalFilters();
   
   const [displayType, setDisplayType] = useState<DisplayType>('returnPercent');
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 1024);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
 
   // Labels to show on X-axis for Return (%) mode - every 0.5% interval
   const returnPercentLabelsToShow = new Set([
@@ -347,31 +355,35 @@ const RiskDistribution = () => {
 
       {/* Chart */}
       <Card className="bg-card border-border">
-        <CardContent className="pt-6">
+        <CardContent className="pt-6 px-2 sm:px-6">
           {closedTrades.length > 0 ? (
-            <ResponsiveContainer width="100%" height={400}>
-              <BarChart data={bucketData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
+            <ResponsiveContainer width="100%" height={isMobile ? 300 : 400}>
+              <BarChart 
+                data={isMobile ? bucketData.filter(b => b.tradeCount > 0) : bucketData} 
+                margin={isMobile ? { top: 10, right: 5, left: 0, bottom: 40 } : { top: 20, right: 30, left: 20, bottom: 60 }}
+              >
                 <CartesianGrid strokeDasharray="3 3" className="stroke-border/50" />
                 <XAxis 
                   dataKey="label" 
                   tick={renderCustomXAxisTick}
-                  height={80}
+                  height={isMobile ? 60 : 80}
                   interval={0}
                 />
                 <YAxis 
-                  tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
-                  label={{ 
+                  tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: isMobile ? 10 : 12 }}
+                  label={isMobile ? undefined : { 
                     value: 'Number of Trades', 
                     angle: -90, 
                     position: 'insideLeft',
                     style: { fill: 'hsl(var(--muted-foreground))' }
                   }}
                   allowDecimals={false}
+                  width={isMobile ? 30 : undefined}
                 />
                 <Tooltip content={<CustomTooltip />} />
                 <ReferenceLine y={0} stroke="hsl(var(--muted-foreground))" strokeWidth={1} />
                 <Bar dataKey="tradeCount" radius={[4, 4, 0, 0]}>
-                  {bucketData.map((entry, index) => (
+                  {(isMobile ? bucketData.filter(b => b.tradeCount > 0) : bucketData).map((entry, index) => (
                     <Cell 
                       key={`cell-${index}`}
                       fill={entry.isWinningBucket ? '#10b981' : '#ef4444'}
@@ -381,7 +393,7 @@ const RiskDistribution = () => {
               </BarChart>
             </ResponsiveContainer>
           ) : (
-            <div className="flex items-center justify-center h-[400px] text-muted-foreground">
+            <div className="flex items-center justify-center h-[300px] lg:h-[400px] text-muted-foreground">
               No closed trades to display
             </div>
           )}
