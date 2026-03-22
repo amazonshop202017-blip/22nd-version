@@ -88,32 +88,32 @@ const ProfilePage = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 sm:gap-6 lg:gap-8">
           {/* Left Column - Avatar & Identity */}
-          <Card className="lg:col-span-2 p-8 flex flex-col items-center text-center relative overflow-hidden">
+          <Card className="lg:col-span-2 p-5 sm:p-8 flex flex-col items-center text-center relative overflow-hidden">
             {/* Decorative gradient blob */}
             <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-br from-primary/20 via-primary/10 to-transparent rounded-t-xl" />
             
-            <div className="relative z-10 mt-8">
+            <div className="relative z-10 mt-4 sm:mt-8">
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 transition={{ type: 'spring', stiffness: 300 }}
               >
-                <Avatar className="w-28 h-28 border-4 border-background shadow-xl">
+                <Avatar className="w-20 h-20 sm:w-28 sm:h-28 border-4 border-background shadow-xl">
                   <AvatarImage src={profileImage || undefined} />
-                  <AvatarFallback className="text-3xl font-bold bg-primary text-primary-foreground">
+                  <AvatarFallback className="text-2xl sm:text-3xl font-bold bg-primary text-primary-foreground">
                     {initials}
                   </AvatarFallback>
                 </Avatar>
               </motion.div>
             </div>
 
-            <h2 className="text-2xl font-bold text-foreground mt-5 relative z-10">
+            <h2 className="text-xl sm:text-2xl font-bold text-foreground mt-4 sm:mt-5 relative z-10">
               {firstName} {lastName}
             </h2>
             <p className="text-sm text-muted-foreground mt-1 relative z-10">@{username}</p>
 
-            <Separator className="my-5 w-full relative z-10" />
+            <Separator className="my-4 sm:my-5 w-full relative z-10" />
 
             <div className="w-full space-y-3 relative z-10">
               <div className="flex items-center gap-3 text-sm text-muted-foreground">
@@ -126,13 +126,14 @@ const ProfilePage = () => {
               </div>
             </div>
 
-            <Separator className="my-5 w-full relative z-10" />
+            <Separator className="my-4 sm:my-5 w-full relative z-10" />
 
             <div className="flex gap-3 w-full relative z-10">
               <Button
                 onClick={handleImageUpload}
                 variant="outline"
-                className="flex-1 gap-2"
+                className="flex-1 gap-2 text-xs sm:text-sm"
+                size="sm"
               >
                 <Camera className="w-4 h-4" />
                 Update
@@ -140,7 +141,8 @@ const ProfilePage = () => {
               <Button
                 onClick={handleRemoveImage}
                 variant="outline"
-                className="flex-1 gap-2 text-destructive hover:text-destructive"
+                className="flex-1 gap-2 text-destructive hover:text-destructive text-xs sm:text-sm"
+                size="sm"
               >
                 <Trash2 className="w-4 h-4" />
                 Remove
@@ -149,18 +151,18 @@ const ProfilePage = () => {
           </Card>
 
           {/* Right Column - Profile Details */}
-          <Card className="lg:col-span-3 p-8">
-            <h3 className="text-lg font-semibold text-foreground mb-6">Personal Information</h3>
+          <Card className="lg:col-span-3 p-5 sm:p-8">
+            <h3 className="text-lg font-semibold text-foreground mb-5 sm:mb-6">Personal Information</h3>
 
-            <div className="space-y-5">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div className="space-y-4 sm:space-y-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
                 <div className="space-y-2">
                   <Label htmlFor="firstName" className="text-sm font-medium text-foreground">First Name</Label>
                   <Input
                     id="firstName"
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
-                    className="h-11"
+                    className="h-10 sm:h-11"
                     placeholder="Enter first name"
                   />
                 </div>
@@ -170,7 +172,7 @@ const ProfilePage = () => {
                     id="lastName"
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
-                    className="h-11"
+                    className="h-10 sm:h-11"
                     placeholder="Enter last name"
                   />
                 </div>
@@ -182,7 +184,7 @@ const ProfilePage = () => {
                   id="username"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="h-11"
+                  className="h-10 sm:h-11"
                   placeholder="Enter username"
                 />
               </div>
@@ -194,7 +196,7 @@ const ProfilePage = () => {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="h-11"
+                  className="h-10 sm:h-11"
                   placeholder="Enter email"
                 />
               </div>
@@ -202,7 +204,7 @@ const ProfilePage = () => {
               <Separator className="my-2" />
 
               <div className="flex justify-end">
-                <Button onClick={handleSave} className="px-8 h-11">
+                <Button onClick={handleSave} className="px-6 sm:px-8 h-10 sm:h-11">
                   Save Changes
                 </Button>
               </div>
