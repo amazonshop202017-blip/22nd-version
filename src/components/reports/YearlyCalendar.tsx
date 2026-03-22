@@ -123,7 +123,7 @@ const YearlyCalendar = () => {
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
-          <h2 className="text-lg font-semibold text-foreground">{selectedYear}</h2>
+          <YearDropdown selectedYear={selectedYear} onChange={setSelectedYear} />
           <button
             onClick={handleNextYear}
             className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"

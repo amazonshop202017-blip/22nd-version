@@ -46,6 +46,75 @@ interface DisplaySettings {
   rMultiple: boolean;
 }
 
+function MonthYearDropdowns({ month, onChange }: { month: Date; onChange: (d: Date) => void }) {
+  const [monthOpen, setMonthOpen] = useState(false);
+  const [yearOpen, setYearOpen] = useState(false);
+  const monthRef = useRef<HTMLDivElement>(null);
+  const yearRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (monthRef.current && !monthRef.current.contains(e.target as Node)) setMonthOpen(false);
+      if (yearRef.current && !yearRef.current.contains(e.target as Node)) setYearOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  return (
+    <div className="flex items-center gap-1">
+      <div ref={monthRef} className="relative">
+        <button
+          type="button"
+          onClick={() => { setMonthOpen(!monthOpen); setYearOpen(false); }}
+          className="flex items-center gap-0.5 text-sm md:text-base font-semibold hover:bg-accent rounded px-1.5 py-0.5 transition-colors border-b border-border"
+        >
+          {MONTH_SHORT[month.getMonth()]}
+          <ChevronDown className="h-3 w-3 opacity-60" />
+        </button>
+        {monthOpen && (
+          <div className="absolute top-full left-0 mt-1 bg-popover border border-border rounded-md shadow-md z-50 py-1 max-h-48 overflow-y-auto min-w-[80px]">
+            {MONTH_NAMES.map((name, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => { const d = new Date(month); d.setMonth(i); onChange(d); setMonthOpen(false); }}
+                className={cn("w-full text-left px-3 py-1.5 text-sm hover:bg-accent transition-colors", i === month.getMonth() && "bg-accent font-medium")}
+              >
+                {name}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+      <div ref={yearRef} className="relative">
+        <button
+          type="button"
+          onClick={() => { setYearOpen(!yearOpen); setMonthOpen(false); }}
+          className="flex items-center gap-0.5 text-sm md:text-base font-semibold hover:bg-accent rounded px-1.5 py-0.5 transition-colors border-b border-border"
+        >
+          {month.getFullYear()}
+          <ChevronDown className="h-3 w-3 opacity-60" />
+        </button>
+        {yearOpen && (
+          <div className="absolute top-full right-0 mt-1 bg-popover border border-border rounded-md shadow-md z-50 py-1 max-h-48 overflow-y-auto min-w-[70px]">
+            {YEARS.map((y) => (
+              <button
+                key={y}
+                type="button"
+                onClick={() => { const d = new Date(month); d.setFullYear(y); onChange(d); setYearOpen(false); }}
+                className={cn("w-full text-left px-3 py-1.5 text-sm hover:bg-accent transition-colors", y === month.getFullYear() && "bg-accent font-medium")}
+              >
+                {y}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export const MonthlyPerformanceCalendar = () => {
   const { filteredTrades: trades } = useFilteredTrades();
   const { currencyConfig } = useGlobalFilters();
