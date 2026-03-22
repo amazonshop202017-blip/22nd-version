@@ -41,6 +41,14 @@ const RiskDistribution = () => {
   const { currencyConfig } = useGlobalFilters();
   
   const [displayType, setDisplayType] = useState<DisplayType>('returnPercent');
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 1024);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
 
   // Labels to show on X-axis for Return (%) mode - every 0.5% interval
   const returnPercentLabelsToShow = new Set([
