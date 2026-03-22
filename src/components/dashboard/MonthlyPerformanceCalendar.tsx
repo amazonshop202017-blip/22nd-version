@@ -325,7 +325,7 @@ export const MonthlyPerformanceCalendar = () => {
                       key={dayKey}
                       onClick={() => isCurrentMonth && handleDayClick(day)}
                       className={`
-                        min-h-[48px] md:min-h-[80px] p-1 md:p-2 rounded-md md:rounded-lg border-transparent transition-colors
+                        min-h-[68px] md:min-h-[80px] p-1 md:p-2 rounded-md md:rounded-lg border-transparent transition-colors
                         ${isCurrentMonth ? bgClass : 'bg-muted/20 opacity-40'}
                         ${isCurrentMonth ? 'cursor-pointer hover:ring-1 hover:ring-primary/50' : ''}
                       `}
@@ -344,18 +344,18 @@ export const MonthlyPerformanceCalendar = () => {
                             </div>
                           )}
                           {displaySettings.numTrades && (
-                            <div className="text-[8px] md:text-[10px] text-muted-foreground hidden sm:block">
-                              {stats.trades} trade{stats.trades !== 1 ? 's' : ''}
+                            <div className="text-[8px] md:text-[10px] text-muted-foreground">
+                              {stats.trades}t
                             </div>
                           )}
                           {displaySettings.winRate && (
-                            <div className="text-[8px] md:text-[10px] text-muted-foreground hidden sm:block">
-                              {stats.winRate.toFixed(1)}%
+                            <div className="text-[8px] md:text-[10px] text-muted-foreground">
+                              {stats.winRate.toFixed(0)}%
                             </div>
                           )}
                           {displaySettings.rMultiple && (
-                            <div className="text-[8px] md:text-[10px] text-muted-foreground hidden sm:block">
-                              {stats.rMultiple >= 0 ? '+' : ''}{stats.rMultiple.toFixed(2)}R
+                            <div className="text-[8px] md:text-[10px] text-muted-foreground">
+                              {stats.rMultiple >= 0 ? '+' : ''}{stats.rMultiple.toFixed(1)}R
                             </div>
                           )}
                         </div>
