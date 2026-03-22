@@ -255,8 +255,10 @@ export const DashboardMetrics = ({ isEditMode }: DashboardMetricsProps) => {
   const lgClass = count <= 5 ? (lgColsMap[count] || 'lg:grid-cols-1') : 'lg:grid-cols-2';
   const gridColsClass = `grid-cols-1 ${mdClass} ${lgClass}`;
 
-  // For odd counts that exceed single-row capacity, last item spans full width
+  // For odd counts that exceed single-row capacity at a breakpoint, last item spans full width
+  // But reset at larger breakpoints where all fit in one row
   const needsMdSpan = count > 3 && count % 2 !== 0;
+  const resetLgSpan = count <= 5; // at lg all fit, so reset the md col-span
   const needsLgSpan = count > 5 && count % 2 !== 0;
 
   const allItems = [
