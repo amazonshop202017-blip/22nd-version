@@ -74,72 +74,69 @@ export const DayCard = ({ date, trades }: DayCardProps) => {
       {/* Card Header */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex items-center gap-4 px-5 py-4 hover:bg-muted/30 transition-colors"
+        className="w-full flex items-center gap-2 sm:gap-4 px-3 sm:px-5 py-3 sm:py-4 hover:bg-muted/30 transition-colors"
       >
         <div className="text-muted-foreground">
           {isExpanded ? (
-            <ChevronUp className="w-5 h-5" />
+            <ChevronUp className="w-4 h-4 sm:w-5 sm:h-5" />
           ) : (
-            <ChevronDown className="w-5 h-5" />
+            <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5" />
           )}
         </div>
-        <div className="flex items-center gap-3">
-          <span className="font-semibold text-foreground">{formattedDate}</span>
-          <span className="text-muted-foreground">•</span>
-          <span className={cn('font-semibold', isPrivacyMode ? 'text-foreground' : isProfit ? 'text-profit' : 'text-loss')}>
+        <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-3 text-left">
+          <span className="font-semibold text-sm sm:text-base text-foreground">{formattedDate}</span>
+          <span className="hidden sm:inline text-muted-foreground">•</span>
+          <span className={cn('font-semibold text-sm sm:text-base', isPrivacyMode ? 'text-foreground' : isProfit ? 'text-profit' : 'text-loss')}>
             Net P&L {maskCurrency(dayStats.netPnl, formatCurrency)}
           </span>
         </div>
       </button>
 
       {/* Card Body - Collapsed State */}
-      <div className="px-5 pb-5">
-        <div className="flex gap-6">
+      <div className="px-3 sm:px-5 pb-4 sm:pb-5">
+        <div className="flex flex-col md:flex-row gap-4 md:gap-6">
           {/* Chart Section */}
-          <div className="w-[300px] h-[140px] flex-shrink-0">
+          <div className="w-full md:w-[300px] h-[140px] flex-shrink-0">
             <IntradayPnLChart trades={trades} />
           </div>
 
           {/* Metrics Section */}
-          <div className="flex-1 grid grid-cols-4 gap-x-6 gap-y-4">
-            {/* Row 1 */}
+          <div className="flex-1 grid grid-cols-2 sm:grid-cols-4 gap-x-4 sm:gap-x-6 gap-y-3 sm:gap-y-4">
             <div>
               <p className="text-xs text-muted-foreground mb-1">Total Trades</p>
-              <p className="text-lg font-semibold text-foreground">{dayStats.totalTrades}</p>
+              <p className="text-base sm:text-lg font-semibold text-foreground">{dayStats.totalTrades}</p>
             </div>
             <div>
               <p className="text-xs text-muted-foreground mb-1">Winners</p>
-              <p className="text-lg font-semibold text-foreground">{dayStats.winners}</p>
+              <p className="text-base sm:text-lg font-semibold text-foreground">{dayStats.winners}</p>
             </div>
             <div>
               <p className="text-xs text-muted-foreground mb-1">Gross P&L</p>
-              <p className={cn('text-lg font-semibold', isPrivacyMode ? 'text-foreground' : isProfit ? 'text-profit' : 'text-loss')}>
+              <p className={cn('text-base sm:text-lg font-semibold', isPrivacyMode ? 'text-foreground' : isProfit ? 'text-profit' : 'text-loss')}>
                 {maskCurrency(dayStats.grossPnl, formatCurrency)}
               </p>
             </div>
             <div>
               <p className="text-xs text-muted-foreground mb-1">Commissions</p>
-              <p className="text-lg font-semibold text-foreground">
+              <p className="text-base sm:text-lg font-semibold text-foreground">
                 {maskCurrency(dayStats.totalCommissions, (v) => formatCurrency(v, false))}
               </p>
             </div>
-
-            {/* Row 2 */}
             <div>
               <p className="text-xs text-muted-foreground mb-1">Winrate</p>
-              <p className="text-lg font-semibold text-foreground">{winRate.toFixed(0)}%</p>
+              <p className="text-base sm:text-lg font-semibold text-foreground">{winRate.toFixed(0)}%</p>
             </div>
             <div>
               <p className="text-xs text-muted-foreground mb-1">Losers</p>
-              <p className="text-lg font-semibold text-foreground">{dayStats.losers}</p>
+              <p className="text-base sm:text-lg font-semibold text-foreground">{dayStats.losers}</p>
             </div>
             <div>
               <p className="text-xs text-muted-foreground mb-1">Volume</p>
-              <p className="text-lg font-semibold text-foreground">{dayStats.totalQuantity.toFixed(2)}</p>
+              <p className="text-base sm:text-lg font-semibold text-foreground">{dayStats.totalQuantity.toFixed(2)}</p>
             </div>
             <div>
               <p className="text-xs text-muted-foreground mb-1">Profit Factor</p>
-              <p className="text-lg font-semibold text-foreground">
+              <p className="text-base sm:text-lg font-semibold text-foreground">
                 {maskProfitFactor(profitFactor)}
               </p>
             </div>
