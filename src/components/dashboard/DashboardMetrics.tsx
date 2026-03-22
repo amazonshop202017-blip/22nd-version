@@ -243,11 +243,13 @@ export const DashboardMetrics = ({ isEditMode }: DashboardMetricsProps) => {
     }
   };
 
-  // Dynamic grid columns: if all fit in one row at a breakpoint, show one row; otherwise stack 1 per row
+  // Dynamic grid: mobile always 1 col. md fits up to 3, lg fits up to 5.
+  // If metrics exceed what fits at a breakpoint, stack all to 1 per row.
   const count = metricsOrder.length + (isEditMode && metricsOrder.length < MAX_METRICS ? 1 : 0);
-  // Mobile: always 1 col. md: fits up to 3. lg: fits up to 5.
-  const mdClass = count <= 3 ? `md:grid-cols-${count}` : 'md:grid-cols-1';
-  const lgClass = count <= 5 ? `lg:grid-cols-${count}` : 'lg:grid-cols-1';
+  const mdColsMap: Record<number, string> = { 1: 'md:grid-cols-1', 2: 'md:grid-cols-2', 3: 'md:grid-cols-3' };
+  const lgColsMap: Record<number, string> = { 1: 'lg:grid-cols-1', 2: 'lg:grid-cols-2', 3: 'lg:grid-cols-3', 4: 'lg:grid-cols-4', 5: 'lg:grid-cols-5' };
+  const mdClass = count <= 3 ? (mdColsMap[count] || 'md:grid-cols-1') : 'md:grid-cols-1';
+  const lgClass = count <= 5 ? (lgColsMap[count] || 'lg:grid-cols-1') : 'lg:grid-cols-1';
   const gridColsClass = `grid-cols-1 ${mdClass} ${lgClass}`;
 
   return (
