@@ -243,14 +243,12 @@ export const DashboardMetrics = ({ isEditMode }: DashboardMetricsProps) => {
     }
   };
 
-  // Dynamic grid columns based on metric count
+  // Dynamic grid columns: if all fit in one row at a breakpoint, show one row; otherwise stack 1 per row
   const count = metricsOrder.length + (isEditMode && metricsOrder.length < MAX_METRICS ? 1 : 0);
-  const gridColsClass =
-    count <= 1 ? 'grid-cols-1' :
-    count === 2 ? 'grid-cols-2' :
-    count === 3 ? 'grid-cols-3' :
-    count === 4 ? 'grid-cols-2 md:grid-cols-4' :
-    'grid-cols-2 md:grid-cols-3 lg:grid-cols-5';
+  // Mobile: always 1 col. md: fits up to 3. lg: fits up to 5.
+  const mdClass = count <= 3 ? `md:grid-cols-${count}` : 'md:grid-cols-1';
+  const lgClass = count <= 5 ? `lg:grid-cols-${count}` : 'lg:grid-cols-1';
+  const gridColsClass = `grid-cols-1 ${mdClass} ${lgClass}`;
 
   return (
     <>
