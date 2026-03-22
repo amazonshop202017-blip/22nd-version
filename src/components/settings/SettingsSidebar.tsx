@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 
 export type SettingsTab = 'main' | 'accounts' | 'custom-tags' | 'trade-comments' | 'symbol-tick' | 'tpsl' | 'fees';
 
-const settingsMenuItems: { icon: typeof Settings; label: string; tab: SettingsTab }[] = [
+export const settingsMenuItems: { icon: typeof Settings; label: string; tab: SettingsTab }[] = [
   { icon: Settings, label: 'Main', tab: 'main' },
   { icon: Wallet, label: 'Accounts', tab: 'accounts' },
   { icon: Tag, label: 'Custom Tags', tab: 'custom-tags' },

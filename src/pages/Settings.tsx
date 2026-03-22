@@ -321,12 +321,12 @@ const Settings = () => {
                         exit={{ opacity: 0, x: -20 }}
                         className="flex items-center justify-between p-4 bg-input rounded-lg border border-border"
                       >
-                        <div className="flex items-center gap-4 flex-1">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 flex-1 min-w-0">
                           <div className="flex items-center gap-3">
-                            <div className="w-2 h-2 rounded-full bg-primary" />
-                            <span className="font-medium">{account.name}</span>
+                            <div className="w-2 h-2 rounded-full bg-primary flex-shrink-0" />
+                            <span className="font-medium truncate">{account.name}</span>
                           </div>
-                          <div className="flex items-center gap-6 text-sm">
+                          <div className="flex items-center gap-3 sm:gap-6 text-sm flex-wrap">
                             <div className="text-muted-foreground">
                               <span className="text-xs">Starting:</span>{' '}
                               <span className="font-mono text-foreground">{currencyConfig.symbol}{account.startingBalance.toLocaleString()}</span>
@@ -421,12 +421,12 @@ const Settings = () => {
                                 exit={{ opacity: 0, height: 0 }}
                                 className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border border-border/50"
                               >
-                                <div className="flex items-center gap-4 flex-1">
+                                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 flex-1 min-w-0">
                                   <div className="flex items-center gap-3">
-                                    <div className="w-2 h-2 rounded-full bg-muted-foreground" />
-                                    <span className="font-medium text-muted-foreground">{account.name}</span>
+                                    <div className="w-2 h-2 rounded-full bg-muted-foreground flex-shrink-0" />
+                                    <span className="font-medium text-muted-foreground truncate">{account.name}</span>
                                   </div>
-                                  <div className="flex items-center gap-6 text-sm text-muted-foreground">
+                                  <div className="flex items-center gap-3 sm:gap-6 text-sm text-muted-foreground flex-wrap">
                                     <div>
                                       <span className="text-xs">Total P/L:</span>{' '}
                                       <span className={cn(
@@ -494,7 +494,7 @@ const Settings = () => {
       {activeSettingsTab === 'custom-tags' && (
         <div className="space-y-6">
           {/* Sub-tab Navigation */}
-          <div className="flex gap-2 p-1 bg-muted/30 rounded-lg w-fit">
+          <div className="flex gap-2 p-1 bg-muted/30 rounded-lg w-fit flex-wrap">
             <button
               onClick={() => setActiveTagsSubTab('categories')}
               className={cn(
